@@ -1,0 +1,65 @@
+{% extends "base_auth.html" %}
+
+{% block title %}
+
+Login - SGJP
+
+{% endblock %}
+
+{% block content %}
+
+<section class="login-card">
+
+    <h1>SGJP</h1>
+
+    <p>
+        Sistema de Gerenciamento da JP Transportes
+    </p>
+
+    <form method="POST"action="{{ url_for('autenticacao.login') }}">
+
+        <div class="form-group">
+
+            <label for="login">
+
+                Usuário
+
+            </label>
+
+            <input
+                type="text"
+                id="login"
+                name="login"
+                autocomplete="username"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="senha">
+
+                Senha
+
+            </label>
+
+            <input
+                type="password"
+                id="senha"
+                name="senha"
+                autocomplete="current-password"
+            >
+
+        </div>
+
+        <button type="submit">
+
+            Entrar
+
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

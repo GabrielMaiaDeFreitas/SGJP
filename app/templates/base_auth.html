@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+
+        {% block title %}
+            SGJP
+        {% endblock %}
+
+    </title>
+
+    <!-- CSS -->
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/theme.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/base.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/layout.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/components.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/forms.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/login.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/utilities.css') }}">
+
+    {% block styles %}
+
+    {% endblock %}
+
+</head>
+
+<body>
+
+    {% include "components/auth_header.html" %}
+
+    <main class="login-main">
+
+        {% include "components/flash_messages.html" %}
+
+        <div class="login-container">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </div>
+
+    </main>
+
+    {% include "components/footer.html" %}
+
+    {% block scripts %}
+
+    {% endblock %}
+
+</body>
+
+</html>

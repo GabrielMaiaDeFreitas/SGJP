@@ -1,0 +1,35 @@
+<header class="header">
+
+    <div class="header-container">
+
+        <div class="header-logo">
+
+            <!-- Logo será adicionada futuramente -->
+
+            <h1>SGJP</h1>
+
+            <span>Sistema de Gerenciamento da JP Transportes</span>
+
+        </div>
+
+        <nav class="header-nav">
+
+            {% if session.get("usuario_id") %}
+
+                <a href="{{ url_for('dashboard.dashboard') }}">
+                    Dashboard
+                </a>
+
+                |
+
+                <a href="{{ url_for('autenticacao.logout') }}">
+                    Sair
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </div>
+
+</header>
