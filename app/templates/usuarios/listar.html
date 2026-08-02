@@ -8,23 +8,17 @@ Usuários
 
 {% include "components/page_header.html" %}
 
+{% include "components/page_header.html" %}
+
 <div class="card">
 
-    <div class="card-header">
+    {% set titulo = "Gerenciamento de Usuários" %}
+    {% set novo_url = url_for("usuario.novo") %}
+    {% set novo_texto = "Novo Usuário" %}
+    {% set visualizacao_url = None %}
+    {% set exportar_url = "#" %}
 
-        <div>
-
-            <h2>Gerenciamento de Usuários</h2>
-
-        </div>
-
-        <a href="{{ url_for('usuario.novo') }}" class="btn btn-primary">
-
-            Novo Usuário
-
-        </a>
-
-    </div>
+    {% include "components/list_header.html" %}
 
     <table class="table">
 

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("motorista.listar") %}
+    {% include "components/card_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>Número CNH</th>
+                <th>Categoria</th>
+                <th>Validade CNH</th>
+                <th>Validade Toxicológico</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for motorista in motoristas %}
+
+            <tr>
+
+                <td>{{ motorista.matricula }}</td>
+
+                <td>{{ motorista.nome }}</td>
+
+                <td>{{ motorista.numero_cnh }}</td>
+
+                <td>{{ motorista.categoria_cnh }}</td>
+
+                <td>{{ motorista.validade_cnh.strftime("%d/%m/%Y") }}</td>
+
+                <td>{{ motorista.validade_toxicologico.strftime("%d/%m/%Y") }}</td>
+
+                <td>
+
+                    {% if motorista.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for('motorista.editar',
+                                        id_motorista=motorista.id_motorista,
+                                        origem='completo') }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                       href="{{ url_for('motorista.toggle',
+                                        id_motorista=motorista.id_motorista,
+                                        origem='completo') }}">
+
+                        {% if motorista.ativo %}
+
+                            Desativar
+
+                        {% else %}
+
+                            Ativar
+
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('motorista.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

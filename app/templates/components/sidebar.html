@@ -2,7 +2,7 @@
 
     <nav>
 
-        <h3>Menu</h3>
+    <h3>Menu</h3>
 
         <ul class="sidebar-menu">
 
@@ -12,33 +12,54 @@
                 Dashboard
             </a>
 
-            <li class="sidebar-title">Cadastros</li>
+        <li class="sidebar-title">Cadastros</li>
 
-             <a
+            <a
                 href="{{ url_for('usuario.listar') }}"
                 class="{% if request.endpoint == 'usuario.listar' %}active{% endif %}">
                 Usuários
             </a>
 
-            <li><a href="#">Motoristas</a></li>
+        <li>
+            <a
+                href="{{ url_for('motorista.listar') }}"
+                class="{% if request.endpoint.startswith('motorista.') %}active{% endif %}">
 
-            <li><a href="#">Caminhões</a></li>
+                Motoristas
 
-            <li><a href="#">Clientes</a></li>
+            </a>
 
-            <li><a href="#">Administradoras</a></li>
+        <li>
+            <a href="#">Caminhões</a>
+        </li>
 
-            <li><a href="#">Tipos de Serviço</a></li>
+        <li>
+            <a href="#">Clientes</a>
+        </li>
 
-            <li><a href="#">Tabela de Valores</a></li>
+        <li>
+            <a href="#">Administradoras</a>
+        </li>
 
-            <li class="sidebar-title">Operações</li>
+        <li>
+            <a href="#">Tipos de Serviço</a>
+        </li>
 
-            <li><a href="#">Atendimentos</a></li>
+        <li>
+            <a href="#">Tabela de Valores</a>
+        </li>
 
-            <li class="sidebar-title">Relatórios</li>
+        <li class="sidebar-title">Operações</li>
 
-            <li><a href="#">Em desenvolvimento...</a></li>
+        <li>
+            <a href="#">Atendimentos</a>
+        </li>
+
+        <li class="sidebar-title">Relatórios</li>
+
+        <li>
+            <a href="#">Em desenvolvimento...</a>
+        </li>
 
         </ul>
 

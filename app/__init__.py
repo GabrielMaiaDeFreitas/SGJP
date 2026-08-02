@@ -23,11 +23,13 @@ def create_app():
     from app.routes.autenticacao_routes import autenticacao_bp
     from app.routes.dashboard_routes import dashboard_bp
     from app.routes.usuario_routes import usuario_bp
+    from app.routes.motorista_routes import motorista_bp
 
     # Registra os blueprints
     app.register_blueprint(autenticacao_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(usuario_bp)
+    app.register_blueprint(motorista_bp)
     
 
     return app

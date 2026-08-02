@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-title">
+
+            <a
+                href="{% if origem == 'completo' %}
+                        {{ url_for('motorista.completo') }}
+                    {% else %}
+                        {{ url_for('motorista.listar') }}
+                    {% endif %}"
+                class="btn btn-secondary">
+
+                ← Voltar
+
+            </a>
+
+            <h2>{{ titulo }}</h2>
+
+        </div>
+
+    </div>
+
+    <form method="POST" class="form">
+
+        <input
+            type="hidden"
+            name="origem"
+            value="{{ origem }}">
+
+        <div class="form-group">
+
+            <label>Matrícula</label>
+
+            <input
+                type="text"
+                name="matricula"
+                value="{{ motorista.matricula if motorista else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Nome</label>
+
+            <input
+                type="text"
+                name="nome"
+                value="{{ motorista.nome if motorista else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Número da CNH</label>
+
+            <input
+                type="text"
+                name="numero_cnh"
+                value="{{ motorista.numero_cnh if motorista else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Categoria da CNH</label>
+
+            <select name="categoria_cnh">
+
+                {% for categoria in ["A","B","C","D","E","AB","AC","AD","AE"] %}
+
+                <option
+                    value="{{ categoria }}"
+                    {% if motorista and motorista.categoria_cnh == categoria %}selected{% endif %}>
+
+                    {{ categoria }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Validade da CNH</label>
+
+            <input
+                type="date"
+                name="validade_cnh"
+                value="{{ motorista.validade_cnh.strftime('%Y-%m-%d') if motorista else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Validade do Toxicológico</label>
+
+            <input
+                type="date"
+                name="validade_toxicologico"
+                value="{{ motorista.validade_toxicologico.strftime('%Y-%m-%d') if motorista else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-actions">
+
+            <a
+                href="{% if origem == 'completo' %}
+                        {{ url_for('motorista.completo') }}
+                    {% else %}
+                        {{ url_for('motorista.listar') }}
+                    {% endif %}"
+                class="btn btn-secondary">
+
+                Cancelar
+
+            </a>
+
+            <button
+                class="btn btn-primary"
+                type="submit">
+
+                Salvar
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

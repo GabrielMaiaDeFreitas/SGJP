@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for('motorista.listar') %}
+    {% include "components/card_header.html" %}
+
+    <table class="table">
+
+        <tr>
+
+            <th>Matrícula</th>
+
+            <td>{{ motorista.matricula }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Nome</th>
+
+            <td>{{ motorista.nome }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Número da CNH</th>
+
+            <td>{{ motorista.numero_cnh }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Categoria</th>
+
+            <td>{{ motorista.categoria_cnh }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Validade da CNH</th>
+
+            <td>{{ motorista.validade_cnh.strftime("%d/%m/%Y") }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Validade do Toxicológico</th>
+
+            <td>{{ motorista.validade_toxicologico.strftime("%d/%m/%Y") }}</td>
+
+        </tr>
+
+        <tr>
+
+            <th>Status</th>
+
+            <td>
+
+                {% if motorista.ativo %}
+
+                    Ativo
+
+                {% else %}
+
+                    Inativo
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('motorista.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for('motorista.editar',
+                             id_motorista=motorista.id_motorista) }}"
+            class="btn btn-primary">
+
+            Editar Motorista
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

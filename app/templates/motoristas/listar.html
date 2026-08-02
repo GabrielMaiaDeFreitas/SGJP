@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Motoristas
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Motoristas" %}
+    {% set novo_url = url_for("motorista.novo") %}
+    {% set novo_texto = "Novo Motorista" %}
+    {% set visualizacao_url = url_for("motorista.completo") %}
+    {% set exportar_url = "#" %}
+
+    {% include "components/list_header.html" %}
+    
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Nome</th>
+                <th>Validade CNH</th>
+                <th>Validade Toxicológico</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for motorista in motoristas %}
+
+            <tr>
+
+                <td>{{ motorista.nome }}</td>
+
+                <td>{{ motorista.validade_cnh.strftime("%d/%m/%Y") }}</td>
+
+                <td>{{ motorista.validade_toxicologico.strftime("%d/%m/%Y") }}</td>
+
+                <td>
+
+                    {% if motorista.ativo %}
+
+                        Ativo
+
+                    {% else %}
+
+                        Inativo
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for('motorista.detalhes',
+                                        id_motorista=motorista.id_motorista) }}">
+
+                        Ver detalhes
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for('motorista.editar',
+                                        id_motorista=motorista.id_motorista) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for('motorista.toggle',
+                                        id_motorista=motorista.id_motorista) }}">
+
+                        {% if motorista.ativo %}
+
+                            Desativar
+
+                        {% else %}
+
+                            Ativar
+
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

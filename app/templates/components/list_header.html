@@ -1,0 +1,42 @@
+<div class="card-header">
+
+    <h2>{{ titulo }}</h2>
+    
+
+    <div class="list-header-actions">
+
+        <a
+            href="{{ novo_url }}"
+            class="btn btn-primary">
+
+            {{ novo_texto }}
+
+        </a>
+
+        {% if visualizacao_url %}
+
+        <a
+            href="{{ visualizacao_url }}"
+            class="btn btn-primary">
+
+            Visualização Completa
+
+        </a>
+
+        {% endif %}
+
+        {% if exportar_url %}
+
+        <a
+            href="{{ exportar_url }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
