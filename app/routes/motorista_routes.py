@@ -11,6 +11,8 @@ from flask import (
 
 from app import db
 from app.models import Motorista
+from app.constants.motorista import CATEGORIAS_CNH
+from app.filters.motorista import FILTROS_MOTORISTA
 
 from datetime import datetime
 
@@ -84,7 +86,8 @@ def novo():
     return render_template(
         "motoristas/form.html",
         titulo="Novo Motorista",
-        motorista=None
+        motorista=None,
+        categorias=CATEGORIAS_CNH
     )
 
 @motorista_bp.route("/<int:id_motorista>")
@@ -147,7 +150,8 @@ def editar(id_motorista):
         "motoristas/form.html",
         titulo="Editar Motorista",
         motorista=motorista,
-        origem=origem
+        origem=origem,
+        categorias=CATEGORIAS_CNH
     )
 
 @motorista_bp.route("/<int:id_motorista>/toggle")
@@ -187,5 +191,6 @@ def completo():
     return render_template(
         "motoristas/completo.html",
         titulo="Visualização Completa de Motoristas",
-        motoristas=motoristas
+        motoristas=motoristas,
+        campos=FILTROS_MOTORISTA
     )

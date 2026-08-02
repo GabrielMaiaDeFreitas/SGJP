@@ -1,0 +1,41 @@
+<div class="filter-row">
+
+    <select class="filter-field">
+
+        <option value="">
+            Selecione um campo
+        </option>
+
+        {% for campo in campos %}
+
+        <option
+            value="{{ campo.campo }}"
+            data-tipo="{{ campo.tipo }}"
+            data-opcoes='{{ campo.opcoes | default([]) | tojson }}'>
+
+            {{ campo.label }}
+
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <div class="filter-value">
+
+        <input
+            type="text"
+            disabled
+            placeholder="Selecione um campo">
+
+    </div>
+
+    <button
+        type="button"
+        class="btn btn-secondary btn-remove-filter">
+
+        Remover
+
+    </button>
+
+</div>

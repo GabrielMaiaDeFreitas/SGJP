@@ -79,8 +79,8 @@
 
             <select name="categoria_cnh">
 
-                {% for categoria in ["A","B","C","D","E","AB","AC","AD","AE"] %}
-
+                {% for categoria in categorias %}
+                
                 <option
                     value="{{ categoria }}"
                     {% if motorista and motorista.categoria_cnh == categoria %}selected{% endif %}>

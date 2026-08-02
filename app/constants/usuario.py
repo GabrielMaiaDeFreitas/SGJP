@@ -1,0 +1,5 @@
+PERFIS = [
+    "Administrador",
+    "Operador",
+    "Leitor"
+]

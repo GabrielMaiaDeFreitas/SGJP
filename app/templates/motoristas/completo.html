@@ -9,7 +9,9 @@
 <div class="card">
 
     {% set voltar = url_for("motorista.listar") %}
-    {% include "components/card_header.html" %}
+    {% include "components/view_header.html" %}
+
+    {% include "components/filter_panel.html" %}
 
     <table class="table">
 
@@ -111,5 +113,11 @@
     </div>
 
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
 
 {% endblock %}

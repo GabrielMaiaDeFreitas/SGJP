@@ -1,0 +1,48 @@
+<div class="filter-panel">
+
+    <h3>Pesquisar</h3>
+
+    <div id="filters-container"></div>
+
+    <template id="filter-template">
+
+        {% include "components/filter_row.html" %}
+
+    </template>
+
+    <div class="filter-buttons">
+
+        <button
+            id="btn-add-filter"
+            type="button"
+            class="btn btn-primary">
+
+            + Adicionar Filtro
+
+        </button>
+
+    </div>
+
+    <div
+        id="filter-actions"
+        class="filter-actions">
+
+        <button
+            type="submit"
+            class="btn btn-primary">
+
+            Pesquisar
+
+        </button>
+
+        <button
+            type="reset"
+            class="btn btn-secondary">
+
+            Limpar
+
+        </button>
+
+    </div>
+
+</div>

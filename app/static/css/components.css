@@ -163,6 +163,56 @@
 }
 
 /* =====================================================
+   FILTER PANEL
+===================================================== */
+
+.filter-panel {
+
+    margin-bottom: 32px;
+
+}
+
+.filter-panel h3 {
+
+    margin-bottom: 20px;
+
+    color: var(--color-primary);
+
+}
+
+.filter-row {
+
+    display: grid;
+
+    grid-template-columns: 220px 1fr 120px;
+
+    gap: 16px;
+
+    align-items: end;
+
+    margin-bottom: 16px;
+
+}
+
+.filter-buttons {
+
+    margin-top: 20px;
+
+}
+
+.filter-actions {
+
+    display: none;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 24px;
+
+}
+
+/* =====================================================
    BOTÕES
 ===================================================== */
 
@@ -205,6 +255,14 @@
 .btn-secondary:hover {
 
     background: #DDDDDD;
+
+}
+
+.btn:disabled {
+
+    opacity: .6;
+
+    cursor: not-allowed;
 
 }
 
