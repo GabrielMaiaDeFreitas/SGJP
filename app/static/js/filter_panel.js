@@ -7,21 +7,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!container) return;
 
+    const dados = document.getElementById("filters-data");
+    const btnLimpar = document.getElementById("btn-clear-filters");
+
+    const filtrosIniciais = dados
+        ? {
+            campos: JSON.parse(dados.dataset.campos),
+            valores: JSON.parse(dados.dataset.valores)
+        }
+        : {
+            campos: [],
+            valores: []
+        };
+
     inicializar();
 
     function inicializar() {
 
+        restaurarFiltros();
+
         atualizarPainel();
 
-        btnAdicionar.addEventListener("click", adicionarFiltro);
+        btnAdicionar.addEventListener(
+            "click",
+            adicionarFiltro
+        );
 
-        container.addEventListener("click", removerFiltro);
+        container.addEventListener(
+            "click",
+            removerFiltro
+        );
 
-        container.addEventListener("change", trocarCampo);
+        btnLimpar.addEventListener(
+            "click",
+            limparFiltros
+        );
 
-        container.addEventListener("input", atualizarPainel);
+        container.addEventListener(
+            "change",
+            trocarCampo
+        );
 
-        container.addEventListener("change", atualizarPainel);
+        container.addEventListener(
+            "input",
+            atualizarPainel
+        );
+
+        container.addEventListener(
+            "change",
+            atualizarPainel
+        );
+
+    }
+
+    function restaurarFiltros() {
+
+        if (filtrosIniciais.campos.length === 0) {
+            return;
+        }
+
+        filtrosIniciais.campos.forEach((campo, indice) => {
+
+            const linha = adicionarFiltro();
+
+            const selectCampo =
+                linha.querySelector(".filter-field");
+
+            selectCampo.value = campo;
+
+            const option =
+                selectCampo.options[
+                    selectCampo.selectedIndex
+                ];
+
+            atualizarCampoValor(
+                linha,
+                option
+            );
+
+            const valor =
+                linha.querySelector(
+                    ".filter-value input, .filter-value select"
+                );
+
+            if (valor) {
+
+                valor.value =
+                    filtrosIniciais.valores[indice];
+
+            }
+
+        });
 
     }
 
@@ -31,7 +107,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         container.appendChild(clone);
 
+        const linha = container.lastElementChild;
+
         atualizarPainel();
+
+        return linha;
 
     }
 
@@ -42,8 +122,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         event.target.closest(".filter-row").remove();
+        atualizarPainel();
+
+        const quantidade =
+            container.querySelectorAll(".filter-row").length;
+
+        if (quantidade === 0) {
+            pesquisar();
+        }
+
+    }
+
+    function limparFiltros() {
+
+        container.replaceChildren();
 
         atualizarPainel();
+
+        pesquisar();
+
+    }
+
+    function atualizarCampoValor(linha, option) {
+
+        const tipo = option.dataset.tipo;
+
+        const opcoes = JSON.parse(
+            option.dataset.opcoes || "[]"
+        );
+
+        const valueContainer =
+            linha.querySelector(".filter-value");
+
+        valueContainer.replaceChildren(
+            criarCampoValor(tipo, opcoes)
+        );
 
     }
 
@@ -55,20 +168,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const campo = event.target;
 
-        const option = campo.options[campo.selectedIndex];
+        const option =
+            campo.options[campo.selectedIndex];
 
-        const tipo = option.dataset.tipo;
+        const linha =
+            campo.closest(".filter-row");
 
-        const opcoes = JSON.parse(
-            option.dataset.opcoes || "[]"
-        );
-
-        const valueContainer = campo
-            .closest(".filter-row")
-            .querySelector(".filter-value");
-
-        valueContainer.replaceChildren(
-            criarCampoValor(tipo, opcoes)
+        atualizarCampoValor(
+            linha,
+            option
         );
 
         atualizarPainel();
@@ -77,20 +185,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function atualizarPainel() {
 
-        const filtros = container.querySelectorAll(".filter-row");
+        const filtros =
+            container.querySelectorAll(".filter-row");
 
         actions.style.display =
-            filtros.length === 0 ? "none" : "flex";
+            filtros.length === 0
+                ? "none"
+                : "flex";
 
-        let podeAdicionar = filtros.length === 0;
+        let podeAdicionar =
+            filtros.length === 0;
 
         filtros.forEach(filtro => {
 
-            const campo = filtro.querySelector(".filter-field");
+            const campo =
+                filtro.querySelector(".filter-field");
 
-            const valor = filtro.querySelector(
-                ".filter-value input, .filter-value select"
-            );
+            const valor =
+                filtro.querySelector(
+                    ".filter-value input, .filter-value select"
+                );
 
             if (
                 campo.value &&
@@ -108,9 +222,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-        btnAdicionar.disabled = !podeAdicionar;
+        btnAdicionar.disabled =
+            !podeAdicionar;
 
     }
+
+    function pesquisar() {
+
+    const filtros =container.querySelectorAll(".filter-row");
+
+    if (filtros.length === 0) {
+
+        window.location = window.location.pathname;
+        return;
+
+    }
+
+    container.closest("form").requestSubmit();
+}
 
 });
 
@@ -118,10 +247,11 @@ function criarCampoValor(tipo, opcoes = []) {
 
     if (tipo === "texto") {
 
-        const input = document.createElement("input");
+        const input =
+            document.createElement("input");
 
         input.type = "text";
-
+        input.name = "valor[]";
         input.placeholder = "Digite um valor";
 
         return input;
@@ -130,9 +260,11 @@ function criarCampoValor(tipo, opcoes = []) {
 
     if (tipo === "data") {
 
-        const input = document.createElement("input");
+        const input =
+            document.createElement("input");
 
         input.type = "date";
+        input.name = "valor[]";
 
         return input;
 
@@ -140,22 +272,25 @@ function criarCampoValor(tipo, opcoes = []) {
 
     if (tipo === "select") {
 
-        const select = document.createElement("select");
+        const select =
+            document.createElement("select");
 
-        const vazio = document.createElement("option");
+        select.name = "valor[]";
+
+        const vazio =
+            document.createElement("option");
 
         vazio.value = "";
-
         vazio.textContent = "Selecione";
 
         select.appendChild(vazio);
 
         opcoes.forEach(opcao => {
 
-            const option = document.createElement("option");
+            const option =
+                document.createElement("option");
 
             option.value = opcao;
-
             option.textContent = opcao;
 
             select.appendChild(option);
@@ -166,10 +301,13 @@ function criarCampoValor(tipo, opcoes = []) {
 
     }
 
-    const input = document.createElement("input");
+    const input =
+        document.createElement("input");
 
     input.type = "text";
+    input.name = "valor[]";
 
     return input;
 
 }
+

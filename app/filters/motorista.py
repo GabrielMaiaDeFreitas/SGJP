@@ -6,39 +6,54 @@ from app.constants.motorista import (
 FILTROS_MOTORISTA = [
     {
         "campo": "matricula",
+        "atributo": "matricula",
         "label": "Matrícula",
-        "tipo": "texto"
+        "tipo": "texto",
+        "operacao": "contains"
     },
     {
         "campo": "nome",
+        "atributo": "nome",
         "label": "Nome",
-        "tipo": "texto"
+        "tipo": "texto",
+        "operacao": "contains"
     },
     {
         "campo": "numero_cnh",
+        "atributo": "numero_cnh",
         "label": "Número da CNH",
-        "tipo": "texto"
+        "tipo": "texto",
+        "operacao": "contains"
     },
     {
         "campo": "categoria_cnh",
+        "atributo": "categoria_cnh",
         "label": "Categoria",
         "tipo": "select",
+        "operacao": "igual",
         "opcoes": CATEGORIAS_CNH
     },
     {
         "campo": "validade_cnh",
+        "atributo": "validade_cnh",
         "label": "Validade CNH",
-        "tipo": "data"
+        "tipo": "data",
+        "operacao": "igual"
     },
     {
         "campo": "validade_toxicologico",
+        "atributo": "validade_toxicologico",
         "label": "Validade Toxicológico",
-        "tipo": "data"
+        "tipo": "data",
+        "operacao": "igual"
     },
     {
         "campo": "ativo",
+        "atributo": "ativo",
         "label": "Status",
         "tipo": "select",
-        "opcoes": STATUS
+        "operacao": "igual",
+        "opcoes": STATUS,
+        "converter": "boolean"
     }
 ]

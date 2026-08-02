@@ -11,7 +11,11 @@
     {% set voltar = url_for("motorista.listar") %}
     {% include "components/view_header.html" %}
 
-    {% include "components/filter_panel.html" %}
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
 
     <table class="table">
 
@@ -39,15 +43,10 @@
             <tr>
 
                 <td>{{ motorista.matricula }}</td>
-
                 <td>{{ motorista.nome }}</td>
-
                 <td>{{ motorista.numero_cnh }}</td>
-
                 <td>{{ motorista.categoria_cnh }}</td>
-
                 <td>{{ motorista.validade_cnh.strftime("%d/%m/%Y") }}</td>
-
                 <td>{{ motorista.validade_toxicologico.strftime("%d/%m/%Y") }}</td>
 
                 <td>
@@ -74,18 +73,14 @@
                     |
 
                     <a
-                       href="{{ url_for('motorista.toggle',
+                        href="{{ url_for('motorista.toggle',
                                         id_motorista=motorista.id_motorista,
                                         origem='completo') }}">
 
                         {% if motorista.ativo %}
-
                             Desativar
-
                         {% else %}
-
                             Ativar
-
                         {% endif %}
 
                     </a>
@@ -110,8 +105,22 @@
 
         </a>
 
+        <a
+            href="{{ url_for('motorista.exportar') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
     </div>
 
+</div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
 </div>
 
 {% endblock %}

@@ -13,6 +13,7 @@ from app import db
 from app.models import Motorista
 from app.constants.motorista import CATEGORIAS_CNH
 from app.filters.motorista import FILTROS_MOTORISTA
+from app.services.motorista_service import MotoristaService
 
 from datetime import datetime
 
@@ -184,13 +185,30 @@ def completo():
     if "usuario_id" not in session:
         return redirect(url_for("autenticacao.login"))
 
-    motoristas = Motorista.query.order_by(
-        Motorista.nome
-    ).all()
+    motoristas = MotoristaService.listar(
+        request.args
+    )
+
+    campos_filtro = request.args.getlist("campo[]")
+    valores_filtro = request.args.getlist("valor[]")
 
     return render_template(
         "motoristas/completo.html",
         titulo="Visualização Completa de Motoristas",
         motoristas=motoristas,
-        campos=FILTROS_MOTORISTA
+        campos=FILTROS_MOTORISTA,
+        campos_filtro=campos_filtro,
+        valores_filtro=valores_filtro
+    )
+
+@motorista_bp.route("/exportar")
+def exportar():
+
+    flash(
+        "Funcionalidade em desenvolvimento.",
+        "info"
+    )
+
+    return redirect(
+        url_for("motorista.completo")
     )
