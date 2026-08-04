@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("usuario.listar") %}
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Nome",
+            "valor": usuario.nome
+        },
+
+        {
+            "label": "Login",
+            "valor": usuario.login
+        },
+
+        {
+            "label": "Perfil",
+            "valor": usuario.perfil
+        },
+
+        {
+            "label": "Status",
+            "valor": "Ativo" if usuario.ativo else "Inativo"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('usuario.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'usuario.editar',
+                id_usuario=usuario.id_usuario
+            ) }}"
+            class="btn btn-primary">
+
+            Editar Usuário
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

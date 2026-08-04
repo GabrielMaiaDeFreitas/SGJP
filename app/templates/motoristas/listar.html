@@ -14,7 +14,7 @@ Gerenciamento de Motoristas
     {% set novo_url = url_for("motorista.novo") %}
     {% set novo_texto = "Novo Motorista" %}
     {% set visualizacao_url = url_for("motorista.completo") %}
-    {% set exportar_url = "#" %}
+    {% set exportar_url = url_for("exportacao.exportar_generico",modulo="motorista") %}
 
     {% include "components/list_header.html" %}
     

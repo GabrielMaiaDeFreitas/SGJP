@@ -200,15 +200,3 @@ def completo():
         campos_filtro=campos_filtro,
         valores_filtro=valores_filtro
     )
-
-@motorista_bp.route("/exportar")
-def exportar():
-
-    flash(
-        "Funcionalidade em desenvolvimento.",
-        "info"
-    )
-
-    return redirect(
-        url_for("motorista.completo")
-    )

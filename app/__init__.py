@@ -25,6 +25,8 @@ def create_app():
     from app.routes.usuario_routes import usuario_bp
     from app.routes.motorista_routes import motorista_bp
     from app.routes.caminhao_routes import caminhao_bp
+    from app.routes.exportacao_routes import exportacao_bp
+    
 
     # Registra os blueprints
     app.register_blueprint(autenticacao_bp)
@@ -32,6 +34,7 @@ def create_app():
     app.register_blueprint(usuario_bp)
     app.register_blueprint(motorista_bp)
     app.register_blueprint(caminhao_bp)
+    app.register_blueprint(exportacao_bp)
     
 
     return app

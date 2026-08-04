@@ -1,24 +1,21 @@
 {% extends "base.html" %}
 
 {% block title %}
-Usuários
+{{ titulo }}
 {% endblock %}
 
 {% block content %}
 
-{% include "components/page_header.html" %}
-
-{% include "components/page_header.html" %}
-
 <div class="card">
 
-    {% set titulo = "Gerenciamento de Usuários" %}
-    {% set novo_url = url_for("usuario.novo") %}
-    {% set novo_texto = "Novo Usuário" %}
-    {% set visualizacao_url = url_for("usuario.completo") %}
-    {% set exportar_url = url_for("exportacao.exportar_generico", modulo="usuario") %}
+    {% set voltar = url_for("usuario.listar") %}
+    {% include "components/view_header.html" %}
 
-    {% include "components/list_header.html" %}
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
 
     <table class="table">
 
@@ -27,13 +24,9 @@ Usuários
             <tr>
 
                 <th>Nome</th>
-
                 <th>Login</th>
-
                 <th>Perfil</th>
-
                 <th>Status</th>
-
                 <th>Ações</th>
 
             </tr>
@@ -55,13 +48,9 @@ Usuários
                 <td>
 
                     {% if usuario.ativo %}
-
                         Ativo
-
                     {% else %}
-
                         Inativo
-
                     {% endif %}
 
                 </td>
@@ -70,20 +59,9 @@ Usuários
 
                     <a
                         href="{{ url_for(
-                            'usuario.detalhes',
-                            id_usuario=usuario.id_usuario
-                        ) }}">
-
-                        Ver detalhes
-
-                    </a>
-
-                    |
-
-                    <a
-                        href="{{ url_for(
                             'usuario.editar',
-                            id_usuario=usuario.id_usuario
+                            id_usuario=usuario.id_usuario,
+                            origem='completo'
                         ) }}">
 
                         Editar
@@ -95,7 +73,8 @@ Usuários
                     <a
                         href="{{ url_for(
                             'usuario.toggle',
-                            id_usuario=usuario.id_usuario
+                            id_usuario=usuario.id_usuario,
+                            origem='completo'
                         ) }}">
 
                         {% if usuario.ativo %}
@@ -116,6 +95,41 @@ Usuários
 
     </table>
 
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('usuario.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='usuario'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
 </div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
 
 {% endblock %}

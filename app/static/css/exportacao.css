@@ -1,0 +1,305 @@
+/* =====================================================
+   LAYOUT GERAL
+===================================================== */
+
+.export-container {
+
+    max-width: 960px;
+
+    margin: 0 auto;
+
+}
+
+.export-section {
+
+    margin-top: 32px;
+
+}
+
+.export-section-title {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+.export-section-title h3 {
+
+    color: var(--color-primary);
+
+    font-size: 1.15rem;
+
+}
+
+.export-counter {
+
+    color: var(--text-secondary);
+
+    font-size: .95rem;
+
+}
+
+/* =====================================================
+   GRADE DAS COLUNAS
+===================================================== */
+
+.export-columns {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 22px;
+
+}
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.export-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    min-height: 120px;
+
+    padding: 18px;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: var(--radius-md);
+
+    background: var(--surface);
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow-sm);
+
+    transition: .20s;
+
+    user-select: none;
+
+}
+
+.export-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: var(--shadow-md);
+
+}
+
+.export-checkbox {
+
+    position: absolute;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+}
+
+/* =====================================================
+   SWITCH
+===================================================== */
+
+.export-switch {
+
+    position: relative;
+
+    width: 46px;
+
+    height: 24px;
+
+    border-radius: 999px;
+
+    background: #D8DDE3;
+
+    transition: .20s;
+
+}
+
+.export-switch::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 3px;
+
+    left: 3px;
+
+    width: 18px;
+
+    height: 18px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+
+    transition: .20s;
+
+}
+
+.export-card.selected .export-switch {
+
+    background: var(--color-primary-light);
+
+}
+
+.export-card.selected .export-switch::before {
+
+    transform: translateX(22px);
+
+}
+
+/* =====================================================
+   TEXTO
+===================================================== */
+
+.export-label {
+
+    margin-top: auto;
+
+    font-size: .95rem;
+
+    font-weight: 600;
+
+    color: var(--text-primary);
+
+    line-height: 1.4;
+
+}
+
+/* =====================================================
+   BOTÕES DAS COLUNAS
+===================================================== */
+
+.export-tools {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin: 22px 0 30px;
+
+}
+
+/* =====================================================
+   DIVISOR
+===================================================== */
+
+.export-divider {
+
+    border: none;
+
+    border-top: 1px solid var(--border-color);
+
+    margin: 40px 0;
+
+}
+
+/* =====================================================
+   FORMATOS
+===================================================== */
+
+.export-formats {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-top: 18px;
+
+}
+
+.export-format {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-weight: 500;
+
+}
+
+.export-format input {
+
+    width: 18px;
+
+    height: 18px;
+
+}
+
+/* =====================================================
+   BOTÕES FINAIS
+===================================================== */
+
+.export-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 14px;
+
+    margin-top: 40px;
+
+}
+
+/* =====================================================
+   RESPONSIVIDADE
+===================================================== */
+
+@media (max-width: 980px) {
+
+    .export-columns {
+
+        grid-template-columns: repeat(2, 1fr);
+
+    }
+
+}
+
+@media (max-width: 640px) {
+
+    .export-columns {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .export-tools {
+
+        justify-content: stretch;
+
+        flex-direction: column;
+
+    }
+
+    .export-actions {
+
+        flex-direction: column-reverse;
+
+    }
+
+}

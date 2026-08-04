@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = request.referrer or "#" %}
+    {% include "components/card_header.html" %}
+
+    <form method="POST">
+
+        {# Mantém os filtros da pesquisa #}
+        {% for key, values in request.args.lists() %}
+            {% for value in values %}
+                <input
+                    type="hidden"
+                    name="{{ key }}"
+                    value="{{ value }}">
+            {% endfor %}
+        {% endfor %}
+
+        <div class="export-container">
+
+            <!-- =======================================================
+                 COLUNAS
+            ======================================================== -->
+
+            <section class="export-section">
+
+                <div class="export-header">
+
+                    <div>
+
+                        <h3>
+
+                            Colunas para exportação
+
+                        </h3>
+
+                        <p
+                            id="contador-colunas"
+                            class="export-counter">
+
+                            {{ colunas|length }} de {{ colunas|length }} selecionadas
+
+                        </p>
+
+                    </div>
+
+                    <div class="export-tools">
+
+                        <button
+                            type="button"
+                            id="btn-marcar-todas"
+                            class="btn btn-primary">
+
+                            Selecionar Todas
+
+                        </button>
+
+                        <button
+                            type="button"
+                            id="btn-desmarcar"
+                            class="btn btn-primary">
+
+                            Limpar Seleção
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="export-columns">
+
+                    {% for coluna in colunas %}
+
+                        <label class="export-card">
+
+                            <input
+                                class="export-checkbox"
+                                type="checkbox"
+                                name="colunas"
+                                value="{{ coluna }}"
+                                checked>
+
+                            <div class="export-switch"></div>
+
+                            <span class="export-label">
+
+                                {{ labels[coluna] }}
+
+                            </span>
+
+                        </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            <hr class="export-divider">
+
+            <!-- =======================================================
+                 FORMATOS
+            ======================================================== -->
+
+            <section class="export-section">
+
+                <h3>
+
+                    Arquivos para gerar
+
+                </h3>
+
+                <div class="export-formats">
+
+                    <label class="export-format">
+
+                        <input
+                            type="checkbox"
+                            name="formatos"
+                            value="excel"
+                            checked>
+
+                        Excel (.xlsx)
+
+                    </label>
+
+                    <label class="export-format">
+
+                        <input
+                            type="checkbox"
+                            name="formatos"
+                            value="pdf">
+
+                        PDF
+
+                    </label>
+
+                </div>
+
+            </section>
+
+            <!-- =======================================================
+                 BOTÕES
+            ======================================================== -->
+
+            <div class="export-actions">
+
+                <a
+                    href="javascript:history.back()"
+                    class="btn btn-secondary">
+
+                    Cancelar
+
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="btn-exportar">
+
+                    Gerar Arquivos
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/exportacao.js') }}"></script>
+
+{% endblock %}

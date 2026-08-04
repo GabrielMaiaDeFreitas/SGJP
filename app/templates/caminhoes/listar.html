@@ -14,7 +14,7 @@ Gerenciamento de Caminhões
     {% set novo_url = url_for("caminhao.novo") %}
     {% set novo_texto = "Novo Caminhão" %}
     {% set visualizacao_url = url_for("caminhao.completo") %}
-    {% set exportar_url = url_for("caminhao.exportar") %}
+    {% set exportar_url = url_for("exportacao.exportar_generico",modulo="caminhao") %}
 
     {% include "components/list_header.html" %}
 

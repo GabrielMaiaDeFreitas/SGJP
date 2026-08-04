@@ -111,7 +111,10 @@
         </a>
 
         <a
-            href="{{ url_for('caminhao.exportar') }}"
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='caminhao'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
             class="btn btn-primary">
 
             Exportar

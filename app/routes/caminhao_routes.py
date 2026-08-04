@@ -39,7 +39,7 @@ def listar():
         novo_url=url_for("caminhao.novo"),
         novo_texto="Novo Caminhão",
         visualizacao_url=url_for("caminhao.completo"),
-        exportar_url=url_for("caminhao.exportar")
+        exportar_url = url_for("exportacao.exportar_generico",modulo="caminhao")
     )
 
 @caminhao_bp.route("/novo", methods=["GET", "POST"])
@@ -176,18 +176,5 @@ def completo():
         campos=FILTROS_CAMINHAO,
         campos_filtro=request.args.getlist("campo[]"),
         valores_filtro=request.args.getlist("valor[]")
-    )
-
-
-@caminhao_bp.route("/exportar")
-def exportar():
-
-    flash(
-        "Funcionalidade em desenvolvimento.",
-        "info"
-    )
-
-    return redirect(
-        url_for("caminhao.completo")
     )
 
