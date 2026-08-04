@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="card-title">
+
+            <a
+                href="{{ url_for('caminhao.listar') }}"
+                class="btn btn-secondary">
+
+                ← Voltar
+
+            </a>
+
+            <h2>{{ titulo }}</h2>
+
+        </div>
+
+    </div>
+
+    <form method="POST" class="form">
+
+        <div class="form-group">
+
+            <label>Placa</label>
+
+            <input
+                type="text"
+                name="placa"
+                value="{{ caminhao.placa if caminhao else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Modelo</label>
+
+            <input
+                type="text"
+                name="modelo"
+                value="{{ caminhao.modelo if caminhao else '' }}"
+                required>
+
+        </div>
+
+        {% set cancelar = url_for("caminhao.listar") %}
+        {% include "components/form_actions.html" %}
+
+    </form>
+
+</div>
+
+{% endblock %}

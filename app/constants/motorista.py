@@ -9,8 +9,3 @@ CATEGORIAS_CNH = [
     "D",
     "E"
 ]
-
-STATUS = [
-    "Ativo",
-    "Inativo"
-]

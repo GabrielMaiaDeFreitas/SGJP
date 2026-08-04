@@ -29,9 +29,13 @@
 
             </a>
 
-        <li>
-            <a href="#">Caminhões</a>
-        </li>
+        <a
+            href="{{ url_for('caminhao.listar') }}"
+            class="{% if request.endpoint.startswith('caminhao.') %}active{% endif %}">
+
+            Caminhões
+
+        </a>
 
         <li>
             <a href="#">Clientes</a>

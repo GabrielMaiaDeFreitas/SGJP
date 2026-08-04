@@ -1,0 +1,23 @@
+<table class="table">
+
+    {% for detalhe in detalhes %}
+
+    <tr>
+
+        <th>
+
+            {{ detalhe.label }}
+
+        </th>
+
+        <td>
+
+            {{ detalhe.valor }}
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>

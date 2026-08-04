@@ -8,80 +8,49 @@
 
 <div class="card">
 
-    {% set voltar = url_for('motorista.listar') %}
+    {% set voltar = url_for("motorista.listar") %}
     {% include "components/card_header.html" %}
 
-    <table class="table">
+    {% set detalhes = [
 
-        <tr>
+        {
+            "label": "Matrícula",
+            "valor": motorista.matricula
+        },
 
-            <th>Matrícula</th>
+        {
+            "label": "Nome",
+            "valor": motorista.nome
+        },
 
-            <td>{{ motorista.matricula }}</td>
+        {
+            "label": "Número da CNH",
+            "valor": motorista.numero_cnh
+        },
 
-        </tr>
+        {
+            "label": "Categoria",
+            "valor": motorista.categoria_cnh
+        },
 
-        <tr>
+        {
+            "label": "Validade da CNH",
+            "valor": motorista.validade_cnh.strftime("%d/%m/%Y")
+        },
 
-            <th>Nome</th>
+        {
+            "label": "Validade do Toxicológico",
+            "valor": motorista.validade_toxicologico.strftime("%d/%m/%Y")
+        },
 
-            <td>{{ motorista.nome }}</td>
+        {
+            "label": "Status",
+            "valor": "Ativo" if motorista.ativo else "Inativo"
+        }
 
-        </tr>
+    ] %}
 
-        <tr>
-
-            <th>Número da CNH</th>
-
-            <td>{{ motorista.numero_cnh }}</td>
-
-        </tr>
-
-        <tr>
-
-            <th>Categoria</th>
-
-            <td>{{ motorista.categoria_cnh }}</td>
-
-        </tr>
-
-        <tr>
-
-            <th>Validade da CNH</th>
-
-            <td>{{ motorista.validade_cnh.strftime("%d/%m/%Y") }}</td>
-
-        </tr>
-
-        <tr>
-
-            <th>Validade do Toxicológico</th>
-
-            <td>{{ motorista.validade_toxicologico.strftime("%d/%m/%Y") }}</td>
-
-        </tr>
-
-        <tr>
-
-            <th>Status</th>
-
-            <td>
-
-                {% if motorista.ativo %}
-
-                    Ativo
-
-                {% else %}
-
-                    Inativo
-
-                {% endif %}
-
-            </td>
-
-        </tr>
-
-    </table>
+    {% include "components/details_table.html" %}
 
     <div class="form-actions">
 
@@ -94,8 +63,10 @@
         </a>
 
         <a
-            href="{{ url_for('motorista.editar',
-                             id_motorista=motorista.id_motorista) }}"
+            href="{{ url_for(
+                'motorista.editar',
+                id_motorista=motorista.id_motorista
+            ) }}"
             class="btn btn-primary">
 
             Editar Motorista

@@ -1,0 +1,4 @@
+STATUS = [
+    "Ativo",
+    "Inativo"
+]

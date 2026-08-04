@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("caminhao.listar") %}
+    {% include "components/view_header.html" %}
+
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for caminhao in caminhoes %}
+
+            <tr>
+
+                <td>{{ caminhao.placa }}</td>
+
+                <td>{{ caminhao.modelo }}</td>
+
+                <td>
+
+                    {% if caminhao.ativo %}
+
+                        Ativo
+
+                    {% else %}
+
+                        Inativo
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'caminhao.editar',
+                            id_caminhao=caminhao.id_caminhao,
+                            origem='completo'
+                        ) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'caminhao.toggle',
+                            id_caminhao=caminhao.id_caminhao,
+                            origem='completo'
+                        ) }}">
+
+                        {% if caminhao.ativo %}
+
+                            Desativar
+
+                        {% else %}
+
+                            Ativar
+
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('caminhao.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for('caminhao.exportar') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
+</div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
+
+{% endblock %}

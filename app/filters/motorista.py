@@ -1,5 +1,8 @@
 from app.constants.motorista import (
-    CATEGORIAS_CNH,
+    CATEGORIAS_CNH
+)
+
+from app.constants.common import (
     STATUS
 )
 
@@ -53,7 +56,7 @@ FILTROS_MOTORISTA = [
         "label": "Status",
         "tipo": "select",
         "operacao": "igual",
-        "opcoes": STATUS,
-        "converter": "boolean"
+        "converter": "boolean",
+        "opcoes": STATUS
     }
 ]

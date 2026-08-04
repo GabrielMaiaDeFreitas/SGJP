@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Caminhões
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Caminhões" %}
+    {% set novo_url = url_for("caminhao.novo") %}
+    {% set novo_texto = "Novo Caminhão" %}
+    {% set visualizacao_url = url_for("caminhao.completo") %}
+    {% set exportar_url = url_for("caminhao.exportar") %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for caminhao in caminhoes %}
+
+            <tr>
+
+                <td>{{ caminhao.modelo }}</td>
+
+                <td>{{ caminhao.placa }}</td>
+
+                <td>
+
+                    {% if caminhao.ativo %}
+
+                        Ativo
+
+                    {% else %}
+
+                        Inativo
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for('caminhao.detalhes',
+                                        id_caminhao=caminhao.id_caminhao) }}">
+
+                        Ver detalhes
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for('caminhao.editar',
+                                        id_caminhao=caminhao.id_caminhao) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for('caminhao.toggle',
+                                        id_caminhao=caminhao.id_caminhao) }}">
+
+                        {% if caminhao.ativo %}
+
+                            Desativar
+
+                        {% else %}
+
+                            Ativar
+
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

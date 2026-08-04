@@ -1,4 +1,6 @@
-from app.constants.usuario import (STATUS)
+from app.constants.common import (
+    STATUS
+)
 
 FILTROS_CAMINHAO = [
     {
@@ -21,6 +23,7 @@ FILTROS_CAMINHAO = [
         "label": "Status",
         "tipo": "select",
         "operacao": "igual",
+        "converter": "boolean",
         "opcoes": STATUS
     }
 ]

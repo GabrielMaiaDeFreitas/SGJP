@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("caminhao.listar") %}
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Modelo",
+            "valor": caminhao.modelo
+        },
+
+        {
+            "label": "Placa",
+            "valor": caminhao.placa
+        },
+
+        {
+            "label": "Status",
+            "valor": "Ativo" if caminhao.ativo else "Inativo"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('caminhao.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'caminhao.editar',
+                id_caminhao=caminhao.id_caminhao
+            ) }}"
+            class="btn btn-primary">
+
+            Editar Caminhão
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
