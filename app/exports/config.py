@@ -1,9 +1,9 @@
-from app.models import Caminhao, Motorista
+from app.models import Usuario, Caminhao, Motorista, Administradora
 
 from app.filters.caminhao import FILTROS_CAMINHAO
 from app.filters.motorista import FILTROS_MOTORISTA
-from app.models import Usuario
 from app.filters.usuario import FILTROS_USUARIO
+from app.filters.administradora import FILTROS_ADMINISTRADORA
 
 
 MODELOS_MAPEADOS = {
@@ -113,6 +113,37 @@ MODELOS_MAPEADOS = {
 
         }
 
-    }
+    },
 
+    "administradora": {
+
+        "modelo": Administradora,
+
+        "titulo": "Administradoras",
+
+        "ordenar_por": "nome",
+
+        "filtros_config": FILTROS_ADMINISTRADORA,
+
+        "colunas_exportacao": [
+
+            "nome",
+
+            "cliente_proprio",
+
+            "ativo"
+
+        ],
+
+        "labels": {
+
+            "nome": "Nome",
+
+            "cliente_proprio": "Cliente Próprio",
+
+            "ativo": "Status"
+
+        }
+
+    }
 }

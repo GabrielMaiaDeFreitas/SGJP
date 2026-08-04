@@ -2,6 +2,9 @@ from app import db
 
 
 class Caminhao(db.Model):
+    """
+    Model responsável por representar os caminhões do sistema.
+    """
 
     __tablename__ = "caminhoes"
 

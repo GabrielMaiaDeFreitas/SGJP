@@ -16,9 +16,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Importa as models
-    from app.models import Usuario
-
     # Importa os blueprints
     from app.routes.autenticacao_routes import autenticacao_bp
     from app.routes.dashboard_routes import dashboard_bp
@@ -26,6 +23,7 @@ def create_app():
     from app.routes.motorista_routes import motorista_bp
     from app.routes.caminhao_routes import caminhao_bp
     from app.routes.exportacao_routes import exportacao_bp
+    from app.routes.administradora_routes import administradora_bp
     
 
     # Registra os blueprints
@@ -35,6 +33,7 @@ def create_app():
     app.register_blueprint(motorista_bp)
     app.register_blueprint(caminhao_bp)
     app.register_blueprint(exportacao_bp)
+    app.register_blueprint(administradora_bp)
     
 
     return app

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("administradora.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    <form method="POST" class="form">
+
+        {% if origem %}
+            <input
+                type="hidden"
+                name="origem"
+                value="{{ origem }}">
+        {% endif %}
+
+        <div class="form-group">
+
+            <label>Nome</label>
+
+            <input
+                type="text"
+                name="nome"
+                value="{{ administradora.nome if administradora else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Cliente Próprio</label>
+
+            <select name="cliente_proprio">
+
+                <option
+                    value="Não"
+                    {% if not administradora or not administradora.cliente_proprio %}selected{% endif %}>
+                    Não
+                </option>
+
+                <option
+                    value="Sim"
+                    {% if administradora and administradora.cliente_proprio %}selected{% endif %}>
+                    Sim
+                </option>
+
+            </select>
+
+        </div>
+
+        {% set cancelar = url_for("administradora.listar") %}
+        {% include "components/form_actions.html" %}
+
+    </form>
+
+</div>
+
+{% endblock %}

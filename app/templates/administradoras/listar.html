@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Administradoras
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Administradoras" %}
+    {% set novo_url = url_for("administradora.novo") %}
+    {% set novo_texto = "Nova Administradora" %}
+    {% set visualizacao_url = url_for("administradora.completo") %}
+    {% set exportar_url = url_for("exportacao.exportar_generico", modulo="administradora") %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Nome</th>
+                <th>Cliente Próprio</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for administradora in administradoras %}
+
+            <tr>
+
+                <td>{{ administradora.nome }}</td>
+
+                <td>
+
+                    {% if administradora.cliente_proprio %}
+                        Sim
+                    {% else %}
+                        Não
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if administradora.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a href="{{ url_for('administradora.detalhes',
+                                        id_administradora=administradora.id_administradora) }}">
+                        Ver detalhes
+                    </a>
+
+                    |
+
+                    <a href="{{ url_for('administradora.editar',
+                                        id_administradora=administradora.id_administradora) }}">
+                        Editar
+                    </a>
+
+                    |
+
+                    <a href="{{ url_for('administradora.toggle',
+                                        id_administradora=administradora.id_administradora) }}">
+
+                        {% if administradora.ativo %}
+                            Desativar
+                        {% else %}
+                            Ativar
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

@@ -1,164 +1,98 @@
-from io import BytesIO
+from datetime import date
+from datetime import datetime
+from io import StringIO
 
 from flask import Response
 
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from openpyxl.styles import Border
-from openpyxl.styles import Side
-from openpyxl.styles import PatternFill
-from openpyxl.styles import Alignment
 
+class CsvService:
 
-class ExcelService:
+    @staticmethod
+    def formatar(valor):
+
+        if isinstance(valor, bool):
+
+            return "Ativo" if valor else "Inativo"
+
+        if isinstance(valor, (date, datetime)):
+
+            return valor.strftime("%d/%m/%Y")
+
+        if valor is None:
+
+            return ""
+
+        return str(valor)
 
     @staticmethod
     def exportar(
         dados,
         colunas,
         nome_arquivo,
-        titulo
+        labels
     ):
 
-        workbook = Workbook()
+        buffer = StringIO()
 
-        sheet = workbook.active
+        # Cabeçalho
+        buffer.write(
 
-        sheet.title = titulo
+            ";".join(
 
-        # ==================================================
-        # TÍTULO
-        # ==================================================
-
-        sheet.merge_cells(
-            start_row=1,
-            start_column=1,
-            end_row=1,
-            end_column=len(colunas)
-        )
-
-        titulo_cell = sheet["A1"]
-
-        titulo_cell.value = titulo
-
-        titulo_cell.font = Font(
-            bold=True,
-            size=16,
-            color="FFFFFF"
-        )
-
-        titulo_cell.alignment = Alignment(
-            horizontal="center"
-        )
-
-        titulo_cell.fill = PatternFill(
-            fill_type="solid",
-            fgColor="17324F"
-        )
-
-        # ==================================================
-        # CABEÇALHO
-        # ==================================================
-
-        borda = Border(
-
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin")
-
-        )
-
-        for coluna_excel, coluna in enumerate(colunas, start=1):
-
-            cell = sheet.cell(
-                row=2,
-                column=coluna_excel
-            )
-
-            cell.value = coluna
-
-            cell.font = Font(
-                bold=True,
-                color="FFFFFF"
-            )
-
-            cell.fill = PatternFill(
-                fill_type="solid",
-                fgColor="17324F"
-            )
-
-            cell.alignment = Alignment(
-                horizontal="center"
-            )
-
-            cell.border = borda
-
-        # ==================================================
-        # DADOS
-        # ==================================================
-
-        linha = 3
-
-        for registro in dados:
-
-            for coluna_excel, coluna in enumerate(colunas, start=1):
-
-                cell = sheet.cell(
-                    row=linha,
-                    column=coluna_excel
-                )
-
-                cell.value = getattr(
-                    registro,
+                labels.get(
+                    coluna,
                     coluna
                 )
 
-                cell.border = borda
+                for coluna in colunas
 
-            linha += 1
+            )
 
-        # ==================================================
-        # AJUSTA LARGURA
-        # ==================================================
+        )
 
-        for coluna in sheet.columns:
+        buffer.write("\n")
 
-            tamanho = 0
+        # Dados
+        for registro in dados:
 
-            letra = coluna[0].column_letter
+            linha = []
 
-            for cell in coluna:
+            for coluna in colunas:
 
-                if cell.value:
+                valor = CsvService.formatar(
 
-                    tamanho = max(
-                        tamanho,
-                        len(str(cell.value))
+                    getattr(
+                        registro,
+                        coluna
                     )
 
-            sheet.column_dimensions[letra].width = tamanho + 4
+                )
 
-        # ==================================================
-        # SALVA
-        # ==================================================
+                # Escapa aspas
+                valor = valor.replace('"', '""')
 
-        buffer = BytesIO()
+                # Coloca entre aspas caso necessário
+                if ";" in valor or "\n" in valor:
 
-        workbook.save(buffer)
+                    valor = f'"{valor}"'
 
-        buffer.seek(0)
+                linha.append(valor)
+
+            buffer.write(";".join(linha))
+
+            buffer.write("\n")
 
         return Response(
 
-            buffer.getvalue(),
+            buffer.getvalue().encode("utf-8-sig"),
 
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            mimetype="text/csv",
 
             headers={
 
                 "Content-Disposition":
-                f"attachment; filename={nome_arquivo}.xlsx"
+
+                f'attachment; filename="{nome_arquivo}.csv"'
 
             }
 

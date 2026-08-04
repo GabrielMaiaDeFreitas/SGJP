@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("administradora.listar") %}
+    {% include "components/view_header.html" %}
+
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Nome</th>
+                <th>Cliente Próprio</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for administradora in administradoras %}
+
+            <tr>
+
+                <td>{{ administradora.nome }}</td>
+
+                <td>
+
+                    {% if administradora.cliente_proprio %}
+                        Sim
+                    {% else %}
+                        Não
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if administradora.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'administradora.editar',
+                            id_administradora=administradora.id_administradora,
+                            origem='completo'
+                        ) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'administradora.toggle',
+                            id_administradora=administradora.id_administradora,
+                            origem='completo'
+                        ) }}">
+
+                        {% if administradora.ativo %}
+                            Desativar
+                        {% else %}
+                            Ativar
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('administradora.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='administradora'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
+</div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
+
+{% endblock %}

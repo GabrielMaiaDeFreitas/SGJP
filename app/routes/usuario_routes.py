@@ -11,7 +11,7 @@ from flask import (
 from app import db
 from app.models import Usuario
 from app.filters.usuario import FILTROS_USUARIO
-from app.services.filter_service import FilterService
+from app.services.usuario_service import UsuarioService
 
 
 usuario_bp = Blueprint(
@@ -305,17 +305,9 @@ def completo():
         or "nome"
     )
 
-    usuarios = FilterService.listar(
-
-        modelo=Usuario,
-
-        filtros=request.args,
-
-        configuracoes=FILTROS_USUARIO,
-
-        ordenar_por=ordem_final
-
-    )
+    usuarios = UsuarioService.listar(
+    request.args
+)
 
     return render_template(
 

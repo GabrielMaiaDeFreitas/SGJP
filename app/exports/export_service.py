@@ -1,6 +1,7 @@
+from app.exports.csv_service import CsvService
 from app.exports.excel_service import ExcelService
 from app.exports.pdf_service import PdfService
-#from app.exports.zip_service import ZipService
+from app.exports.zip_service import ZipService
 
 
 class ExportService:
@@ -9,49 +10,56 @@ class ExportService:
     def exportar(
         dados,
         colunas,
-        labels,
         formatos,
         nome_arquivo,
-        titulo
+        titulo,
+        labels
     ):
 
-        arquivos = []
+        # Apenas um formato
+        if len(formatos) == 1:
 
-        if "excel" in formatos:
+            formato = formatos[0]
 
-            arquivos.append(
+            if formato == "excel":
 
-                ExcelService.exportar(
-                    dados=dados,
-                    colunas=colunas,
-                    labels=labels,
-                    nome_arquivo=nome_arquivo,
-                    titulo=titulo
-                )
-
-            )
-
-        if "pdf" in formatos:
-
-            arquivos.append(
-
-                PdfService.exportar(
+                return ExcelService.exportar(
                     dados=dados,
                     colunas=colunas,
                     nome_arquivo=nome_arquivo,
-                    titulo=titulo
+                    titulo=titulo,
+                    labels=labels
                 )
 
+            if formato == "pdf":
+
+                return PdfService.exportar(
+                    dados=dados,
+                    colunas=colunas,
+                    nome_arquivo=nome_arquivo,
+                    titulo=titulo,
+                    labels=labels
+                )
+
+            if formato == "csv":
+
+                return CsvService.exportar(
+                    dados=dados,
+                    colunas=colunas,
+                    nome_arquivo=nome_arquivo,
+                    labels=labels
+                )
+
+            raise ValueError(
+                f"Formato '{formato}' não suportado."
             )
 
-        #if len(arquivos) == 1:
-
-            #return arquivos[0]
-
-        #return ZipService.exportar(arquivos)
-
-        if not arquivos:
-            return None
-
-        # temporário
-        return arquivos[0]
+        # Mais de um formato
+        return ZipService.exportar(
+            dados=dados,
+            colunas=colunas,
+            formatos=formatos,
+            nome_arquivo=nome_arquivo,
+            titulo=titulo,
+            labels=labels
+        )

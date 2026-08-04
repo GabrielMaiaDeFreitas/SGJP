@@ -54,6 +54,13 @@ class FilterService:
 
                 valor = valor == "Ativo"
 
+            if (
+                configuracao.get("converter")
+                == "cliente_proprio"
+            ):
+
+                valor = valor == "Sim"
+
             if operacao == "contains":
 
                 query = query.filter(

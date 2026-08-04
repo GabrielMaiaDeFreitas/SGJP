@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("administradora.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Nome",
+            "valor": administradora.nome
+        },
+
+        {
+            "label": "Cliente Próprio",
+            "valor": "Sim" if administradora.cliente_proprio else "Não"
+        },
+
+        {
+            "label": "Status",
+            "valor": "Ativo" if administradora.ativo else "Inativo"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('administradora.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'administradora.editar',
+                id_administradora=administradora.id_administradora
+            ) }}"
+            class="btn btn-primary">
+
+            Editar Administradora
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
