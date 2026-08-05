@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("tipo_servico.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Nome",
+            "valor": tipo_servico.nome
+        },
+
+        {
+            "label": "Status",
+            "valor": "Ativo" if tipo_servico.ativo else "Inativo"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('tipo_servico.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'tipo_servico.editar',
+                id_tipo_servico=tipo_servico.id_tipo_servico
+            ) }}"
+            class="btn btn-primary">
+
+            Editar Tipo de Serviço
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

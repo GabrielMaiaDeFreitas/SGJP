@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("tipo_servico.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    <form method="POST" class="form">
+
+        {% if origem %}
+            <input
+                type="hidden"
+                name="origem"
+                value="{{ origem }}">
+        {% endif %}
+
+        <div class="form-group">
+
+            <label>Nome</label>
+
+            <input
+                type="text"
+                name="nome"
+                value="{{ tipo_servico.nome if tipo_servico else '' }}"
+                required>
+
+        </div>
+
+        {% set cancelar = url_for("tipo_servico.listar") %}
+        {% include "components/form_actions.html" %}
+
+    </form>
+
+</div>
+
+{% endblock %}

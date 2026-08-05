@@ -49,9 +49,13 @@
 
         </a>
 
-        <li>
-            <a href="#">Tipos de Serviço</a>
-        </li>
+        <a
+            href="{{ url_for('tipo_servico.listar') }}"
+            class="{% if request.endpoint.startswith('tipo_servico.') %}active{% endif %}">
+
+            Tipos de Serviço
+
+        </a>
 
         <li>
             <a href="#">Tabela de Valores</a>

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Tipos de Serviço
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Tipos de Serviço" %}
+    {% set novo_url = url_for("tipo_servico.novo") %}
+    {% set novo_texto = "Novo Tipo de Serviço" %}
+    {% set visualizacao_url = url_for("tipo_servico.completo") %}
+    {% set exportar_url = url_for(
+        "exportacao.exportar_generico",
+        modulo="tipo_servico"
+    ) %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Nome</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for tipo_servico in tipos_servico %}
+
+            <tr>
+
+                <td>{{ tipo_servico.nome }}</td>
+
+                <td>
+
+                    {% if tipo_servico.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'tipo_servico.detalhes',
+                            id_tipo_servico=tipo_servico.id_tipo_servico
+                        ) }}">
+
+                        Ver detalhes
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'tipo_servico.editar',
+                            id_tipo_servico=tipo_servico.id_tipo_servico
+                        ) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'tipo_servico.toggle',
+                            id_tipo_servico=tipo_servico.id_tipo_servico
+                        ) }}">
+
+                        {% if tipo_servico.ativo %}
+                            Desativar
+                        {% else %}
+                            Ativar
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
