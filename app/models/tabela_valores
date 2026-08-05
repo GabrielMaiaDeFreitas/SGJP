@@ -1,0 +1,57 @@
+from decimal import Decimal
+
+from app import db
+
+
+class TabelaValores(db.Model):
+
+    __tablename__ = "tabela_valores"
+
+    id_tabela_valores = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    valor_saida = db.Column(
+        db.Numeric(10, 2),
+        nullable=False,
+        default=Decimal("0.00")
+    )
+
+    valor_km_excedente = db.Column(
+        db.Numeric(10, 2),
+        nullable=False,
+        default=Decimal("0.00")
+    )
+
+    ativo = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=True
+    )
+
+    fk_tipo_servico_id_tipo_servico = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "tipo_servico.id_tipo_servico"
+        ),
+        nullable=False
+    )
+
+    fk_administradora_id_administradora = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "administradora.id_administradora"
+        ),
+        nullable=False
+    )
+
+    tipo_servico = db.relationship(
+        "TipoServico",
+        back_populates="tabelas_valores"
+    )
+
+    administradora = db.relationship(
+        "Administradora",
+        back_populates="tabelas_valores"
+    )

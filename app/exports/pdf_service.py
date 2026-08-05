@@ -1,12 +1,13 @@
 from datetime import date
 from datetime import datetime
 from io import BytesIO
-
 from flask import Response
-
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib.styles import getSampleStyleSheet
+
+from app.utils.object_utils import ObjectUtils
+
 from reportlab.platypus import (
     SimpleDocTemplate,
     Table,
@@ -85,7 +86,7 @@ class PdfService:
 
                     PdfService.formatar(
 
-                        getattr(
+                        ObjectUtils.obter_valor(
 
                             registro,
 

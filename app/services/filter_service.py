@@ -28,17 +28,23 @@ class FilterService:
 
             configuracao = configuracoes.get(campo)
 
+            configuracao = configuracoes.get(campo)
+
             if configuracao is None:
                 continue
 
-            atributo = getattr(
+            atributo_config = configuracao.get(
+                "atributo",
+                configuracao["campo"]
+            )
+
+            query, atributo = FilterService._obter_atributo(
+
+                query,
 
                 modelo,
 
-                configuracao.get(
-                    "atributo",
-                    configuracao["campo"]
-                )
+                atributo_config
 
             )
 
@@ -81,3 +87,26 @@ class FilterService:
         return query.order_by(
             atributo_ordenacao
         ).all()
+
+    @staticmethod
+    def _obter_atributo(query, modelo, atributo_config):
+
+        if "." not in atributo_config:
+
+            return query, getattr(modelo, atributo_config)
+
+        relacionamento, coluna = atributo_config.split(".", 1)
+
+        relacionamento_modelo = getattr(
+            modelo,
+            relacionamento
+        ).property.mapper.class_
+
+        query = query.join(
+            relacionamento_modelo
+        )
+
+        return (
+            query,
+            getattr(relacionamento_modelo, coluna)
+        )

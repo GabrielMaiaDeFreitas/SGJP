@@ -6,6 +6,7 @@ from flask import Response
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+from app.utils.object_utils import ObjectUtils
 
 from openpyxl.styles import (
     Alignment,
@@ -169,7 +170,7 @@ class ExcelService:
 
                 cell.value = ExcelService.formatar(
 
-                    getattr(
+                    ObjectUtils.obter_valor(
 
                         registro,
 

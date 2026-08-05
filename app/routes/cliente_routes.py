@@ -18,6 +18,8 @@ from app.models import (
 from app.filters.cliente import FILTROS_CLIENTE
 from app.services.cliente_service import ClienteService
 
+from copy import deepcopy
+
 
 cliente_bp = Blueprint(
     "cliente",
@@ -335,6 +337,41 @@ def completo():
         request.args
     )
 
+    campos = deepcopy(
+        FILTROS_CLIENTE
+    )
+
+    administradoras = Administradora.query.filter_by(
+
+        ativo=True
+
+    ).order_by(
+
+        Administradora.nome
+
+    ).all()
+
+    for campo in campos:
+
+        if (
+            campo["campo"]
+            == "fk_administradora_id_administradora"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+
+                    "id": administradora.id_administradora,
+
+                    "label": administradora.nome
+
+                }
+
+                for administradora in administradoras
+
+            ]
+
     return render_template(
 
         "clientes/completo.html",
@@ -343,7 +380,7 @@ def completo():
 
         clientes=clientes,
 
-        campos=FILTROS_CLIENTE,
+        campos=campos,
 
         campos_filtro=request.args.getlist("campo[]"),
 

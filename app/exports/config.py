@@ -189,6 +189,8 @@ MODELOS_MAPEADOS = {
 
         "colunas_exportacao": [
 
+            "administradora.nome",
+
             "nome_fantasia",
 
             "razao_social",
@@ -200,6 +202,8 @@ MODELOS_MAPEADOS = {
         ],
 
         "labels": {
+
+            "administradora.nome": "Administradora",
 
             "nome_fantasia": "Nome Fantasia",
 

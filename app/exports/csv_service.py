@@ -1,8 +1,8 @@
 from datetime import date
 from datetime import datetime
 from io import StringIO
-
 from flask import Response
+from app.utils.object_utils import ObjectUtils
 
 
 class CsvService:
@@ -61,9 +61,12 @@ class CsvService:
 
                 valor = CsvService.formatar(
 
-                    getattr(
+                    ObjectUtils.obter_valor(
+
                         registro,
+
                         coluna
+
                     )
 
                 )

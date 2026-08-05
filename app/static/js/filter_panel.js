@@ -290,8 +290,21 @@ function criarCampoValor(tipo, opcoes = []) {
             const option =
                 document.createElement("option");
 
-            option.value = opcao;
-            option.textContent = opcao;
+            if (
+                typeof opcao === "object"
+            ) {
+
+                option.value = opcao.id;
+
+                option.textContent = opcao.label;
+
+            } else {
+
+                option.value = opcao;
+
+                option.textContent = opcao;
+
+            }
 
             select.appendChild(option);
 

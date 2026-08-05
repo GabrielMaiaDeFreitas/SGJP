@@ -35,6 +35,20 @@ FILTROS_CLIENTE = [
         "operacao": "igual",
         "converter": "boolean",
         "opcoes": STATUS
+    },
+
+    {
+        "campo": "fk_administradora_id_administradora",
+
+        "atributo": "fk_administradora_id_administradora",
+
+        "label": "Administradora",
+
+        "tipo": "select",
+
+        "operacao": "igual",
+
+        "opcoes": []
     }
 
 ]
