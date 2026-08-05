@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Clientes
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Clientes" %}
+    {% set novo_url = url_for("cliente.novo") %}
+    {% set novo_texto = "Novo Cliente" %}
+    {% set visualizacao_url = url_for("cliente.completo") %}
+    {% set exportar_url = url_for("exportacao.exportar_generico", modulo="cliente") %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Nome Fantasia</th>
+                <th>Administradora</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for cliente in clientes %}
+
+            <tr>
+
+                <td>{{ cliente.nome_fantasia }}</td>
+
+                <td>{{ cliente.administradora.nome }}</td>
+
+                <td>
+
+                    {% if cliente.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a href="{{ url_for('cliente.detalhes',
+                                        id_cliente=cliente.id_cliente) }}">
+                        Ver detalhes
+                    </a>
+
+                    |
+
+                    <a href="{{ url_for('cliente.editar',
+                                        id_cliente=cliente.id_cliente) }}">
+                        Editar
+                    </a>
+
+                    |
+
+                    <a href="{{ url_for('cliente.toggle',
+                                        id_cliente=cliente.id_cliente) }}">
+
+                        {% if cliente.ativo %}
+                            Desativar
+                        {% else %}
+                            Ativar
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

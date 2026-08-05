@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("cliente.listar") %}
+
+    {% include "components/view_header.html" %}
+
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Administradora</th>
+                <th>Nome Fantasia</th>
+                <th>Razão Social</th>
+                <th>CNPJ</th>
+                <th>Status</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for cliente in clientes %}
+
+            <tr>
+
+                <td>{{ cliente.administradora.nome }}</td>
+
+                <td>{{ cliente.nome_fantasia }}</td>
+
+                <td>{{ cliente.razao_social }}</td>
+
+                <td>{{ cliente.cnpj }}</td>
+
+                <td>
+
+                    {% if cliente.ativo %}
+                        Ativo
+                    {% else %}
+                        Inativo
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'cliente.editar',
+                            id_cliente=cliente.id_cliente,
+                            origem='completo'
+                        ) }}">
+
+                        Editar
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'cliente.toggle',
+                            id_cliente=cliente.id_cliente,
+                            origem='completo'
+                        ) }}">
+
+                        {% if cliente.ativo %}
+                            Desativar
+                        {% else %}
+                            Ativar
+                        {% endif %}
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('cliente.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='cliente'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
+</div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
+
+{% endblock %}

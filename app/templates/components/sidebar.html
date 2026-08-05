@@ -37,9 +37,13 @@
 
         </a>
 
-        <li>
-            <a href="#">Clientes</a>
-        </li>
+        <a
+            href="{{ url_for('cliente.listar') }}"
+            class="{% if request.endpoint.startswith('cliente.') %}active{% endif %}">
+
+            Clientes
+
+        </a>
 
         <a
             href="{{ url_for('administradora.listar') }}"

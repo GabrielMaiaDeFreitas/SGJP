@@ -31,6 +31,14 @@ class Administradora(db.Model):
         default=True
     )
 
+    clientes = db.relationship(
+
+    "Cliente",
+
+    back_populates="administradora"
+
+)
+
     def __repr__(self):
         """
         Representação textual do objeto.

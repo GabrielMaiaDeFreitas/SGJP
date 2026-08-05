@@ -1,10 +1,11 @@
-from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico
+from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico, Cliente
 
 from app.filters.caminhao import FILTROS_CAMINHAO
 from app.filters.motorista import FILTROS_MOTORISTA
 from app.filters.usuario import FILTROS_USUARIO
 from app.filters.administradora import FILTROS_ADMINISTRADORA
 from app.filters.tipo_servico import FILTROS_TIPO_SERVICO
+from app.filters.cliente import FILTROS_CLIENTE
 
 
 MODELOS_MAPEADOS = {
@@ -169,6 +170,42 @@ MODELOS_MAPEADOS = {
         "labels": {
 
             "nome": "Nome",
+
+            "ativo": "Status"
+
+        }
+
+    },
+
+    "cliente": {
+
+        "modelo": Cliente,
+
+        "titulo": "Clientes",
+
+        "ordenar_por": "nome_fantasia",
+
+        "filtros_config": FILTROS_CLIENTE,
+
+        "colunas_exportacao": [
+
+            "nome_fantasia",
+
+            "razao_social",
+
+            "cnpj",
+
+            "ativo"
+
+        ],
+
+        "labels": {
+
+            "nome_fantasia": "Nome Fantasia",
+
+            "razao_social": "Razão Social",
+
+            "cnpj": "CNPJ",
 
             "ativo": "Status"
 

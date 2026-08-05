@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("cliente.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    <form method="POST" class="form">
+
+        {% if origem %}
+            <input
+                type="hidden"
+                name="origem"
+                value="{{ origem }}">
+        {% endif %}
+
+        <div class="form-group">
+
+            <label>Administradora</label>
+
+            <select
+                name="fk_administradora_id_administradora"
+                required>
+
+                <option value="">
+                    Selecione...
+                </option>
+
+                {% for administradora in administradoras %}
+
+                <option
+                    value="{{ administradora.id_administradora }}"
+                    {% if cliente and cliente.fk_administradora_id_administradora == administradora.id_administradora %}
+                    selected
+                    {% endif %}>
+
+                    {{ administradora.nome }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Nome Fantasia</label>
+
+            <input
+                type="text"
+                name="nome_fantasia"
+                value="{{ cliente.nome_fantasia if cliente else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Razão Social</label>
+
+            <input
+                type="text"
+                name="razao_social"
+                value="{{ cliente.razao_social if cliente else '' }}"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>CNPJ</label>
+
+            <input
+                type="text"
+                name="cnpj"
+                value="{{ cliente.cnpj if cliente else '' }}"
+                required>
+
+        </div>
+
+        {% set cancelar = url_for("cliente.listar") %}
+        {% include "components/form_actions.html" %}
+
+    </form>
+
+</div>
+
+{% endblock %}

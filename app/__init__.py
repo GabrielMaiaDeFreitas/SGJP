@@ -25,6 +25,7 @@ def create_app():
     from app.routes.exportacao_routes import exportacao_bp
     from app.routes.administradora_routes import administradora_bp
     from app.routes.tipo_servico_routes import tipo_servico_bp
+    from app.routes.cliente_routes import cliente_bp
     
 
     # Registra os blueprints
@@ -36,6 +37,7 @@ def create_app():
     app.register_blueprint(exportacao_bp)
     app.register_blueprint(administradora_bp)
     app.register_blueprint(tipo_servico_bp)
+    app.register_blueprint(cliente_bp)
     
 
     return app

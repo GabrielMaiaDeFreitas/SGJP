@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("cliente.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Administradora",
+            "valor": cliente.administradora.nome
+        },
+
+        {
+            "label": "Nome Fantasia",
+            "valor": cliente.nome_fantasia
+        },
+
+        {
+            "label": "Razão Social",
+            "valor": cliente.razao_social
+        },
+
+        {
+            "label": "CNPJ",
+            "valor": cliente.cnpj
+        },
+
+        {
+            "label": "Status",
+            "valor": "Ativo" if cliente.ativo else "Inativo"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('cliente.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for('cliente.editar',
+                             id_cliente=cliente.id_cliente) }}"
+            class="btn btn-primary">
+
+            Editar Cliente
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
