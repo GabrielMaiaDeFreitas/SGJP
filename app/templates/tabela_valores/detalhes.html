@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("tabela_valores.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    <div class="details-container">
+
+        <div class="detail-item">
+
+            <strong>
+
+                Administradora
+
+            </strong>
+
+            <p>
+
+                {{ administradora.nome }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>
+
+                    Tipo de Serviço
+
+                </th>
+
+                <th>
+
+                    Valor de Saída
+
+                </th>
+
+                <th>
+
+                    KM Excedente
+
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for linha in tabela %}
+
+            <tr>
+
+                <td>
+
+                    {{ linha.tipo_servico.nome }}
+
+                </td>
+
+                <td>
+
+                    {% if linha.valor_saida == 0 %}
+
+                        —
+
+                    {% else %}
+
+                        {{ "%.2f"|format(linha.valor_saida) }}
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if linha.valor_km_excedente == 0 %}
+
+                        —
+
+                    {% else %}
+
+                        {{ "%.2f"|format(linha.valor_km_excedente) }}
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="form-actions">
+
+        <a
+
+            href="{{ url_for(
+                'tabela_valores.editar',
+                id_administradora=administradora.id_administradora
+            ) }}"
+
+            class="btn btn-primary"
+
+        >
+
+            Editar
+
+        </a>
+
+        <a
+
+            href="{{ url_for(
+                'tabela_valores.listar'
+            ) }}"
+
+            class="btn btn-secondary"
+
+        >
+
+            Voltar
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

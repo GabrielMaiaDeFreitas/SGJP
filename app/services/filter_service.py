@@ -28,8 +28,6 @@ class FilterService:
 
             configuracao = configuracoes.get(campo)
 
-            configuracao = configuracoes.get(campo)
-
             if configuracao is None:
                 continue
 

@@ -26,6 +26,7 @@ def create_app():
     from app.routes.administradora_routes import administradora_bp
     from app.routes.tipo_servico_routes import tipo_servico_bp
     from app.routes.cliente_routes import cliente_bp
+    from app.routes.tabela_valores_routes import tabela_valores_bp
     
 
     # Registra os blueprints
@@ -38,6 +39,6 @@ def create_app():
     app.register_blueprint(administradora_bp)
     app.register_blueprint(tipo_servico_bp)
     app.register_blueprint(cliente_bp)
+    app.register_blueprint(tabela_valores_bp)
     
-
     return app

@@ -38,6 +38,14 @@ class Administradora(db.Model):
     back_populates="administradora"
 
 )
+    
+    tabelas_valores = db.relationship(
+
+    "TabelaValores",
+
+    back_populates="administradora"
+
+)
 
     def __repr__(self):
         """

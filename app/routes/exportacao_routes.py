@@ -11,6 +11,7 @@ from app.exports.export_service import ExportService
 from app.services.filter_service import FilterService
 
 
+
 exportacao_bp = Blueprint(
     "exportacao",
     __name__,
@@ -80,17 +81,27 @@ def exportar_generico(modulo):
 
         )
 
-        dados = FilterService.listar(
+        if "listar_service" in mapeamento:
 
-            modelo=modelo,
+            dados = mapeamento["listar_service"](
 
-            filtros=request.values,
+                request.values
 
-            configuracoes=filtros_config,
+            )
 
-            ordenar_por=ordem_final
+        else:
 
-        )
+            dados = FilterService.listar(
+
+                modelo=modelo,
+
+                filtros=request.values,
+
+                configuracoes=filtros_config,
+
+                ordenar_por=ordem_final
+
+            )
 
         return ExportService.exportar(
 

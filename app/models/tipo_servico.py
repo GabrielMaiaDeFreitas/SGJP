@@ -25,6 +25,14 @@ class TipoServico(db.Model):
         default=True
     )
 
+    tabelas_valores = db.relationship(
+
+        "TabelaValores",
+
+        back_populates="tipo_servico"
+
+    )
+
     def __repr__(self):
 
         return f"<TipoServico {self.nome}>"

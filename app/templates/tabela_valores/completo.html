@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("tabela_valores.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
+
+    <div
+        id="filters-data"
+        data-campos='{{ campos_filtro | tojson }}'
+        data-valores='{{ valores_filtro | tojson }}'>
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+
+                        Administradora
+
+                    </th>
+
+                    <th>
+
+                        Tipo de Serviço
+
+                    </th>
+
+                    <th>
+
+                        Valor de Saída
+
+                    </th>
+
+                    <th>
+
+                        KM Excedente
+
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for tabela in tabelas %}
+
+                <tr>
+
+                    <td>
+
+                        {{ tabela.administradora.nome }}
+
+                    </td>
+
+                    <td>
+
+                        {{ tabela.tipo_servico.nome }}
+
+                    </td>
+
+                    <td>
+
+                        {% if tabela.valor_saida == 0 %}
+
+                            —
+
+                        {% else %}
+
+                            {{ "%.2f"|format(tabela.valor_saida) }}
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if tabela.valor_km_excedente == 0 %}
+
+                            —
+
+                        {% else %}
+
+                            {{ "%.2f"|format(tabela.valor_km_excedente) }}
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('tabela_valores.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='tabela_valores_completo'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
+
+{% endblock %}

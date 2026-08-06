@@ -270,6 +270,20 @@ function criarCampoValor(tipo, opcoes = []) {
 
     }
 
+    if (tipo === "numero") {
+
+        const input = document.createElement("input");
+
+        input.type = "number";
+        input.name = "valor[]";
+        input.min = "0";
+        input.step = "0.01";
+        input.placeholder = "Digite um valor";
+
+        return input;
+
+    }
+
     if (tipo === "select") {
 
         const select =

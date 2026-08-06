@@ -113,7 +113,21 @@ def novo():
 
         if administradora.cliente_proprio:
 
-            return redirect("#")
+            return redirect(
+
+                url_for(
+
+                    "cliente.novo",
+
+                    id_administradora=(
+                        administradora.id_administradora
+                    ),
+
+                    origem="administradora"
+
+                )
+
+            )
 
         return redirect(
             url_for("administradora.listar")

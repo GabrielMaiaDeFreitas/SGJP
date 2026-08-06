@@ -66,21 +66,48 @@ def listar():
 def novo():
 
     if "usuario_id" not in session:
+
         return redirect(
             url_for("autenticacao.login")
         )
 
-    administradoras = Administradora.query.filter_by(
+    origem = request.args.get(
+        "origem"
+    )
 
-        ativo=True,
+    id_administradora = request.args.get(
 
-        cliente_proprio=False
+        "id_administradora",
 
-    ).order_by(
+        type=int
 
-        Administradora.nome
+    )
 
-    ).all()
+    if origem == "administradora":
+
+        administradoras = Administradora.query.filter_by(
+
+            ativo=True
+
+        ).order_by(
+
+            Administradora.nome
+
+        ).all()
+
+    else:
+
+        administradoras = Administradora.query.filter_by(
+
+            ativo=True,
+
+            cliente_proprio=False
+
+        ).order_by(
+
+            Administradora.nome
+
+        ).all()
 
     if request.method == "POST":
 
@@ -88,15 +115,15 @@ def novo():
 
             cliente = Cliente(
 
-                nome_fantasia=request.form["nome_fantasia"],
+                nome_fantasia=administradora.nome,
 
-                razao_social=request.form["razao_social"],
+                razao_social="",
 
-                cnpj=request.form["cnpj"],
+                cnpj="",
 
-                fk_administradora_id_administradora=request.form[
-                    "fk_administradora_id_administradora"
-                ]
+                fk_administradora_id_administradora=(
+                    administradora.id_administradora
+                )
 
             )
 
@@ -108,7 +135,9 @@ def novo():
 
                 cliente=cliente,
 
-                administradoras=administradoras
+                administradoras=administradoras,
+
+                origem=request.form.get("origem")
 
             )
 
@@ -119,8 +148,11 @@ def novo():
         ).first():
 
             flash(
+
                 "Já existe um cliente com esse CNPJ.",
+
                 "warning"
+
             )
 
             return voltar_formulario()
@@ -146,12 +178,37 @@ def novo():
         db.session.commit()
 
         flash(
+
             "Cliente cadastrado com sucesso.",
+
             "success"
+
         )
 
         return redirect(
+
             url_for("cliente.listar")
+
+        )
+
+    cliente = None
+
+    if origem == "administradora" and id_administradora:
+
+        administradora = Administradora.query.get_or_404(
+
+            id_administradora
+
+        )
+
+        cliente = Cliente(
+
+            nome_fantasia=administradora.nome,
+
+            fk_administradora_id_administradora=(
+                administradora.id_administradora
+            )
+
         )
 
     return render_template(
@@ -160,9 +217,11 @@ def novo():
 
         titulo="Novo Cliente",
 
-        cliente=None,
+        cliente=cliente,
 
-        administradoras=administradoras
+        administradoras=administradoras,
+
+        origem=origem
 
     )
 
@@ -385,5 +444,45 @@ def completo():
         campos_filtro=request.args.getlist("campo[]"),
 
         valores_filtro=request.args.getlist("valor[]")
+
+    )
+
+
+@cliente_bp.route(
+    "/cancelar-cadastro-proprio/<int:id_administradora>"
+)
+def cancelar_cadastro_proprio(id_administradora):
+
+    if "usuario_id" not in session:
+
+        return redirect(
+            url_for("autenticacao.login")
+        )
+
+    administradora = Administradora.query.get_or_404(
+
+        id_administradora
+
+    )
+
+    db.session.delete(
+
+        administradora
+
+    )
+
+    db.session.commit()
+
+    flash(
+
+        "Cadastro cancelado.",
+
+        "info"
+
+    )
+
+    return redirect(
+
+        url_for("administradora.listar")
 
     )

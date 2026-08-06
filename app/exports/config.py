@@ -1,4 +1,4 @@
-from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico, Cliente
+from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico, Cliente, TabelaValores
 
 from app.filters.caminhao import FILTROS_CAMINHAO
 from app.filters.motorista import FILTROS_MOTORISTA
@@ -6,6 +6,11 @@ from app.filters.usuario import FILTROS_USUARIO
 from app.filters.administradora import FILTROS_ADMINISTRADORA
 from app.filters.tipo_servico import FILTROS_TIPO_SERVICO
 from app.filters.cliente import FILTROS_CLIENTE
+from app.filters.tabela_valores import FILTROS_TABELA_VALORES
+
+
+from app.services.tabela_valores_service import TabelaValoresService
+
 
 
 MODELOS_MAPEADOS = {
@@ -212,6 +217,76 @@ MODELOS_MAPEADOS = {
             "cnpj": "CNPJ",
 
             "ativo": "Status"
+
+        }
+
+    },
+
+        "tabela_valores": {
+
+        "modelo": TabelaValores,
+
+        "titulo": "Tabelas de Valores",
+
+        "ordenar_por": "fk_administradora_id_administradora",
+
+        "listar_service": TabelaValoresService.listar,
+
+        "filtros_config": FILTROS_TABELA_VALORES,
+
+        "colunas_exportacao": [
+
+            "administradora",
+
+            "quantidade",
+
+            "situacao"
+
+        ],
+
+        "labels": {
+
+            "administradora": "Administradora",
+
+            "quantidade": "Quantidade",
+
+            "situacao": "Situação"
+
+        }
+
+    },
+
+    "tabela_valores_completo": {
+
+        "modelo": TabelaValores,
+
+        "titulo": "Tabelas de Valores",
+
+        "ordenar_por": "fk_administradora_id_administradora",
+
+        "filtros_config": FILTROS_TABELA_VALORES,
+
+        "colunas_exportacao": [
+
+            "administradora.nome",
+
+            "tipo_servico.nome",
+
+            "valor_saida",
+
+            "valor_km_excedente"
+
+        ],
+
+        "labels": {
+
+            "administradora.nome": "Administradora",
+
+            "tipo_servico.nome": "Tipo de Serviço",
+
+            "valor_saida": "Valor de Saída",
+
+            "valor_km_excedente": "KM Excedente"
 
         }
 

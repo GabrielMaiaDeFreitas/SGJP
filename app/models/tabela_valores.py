@@ -33,7 +33,7 @@ class TabelaValores(db.Model):
     fk_tipo_servico_id_tipo_servico = db.Column(
         db.Integer,
         db.ForeignKey(
-            "tipo_servico.id_tipo_servico"
+            "tipos_servico.id_tipo_servico"
         ),
         nullable=False
     )
@@ -41,7 +41,7 @@ class TabelaValores(db.Model):
     fk_administradora_id_administradora = db.Column(
         db.Integer,
         db.ForeignKey(
-            "administradora.id_administradora"
+            "administradoras.id_administradora"
         ),
         nullable=False
     )

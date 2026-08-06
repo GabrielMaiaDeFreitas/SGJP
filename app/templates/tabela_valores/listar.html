@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Tabelas de Valores
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Tabelas de Valores" %}
+    {% set novo_url = url_for("tabela_valores.novo") %}
+    {% set novo_texto = "Nova Tabela de Valores" %}
+    {% set visualizacao_url = url_for("tabela_valores.completo") %}
+    {% set exportar_url = url_for(
+        "exportacao.exportar_generico",
+        modulo="tabela_valores"
+    ) %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Administradora</th>
+                <th>Quantidade</th>
+                <th>Situação</th>
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for tabela in tabelas %}
+
+            <tr>
+
+                <td>
+
+                    {{ tabela.administradora }}
+
+                </td>
+
+                <td>
+
+                    {{ tabela.quantidade }}
+
+                </td>
+
+                <td>
+
+                    {{ tabela.situacao }}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'tabela_valores.detalhes',
+                            id_administradora=tabela.id_administradora
+                        ) }}">
+
+                        Ver detalhes
+
+                    </a>
+
+                    |
+
+                    <a
+                        href="{{ url_for(
+                            'tabela_valores.editar',
+                            id_administradora=tabela.id_administradora
+                        ) }}">
+
+                        Editar
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

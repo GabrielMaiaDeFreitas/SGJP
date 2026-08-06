@@ -61,9 +61,13 @@
 
         </a>
 
-        <li>
-            <a href="#">Tabela de Valores</a>
-        </li>
+        <a
+            href="{{ url_for('tabela_valores.listar') }}"
+            class="{% if request.endpoint.startswith('tabela_valores.') %}active{% endif %}">
+
+            Tabela de Valores
+
+        </a>
 
         <li class="sidebar-title">Operações</li>
 

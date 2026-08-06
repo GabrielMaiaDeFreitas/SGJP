@@ -8,8 +8,21 @@ class ObjectUtils:
         for atributo in caminho.split("."):
 
             if valor is None:
+
                 return None
 
-            valor = getattr(valor, atributo)
+            if isinstance(valor, dict):
+
+                valor = valor.get(atributo)
+
+            else:
+
+                valor = getattr(
+
+                    valor,
+
+                    atributo
+
+                )
 
         return valor
