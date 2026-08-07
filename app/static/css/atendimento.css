@@ -1,0 +1,221 @@
+/* =====================================================
+   SEÇÕES DO FORMULÁRIO
+===================================================== */
+
+.form-section {
+
+    margin-top: 36px;
+
+}
+
+.form-section:first-of-type {
+
+    margin-top: 0;
+
+}
+
+.form-section h3 {
+
+    color: var(--color-primary);
+
+    font-size: 1.15rem;
+
+    font-weight: 600;
+
+    margin-bottom: 18px;
+
+    padding-bottom: 8px;
+
+    border-bottom: 1px solid var(--border-color);
+
+}
+
+/* =====================================================
+   CAMPOS EM LARGURA TOTAL
+===================================================== */
+
+.form-group.full {
+
+    flex: 100%;
+
+}
+
+/* =====================================================
+   CAMPOS SOMENTE LEITURA
+===================================================== */
+
+.form-group input[readonly] {
+
+    background: var(--background);
+
+    color: var(--text-secondary);
+
+    cursor: default;
+
+}
+
+/* =====================================================
+   CAMPOS DESABILITADOS
+===================================================== */
+
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled {
+
+    background: var(--background);
+
+    color: var(--text-secondary);
+
+    opacity: .8;
+
+    cursor: not-allowed;
+
+}
+
+/* =====================================================
+   CHECKBOXES
+===================================================== */
+
+.checkbox-group {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 16px;
+
+}
+
+.checkbox-group input[type="checkbox"] {
+
+    width: auto;
+
+    margin: 0;
+
+}
+
+.checkbox-group label {
+
+    margin: 0;
+
+    font-weight: 500;
+
+    color: var(--text-primary);
+
+}
+
+/* =====================================================
+   CAMPOS OPCIONAIS
+===================================================== */
+
+.opcional {
+
+    display: none;
+
+}
+
+/* =====================================================
+   BOTÃO CALCULAR
+===================================================== */
+
+.btn-calcular {
+
+    margin-top: 12px;
+
+}
+
+/* =====================================================
+   OBSERVAÇÃO
+===================================================== */
+
+textarea {
+
+    resize: vertical;
+
+    min-height: 120px;
+
+}
+
+/* =====================================================
+   LINHAS COM TRÊS COLUNAS
+===================================================== */
+
+.form-row.triple {
+
+    display: flex;
+
+    gap: 24px;
+
+}
+
+.form-row.triple .form-group {
+
+    flex: 1;
+
+}
+
+/* =====================================================
+   TÍTULO DAS SEÇÕES
+===================================================== */
+
+.section-description {
+
+    color: var(--text-secondary);
+
+    font-size: .9rem;
+
+    margin-top: -10px;
+
+    margin-bottom: 18px;
+
+}
+
+/* =====================================================
+   JAVA SCRIPT
+===================================================== */
+
+.oculto {
+
+    display: none;
+
+}
+
+/* =====================================================
+   PEDÁGIO
+===================================================== */
+
+.campo-cobrar-pedagio {
+
+    margin-top: -34px;
+
+    margin-bottom: 46px;
+
+}
+
+/* =====================================================
+   VALORES
+===================================================== */
+
+.valor-negociado {
+
+    margin-top: 8px;
+
+    margin-left: 4px;
+
+}
+
+.valor-negociado .checkbox-group {
+
+    margin-bottom: 0;
+
+}
+
+.btn-distancia {
+
+    margin-top: 8px;
+
+    justify-content: flex-start;
+
+}

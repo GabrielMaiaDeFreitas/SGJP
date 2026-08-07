@@ -358,3 +358,23 @@ class TabelaValoresService:
             ativo=True
 
         ).first() is not None
+
+    @staticmethod
+    def buscar_tabela(
+        id_administradora,
+        id_tipo_servico
+    ):
+
+        return TabelaValores.query.filter_by(
+
+            fk_administradora_id_administradora=(
+                id_administradora
+            ),
+
+            fk_tipo_servico_id_tipo_servico=(
+                id_tipo_servico
+            ),
+
+            ativo=True
+
+        ).first()

@@ -1,0 +1,837 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block styles %}
+
+{{ super() }}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/atendimento.css'
+    ) }}">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("atendimento.listar") %}
+    {% include "components/card_header.html" %}
+
+    <form
+        method="POST"
+        class="form">
+
+        <!-- =====================================================
+            DADOS DO SERVIÇO
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Dados do Serviço
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Administradora
+
+                    </label>
+
+                    <select
+                        id="id_administradora"
+                        name="id_administradora"
+                        required>
+
+                        <option value="">
+
+                            Selecione...
+
+                        </option>
+
+                        {% for administradora in administradoras %}
+
+                        <option
+                            value="{{ administradora.id_administradora }}"
+                            {% if atendimento
+                                and atendimento.tabela_valores.fk_administradora_id_administradora == administradora.id_administradora %}
+                                selected
+                            {% endif %}>
+
+                            {{ administradora.nome }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Tipo de Serviço
+
+                    </label>
+
+                    <select
+                        id="id_tipo_servico"
+                        name="id_tipo_servico"
+                        required>
+
+                        <option value="">
+
+                            Selecione...
+
+                        </option>
+
+                        {% for tipo in tipos_servico %}
+
+                        <option
+                            value="{{ tipo.id_tipo_servico }}"
+                            {% if atendimento
+                                and atendimento.tabela_valores.fk_tipo_servico_id_tipo_servico == tipo.id_tipo_servico %}
+                                selected
+                            {% endif %}>
+
+                            {{ tipo.nome }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group full">
+
+                    <label>
+
+                        Cliente
+
+                    </label>
+
+                    <select
+                        id="id_cliente"
+                        name="id_cliente"
+                        disabled>
+
+                        <option value="">
+
+                            Selecione uma administradora...
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+            ATENDIMENTO
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Atendimento
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Data do Atendimento
+
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_atendimento"
+                        name="data_atendimento"
+                        value="{{ atendimento.data_atendimento.isoformat() if atendimento else '' }}">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Protocolo
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="protocolo"
+                        name="protocolo"
+                        value="{{ atendimento.protocolo if atendimento else '' }}">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+            EQUIPE
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Equipe
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Motorista
+
+                    </label>
+
+                    <select
+                        id="id_motorista"
+                        name="id_motorista">
+
+                        <option value="">
+
+                            Selecione...
+
+                        </option>
+
+                        {% for motorista in motoristas %}
+
+                        <option
+                            value="{{ motorista.id_motorista }}"
+                            {% if atendimento
+                                and atendimento.fk_motorista_id_motorista == motorista.id_motorista %}
+                                selected
+                            {% endif %}>
+
+                            {{ motorista.nome }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Caminhão
+
+                    </label>
+
+                    <select
+                        id="id_caminhao"
+                        name="id_caminhao">
+
+                        <option value="">
+
+                            Selecione...
+
+                        </option>
+
+                        {% for caminhao in caminhoes %}
+
+                        <option
+                            value="{{ caminhao.id_caminhao }}"
+                            {% if atendimento
+                                and atendimento.fk_caminhao_id_caminhao == caminhao.id_caminhao %}
+                                selected
+                            {% endif %}>
+
+                            {{ caminhao.placa }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+       <!-- =====================================================
+            VEÍCULO REBOCADO
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Veículo Rebocado
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Placa
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="placa_veiculo_rebocado"
+                        name="placa_veiculo_rebocado"
+                        maxlength="10"
+                        placeholder="ABC1D23"
+                        value="{{ atendimento.veiculo_rebocado.placa if atendimento and atendimento.veiculo_rebocado else '' }}">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Modelo
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="modelo_veiculo_rebocado"
+                        name="modelo_veiculo_rebocado"
+                        maxlength="100"
+                        placeholder="Ex.: Gol, HB20, Onix"
+                        value="{{ atendimento.veiculo_rebocado.modelo if atendimento and atendimento.veiculo_rebocado else '' }}">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+            VALORES
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Valores
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Origem
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="origem"
+                        name="origem"
+                        placeholder="Endereço ou coordenadas"
+                        value="{{ atendimento.origem if atendimento else '' }}">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Destino
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="destino"
+                        name="destino"
+                        placeholder="Endereço ou coordenadas"
+                        value="{{ atendimento.destino if atendimento else '' }}">
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <!-- ==========================================
+                    VALOR
+                =========================================== -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Valor
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="valor_total"
+                        name="valor_total"
+                        min="0"
+                        step="0.01"
+                        value="{{ atendimento.valor_total if atendimento else '' }}"
+                        readonly>
+
+                    <div class="valor-negociado">
+
+                        <div class="checkbox-group">
+
+                            <input
+                                type="checkbox"
+                                id="valor_negociado">
+
+                            <label for="valor_negociado">
+
+                                Valor Negociado
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ==========================================
+                    KM
+                =========================================== -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        KM Rodado
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="km_total"
+                        name="km_total"
+                        min="0"
+                        step="0.01"
+                        value="{{ atendimento.km_total if atendimento else '' }}">
+
+                    <div class="btn-distancia">
+
+                        <button
+                            type="button"
+                            id="btn_calcular_distancia"
+                            class="btn btn-secondary">
+
+                            Calcular Distância
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+            ADICIONAIS
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Adicionais
+
+            </h3>
+
+            <!-- ==============================================
+                PEDÁGIO
+            ============================================== -->
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="houve_pedagio"
+                    {% if atendimento and atendimento.valor_pedagio > 0 %}
+                        checked
+                    {% endif %}>
+
+                <label for="houve_pedagio">
+
+                    Houve Pedágio
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_pedagio"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Valor do Pedágio
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="valor_pedagio"
+                        name="valor_pedagio"
+                        min="0"
+                        step="0.01"
+                        value="{{ atendimento.valor_pedagio if atendimento else '0.00' }}">
+
+                </div>
+
+            </div>
+
+            <div
+                id="campo_cobrar_pedagio"
+                class="checkbox-group campo-cobrar-pedagio oculto">
+
+                <input
+                    type="checkbox"
+                    id="cobrar_pedagio"
+                    name="cobrar_pedagio"
+                    {% if atendimento and atendimento.cobrar_pedagio %}
+                        checked
+                    {% endif %}>
+
+                <label for="cobrar_pedagio">
+
+                    Cobrar Pedágio do Cliente
+
+                </label>
+
+            </div>
+
+            <!-- ==============================================
+                HORA PARADA
+            ============================================== -->
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="cobrar_hora_parada"
+                    name="cobrar_hora_parada"
+                    {% if atendimento and atendimento.cobrar_hora_parada %}
+                        checked
+                    {% endif %}>
+
+                <label for="cobrar_hora_parada">
+
+                    Houve Hora Parada
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_hora_parada"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Quantidade de Horas Paradas
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="quantidade_hora_parada"
+                        name="quantidade_hora_parada"
+                        min="0"
+                        value="{{ atendimento.quantidade_hora_parada if atendimento else 0 }}">
+
+                </div>
+
+            </div>
+
+            <!-- ==============================================
+                HORA TRABALHADA
+            ============================================== -->
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="cobrar_hora_trabalhada"
+                    name="cobrar_hora_trabalhada"
+                    {% if atendimento and atendimento.cobrar_hora_trabalhada %}
+                        checked
+                    {% endif %}>
+
+                <label for="cobrar_hora_trabalhada">
+
+                    Houve Hora Trabalhada
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_hora_trabalhada"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Quantidade de Horas Trabalhadas
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="quantidade_hora_trabalhada"
+                        name="quantidade_hora_trabalhada"
+                        min="0"
+                        value="{{ atendimento.quantidade_hora_trabalhada if atendimento else 0 }}">
+
+                </div>
+
+            </div>
+
+            <!-- ==============================================
+                PATINS
+            ============================================== -->
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="usar_patins"
+                    name="usar_patins"
+                    {% if atendimento and atendimento.usar_patins %}
+                        checked
+                    {% endif %}>
+
+                <label for="usar_patins">
+
+                    Utilizou Patins
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_patins"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Quantidade de Patins
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="quantidade_patins"
+                        name="quantidade_patins"
+                        min="0"
+                        value="{{ atendimento.quantidade_patins if atendimento else 0 }}">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+             PAGAMENTO
+        ====================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Pagamento
+
+            </h3>
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="recebeu_pagamento"
+                    name="recebeu_pagamento"
+                    {% if atendimento and atendimento.valor_pago > 0 %}
+                        checked
+                    {% endif %}>
+
+                <label for="recebeu_pagamento">
+
+                    Recebeu pagamento durante o atendimento
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_valor_pago"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Valor Pago
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="valor_pago"
+                        name="valor_pago"
+                        min="0"
+                        step="0.01"
+                        value="{{ atendimento.valor_pago if atendimento else '0.00' }}">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+            OBSERVAÇÕES
+        ===================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Observações
+
+            </h3>
+
+            <div class="form-row">
+
+                <div class="form-group full">
+
+                    <textarea
+                        id="observacao"
+                        name="observacao"
+                        rows="5">{{ atendimento.observacao if atendimento else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('atendimento.listar') }}"
+                class="btn btn-secondary">
+
+                Cancelar
+
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                {% if atendimento %}
+
+                    Atualizar
+
+                {% else %}
+
+                    Salvar
+
+                {% endif %}
+
+            </button>
+
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+    const CONSTANTES = {
+
+        VALOR_PATINS: {{ VALOR_PATINS | tojson }},
+
+        VALOR_HORA_PARADA: {{ VALOR_HORA_PARADA | tojson }},
+
+        VALOR_HORA_TRABALHADA: {{ VALOR_HORA_TRABALHADA | tojson }},
+
+        KM_FRANQUIA: {{ KM_FRANQUIA | tojson }}
+
+    };
+
+    const ATENDIMENTO = {{ atendimento_json | default(None) | tojson }};
+
+</script>
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/atendimento.js'
+    ) }}">
+</script>
+
+{% endblock %}

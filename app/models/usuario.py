@@ -40,6 +40,11 @@ class Usuario(db.Model):
         default=True
     )
 
+    atendimentos = db.relationship(
+        "Atendimento",
+        back_populates="usuario"
+    )
+
     def __repr__(self):
         """
         Representação textual do objeto.

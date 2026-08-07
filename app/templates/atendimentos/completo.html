@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("atendimento.listar") %}
+
+    {% include "components/view_header.html" %}
+
+    <form method="GET">
+
+        {% include "components/filter_panel.html" %}
+
+    </form>
+
+    <div class="table-responsive">
+
+        <table class="table table-wide">
+
+            <thead>
+
+                <tr>
+
+                    <th>Data</th>
+                    <th>Administradora</th>
+                    <th>Cliente</th>
+                    <th>Usuário</th>
+                    <th>Tipo Serviço</th>
+                    <th>Motorista</th>
+                    <th>Caminhão</th>
+                    <th>Placa Rebocada</th>
+                    <th>Modelo Rebocado</th>
+                    <th>Origem</th>
+                    <th>Destino</th>
+                    <th>Protocolo</th>
+                    <th>KM</th>
+                    <th>Valor</th>
+                    <th>Valor Pago</th>
+                    <th>Pedágio</th>
+                    <th>Hora Parada</th>
+                    <th>Hora Trabalhada</th>
+                    <th>Patins</th>
+                    <th>Status Operacional</th>
+                    <th>Status Financeiro</th>
+                    <th>Observação</th>
+                    <th>Ações</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for atendimento in atendimentos %}
+
+                <tr>
+
+                    <td>
+
+                        {{ atendimento.data_atendimento.strftime("%d/%m/%Y") if atendimento.data_atendimento else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.tabela_valores.administradora.nome if atendimento.tabela_valores else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.cliente.nome_fantasia if atendimento.cliente else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.usuario.nome if atendimento.usuario else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.tabela_valores.tipo_servico.nome if atendimento.tabela_valores else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.motorista.nome if atendimento.motorista else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.caminhao.placa if atendimento.caminhao else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.veiculo_rebocado.placa if atendimento.veiculo_rebocado else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.veiculo_rebocado.modelo if atendimento.veiculo_rebocado else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.origem or "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.destino or "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.protocolo or "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.km_total if atendimento.km_total is not none else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(atendimento.valor_total) if atendimento.valor_total is not none else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(atendimento.valor_pago) if atendimento.valor_pago is not none else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(atendimento.valor_pedagio) if atendimento.valor_pedagio is not none else "—" }}
+
+                    </td>
+
+                    <td>
+
+                        {% if atendimento.cobrar_hora_parada %}
+                            Sim ({{ atendimento.quantidade_hora_parada }})
+                        {% else %}
+                            Não
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if atendimento.cobrar_hora_trabalhada %}
+                            Sim ({{ atendimento.quantidade_hora_trabalhada }})
+                        {% else %}
+                            Não
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if atendimento.usar_patins %}
+                            Sim ({{ atendimento.quantidade_patins }})
+                        {% else %}
+                            Não
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.status_operacional }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.status_financeiro }}
+
+                    </td>
+
+                    <td>
+
+                        {{ atendimento.observacao or "—" }}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{{ url_for(
+                                'atendimento.detalhes',
+                                id_atendimento=atendimento.id_atendimento
+                            ) }}">
+
+                            Ver
+
+                        </a>
+
+                        |
+
+                        <a
+                            href="{{ url_for(
+                                'atendimento.editar',
+                                id_atendimento=atendimento.id_atendimento
+                            ) }}">
+
+                            Editar
+
+                        </a>
+
+                        {% if session.get("perfil") == "Administrador" %}
+                        
+                        |
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'atendimento.excluir',
+                                id_atendimento=atendimento.id_atendimento
+                            ) }}"
+                            style="display:inline;">
+
+                            <button
+                                type="submit"
+                                class="link-button"
+                                onclick="return confirm(
+                                    'Deseja realmente excluir este atendimento? Isso não poderá ser desfeito.'
+                                );">
+
+                                Excluir
+
+                            </button>
+
+                        </form>>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('atendimento.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'exportacao.exportar_generico',
+                modulo='atendimento_completo'
+            ) }}?{{ request.query_string.decode('utf-8') }}"
+            class="btn btn-primary">
+
+            Exportar
+
+        </a>
+
+    </div>
+
+</div>
+
+<div
+    id="filters-data"
+    data-campos='{{ campos_filtro | tojson }}'
+    data-valores='{{ valores_filtro | tojson }}'>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/filter_panel.js'
+    ) }}">
+</script>
+
+{% endblock %}

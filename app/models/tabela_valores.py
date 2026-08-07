@@ -55,3 +55,8 @@ class TabelaValores(db.Model):
         "Administradora",
         back_populates="tabelas_valores"
     )
+
+    atendimentos = db.relationship(
+        "Atendimento",
+        back_populates="tabela_valores"
+    )

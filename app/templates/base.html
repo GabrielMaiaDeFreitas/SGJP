@@ -1,89 +1,87 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<head>
+    <head>
 
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        {% block title %}
-            SGJP
+        <title>
+            {% block title %}
+                SGJP
+            {% endblock %}
+        </title>
+
+        <!-- CSS -->
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/theme.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/base.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/layout.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/components.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/forms.css') }}">
+
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/tables.css') }}">
+        
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/exportacao.css') }}">
+
+        {% block styles %}
+
         {% endblock %}
-    </title>
 
-    <!-- CSS -->
+    </head>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/theme.css') }}">
+    <body>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/base.css') }}">
+        {% include "components/header.html" %}
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/layout.css') }}">
+        <main class="main">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/components.css') }}">
+            <div class="main-container">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/forms.css') }}">
+                {% include "components/flash_messages.html" %}
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/tables.css') }}">
+                <div class="app-layout">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/utilities.css') }}">
-    
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/exportacao.css') }}">
+                    {% include "components/sidebar.html" %}
 
-    {% block styles %}
+                    <section class="content">
 
-    {% endblock %}
+                        {% block content %}
 
-</head>
+                        <h2>Bem-vindo ao SGJP</h2>
 
-<body>
+                        <p>
+                            Sistema de Gerenciamento da JP Transportes.
+                        </p>
 
-    {% include "components/header.html" %}
+                        {% endblock %}
 
-    <main class="main">
+                    </section>
 
-        <div class="main-container">
-
-            {% include "components/flash_messages.html" %}
-
-            <div class="app-layout">
-
-                {% include "components/sidebar.html" %}
-
-                <section class="content">
-
-                    {% block content %}
-
-                    <h2>Bem-vindo ao SGJP</h2>
-
-                    <p>
-                        Sistema de Gerenciamento da JP Transportes.
-                    </p>
-
-                    {% endblock %}
-
-                </section>
+                </div>
 
             </div>
 
-        </div>
+        </main>
 
-    </main>
+        {% include "components/footer.html" %}
 
-    {% include "components/footer.html" %}
+        {% block scripts %}
 
-    {% block scripts %}
-    {% endblock %}
+        {% endblock %}
 
-</body>
+    </body>
 
 </html>

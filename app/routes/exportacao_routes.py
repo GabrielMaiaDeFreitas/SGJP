@@ -11,28 +11,43 @@ from app.exports.export_service import ExportService
 from app.services.filter_service import FilterService
 
 
-
 exportacao_bp = Blueprint(
+
     "exportacao",
+
     __name__,
+
     url_prefix="/exportar"
+
 )
 
 
-@exportacao_bp.route("/<modulo>", methods=["GET", "POST"])
+@exportacao_bp.route(
+    "/<string:modulo>",
+    methods=["GET", "POST"]
+)
 def exportar_generico(modulo):
 
-    mapeamento = MODELOS_MAPEADOS.get(modulo)
+    mapeamento = MODELOS_MAPEADOS.get(
+
+        modulo
+
+    )
 
     if not mapeamento:
 
         flash(
+
             "Módulo não encontrado para exportação.",
+
             "error"
+
         )
 
         return redirect(
+
             request.referrer or "/"
+
         )
 
     modelo = mapeamento["modelo"]
@@ -46,48 +61,84 @@ def exportar_generico(modulo):
     if request.method == "POST":
 
         colunas_selecionadas = request.form.getlist(
+
             "colunas"
+
         )
 
         if not colunas_selecionadas:
 
             flash(
+
                 "Selecione pelo menos uma coluna.",
+
                 "warning"
+
             )
 
-            return redirect(request.url)
+            return redirect(
+
+                request.url
+
+            )
 
         formatos = request.form.getlist(
+
             "formatos"
+
         )
 
         if not formatos:
 
             flash(
+
                 "Selecione pelo menos um formato para exportação.",
+
                 "warning"
+
             )
 
-            return redirect(request.url)
+            return redirect(
+
+                request.url
+
+            )
 
         ordem_final = (
 
-            request.values.get("ordenar_por")
+            request.values.get(
 
-            or request.values.get("sort")
+                "ordenar_por"
 
-            or mapeamento["ordenar_por"]
+            )
+
+            or
+
+            request.values.get(
+
+                "sort"
+
+            )
+
+            or
+
+            mapeamento["ordenar_por"]
 
         )
 
         if "listar_service" in mapeamento:
 
-            dados = mapeamento["listar_service"](
+            try:
 
-                request.values
+                dados = mapeamento["listar_service"](
 
-            )
+                    request.values
+
+                )
+
+            except TypeError:
+
+                dados = mapeamento["listar_service"]()
 
         else:
 

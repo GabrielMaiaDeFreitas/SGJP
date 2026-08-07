@@ -48,6 +48,11 @@ class Cliente(db.Model):
         back_populates="clientes"
     )
 
+    atendimentos = db.relationship(
+        "Atendimento",
+        back_populates="cliente"
+    )
+
     def __repr__(self):
 
         return f"<Cliente {self.nome_fantasia}>"

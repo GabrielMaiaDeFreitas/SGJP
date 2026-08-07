@@ -54,11 +54,13 @@
         </a>
 
         <a
-            href="{{ url_for('cliente.editar',
-                             id_cliente=cliente.id_cliente) }}"
-            class="btn btn-primary">
+            href="{{ url_for(
+                'cliente.editar',
+                id_cliente=cliente.id_cliente,
+                origem='completo'
+            ) }}">
 
-            Editar Cliente
+            Editar  
 
         </a>
 

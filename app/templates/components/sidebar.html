@@ -71,9 +71,13 @@
 
         <li class="sidebar-title">Operações</li>
 
-        <li>
-            <a href="#">Atendimentos</a>
-        </li>
+        <a
+            href="{{ url_for('atendimento.listar') }}"
+            class="{% if request.endpoint.startswith('atendimento.') %}active{% endif %}">
+
+            Atendimentos
+
+        </a>
 
         <li class="sidebar-title">Relatórios</li>
 

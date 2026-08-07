@@ -1,4 +1,4 @@
-from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico, Cliente, TabelaValores
+from app.models import Usuario, Caminhao, Motorista, Administradora, TipoServico, Cliente, TabelaValores, Atendimento
 
 from app.filters.caminhao import FILTROS_CAMINHAO
 from app.filters.motorista import FILTROS_MOTORISTA
@@ -7,9 +7,11 @@ from app.filters.administradora import FILTROS_ADMINISTRADORA
 from app.filters.tipo_servico import FILTROS_TIPO_SERVICO
 from app.filters.cliente import FILTROS_CLIENTE
 from app.filters.tabela_valores import FILTROS_TABELA_VALORES
+from app.filters.atendimento import FILTROS_ATENDIMENTO
 
 
 from app.services.tabela_valores_service import TabelaValoresService
+from app.services.atendimento_service import AtendimentoService
 
 
 
@@ -287,6 +289,162 @@ MODELOS_MAPEADOS = {
             "valor_saida": "Valor de Saída",
 
             "valor_km_excedente": "KM Excedente"
+
+        }
+
+    },
+
+    "atendimento": {
+
+        "modelo": Atendimento,
+
+        "titulo": "Atendimentos",
+
+        "ordenar_por": "data_atendimento",
+
+        "listar_service": AtendimentoService.listar,
+
+        "filtros_config": FILTROS_ATENDIMENTO,
+
+        "colunas_exportacao": [
+
+            "data_atendimento",
+
+            "tabela_valores.administradora.nome",
+
+            "motorista.nome",
+
+            "valor_total",
+
+            "km_total",
+
+            "status_operacional"
+
+        ],
+
+        "labels": {
+
+            "data_atendimento": "Data",
+
+            "tabela_valores.administradora.nome": "Administradora",
+
+            "motorista.nome": "Motorista",
+
+            "valor_total": "Valor",
+
+            "km_total": "KM Rodado",
+
+            "status_operacional": "Status Operacional"
+
+        }
+
+    },
+
+    "atendimento_completo": {
+
+        "modelo": Atendimento,
+
+        "titulo": "Atendimentos",
+
+        "ordenar_por": "data_atendimento",
+
+        "listar_service": AtendimentoService.listar,
+
+        "filtros_config": FILTROS_ATENDIMENTO,
+
+        "colunas_exportacao": [
+
+            "data_atendimento",
+
+            "tabela_valores.administradora.nome",
+
+            "cliente.nome_fantasia",
+
+            "usuario.nome",
+
+            "tabela_valores.tipo_servico.nome",
+
+            "motorista.nome",
+
+            "caminhao.placa",
+
+            "veiculo_rebocado.placa",
+
+            "veiculo_rebocado.modelo",
+
+            "protocolo",
+
+            "origem",
+
+            "destino",
+
+            "km_total",
+
+            "valor_total",
+
+            "valor_pago",
+
+            "valor_pedagio",
+
+            "quantidade_hora_parada",
+
+            "quantidade_hora_trabalhada",
+
+            "quantidade_patins",
+
+            "status_operacional",
+
+            "status_financeiro",
+
+            "observacao"
+
+        ],
+
+        "labels": {
+
+            "data_atendimento": "Data do Atendimento",
+
+            "tabela_valores.administradora.nome": "Administradora",
+
+            "cliente.nome_fantasia": "Cliente",
+
+            "usuario.nome": "Usuário",
+
+            "tabela_valores.tipo_servico.nome": "Tipo de Serviço",
+
+            "motorista.nome": "Motorista",
+
+            "caminhao.placa": "Caminhão",
+
+            "veiculo_rebocado.placa": "Placa do Veículo Rebocado",
+
+            "veiculo_rebocado.modelo": "Modelo do Veículo Rebocado",
+
+            "protocolo": "Protocolo",
+
+            "origem": "Origem",
+
+            "destino": "Destino",
+
+            "km_total": "KM Rodado",
+
+            "valor_total": "Valor Total",
+
+            "valor_pago": "Valor Pago",
+
+            "valor_pedagio": "Valor Pedágio",
+
+            "quantidade_hora_parada": "Horas Paradas",
+
+            "quantidade_hora_trabalhada": "Horas Trabalhadas",
+
+            "quantidade_patins": "Quantidade de Patins",
+
+            "status_operacional": "Status Operacional",
+
+            "status_financeiro": "Status Financeiro",
+
+            "observacao": "Observação"
 
         }
 

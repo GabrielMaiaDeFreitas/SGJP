@@ -16,6 +16,18 @@
 
 }
 
+.table thead th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1;
+
+    background: var(--color-primary);
+
+}
+
 .table th,
 .table td {
 
@@ -30,5 +42,25 @@
 .table tbody tr:hover {
 
     background: #F4F7FB;
+
+}
+
+.table-responsive {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+.table-wide {
+
+    width: max-content;
+
+    min-width: 100%;
 
 }

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for("atendimento.listar") %}
+
+    {% include "components/card_header.html" %}
+
+    {% set detalhes = [
+
+        {
+            "label": "Data do Atendimento",
+            "valor": atendimento.data_atendimento.strftime("%d/%m/%Y")
+                    if atendimento.data_atendimento
+                    else "—"
+        },
+
+        {
+            "label": "Administradora",
+            "valor": atendimento.tabela_valores.administradora.nome
+                    if atendimento.tabela_valores
+                    else "—"
+        },
+
+        {
+            "label": "Cliente",
+            "valor": atendimento.cliente.nome_fantasia
+                    if atendimento.cliente
+                    else "—"
+        },
+
+        {
+            "label": "Usuário",
+            "valor": atendimento.usuario.nome
+                    if atendimento.usuario
+                    else "—"
+        },
+
+        {
+            "label": "Tipo de Serviço",
+            "valor": atendimento.tabela_valores.tipo_servico.nome
+                    if atendimento.tabela_valores
+                    else "—"
+        },
+
+        {
+            "label": "Motorista",
+            "valor": atendimento.motorista.nome
+                    if atendimento.motorista
+                    else "—"
+        },
+
+        {
+            "label": "Caminhão",
+            "valor": atendimento.caminhao.placa
+                    if atendimento.caminhao
+                    else "—"
+        },
+
+        {
+            "label": "Placa do Veículo Rebocado",
+            "valor": atendimento.veiculo_rebocado.placa
+                    if atendimento.veiculo_rebocado
+                    else "—"
+        },
+
+        {
+            "label": "Modelo do Veículo Rebocado",
+            "valor": atendimento.veiculo_rebocado.modelo
+                    if atendimento.veiculo_rebocado
+                    else "—"
+        },
+
+        {
+            "label": "Protocolo",
+            "valor": atendimento.protocolo
+                    if atendimento.protocolo
+                    else "—"
+        },
+
+        {
+            "label": "Origem",
+            "valor": atendimento.origem
+                    if atendimento.origem
+                    else "—"
+        },
+
+        {
+            "label": "Destino",
+            "valor": atendimento.destino
+                    if atendimento.destino
+                    else "—"
+        },
+
+        {
+            "label": "KM Rodado",
+            "valor": atendimento.km_total
+                    if atendimento.km_total is not none
+                    else "—"
+        },
+
+        {
+            "label": "Valor Total",
+            "valor": "R$ %.2f"|format(atendimento.valor_total)
+                    if atendimento.valor_total is not none
+                    else "—"
+        },
+
+        {
+            "label": "Valor Pago",
+            "valor": "R$ %.2f"|format(atendimento.valor_pago)
+                    if atendimento.valor_pago is not none
+                    else "—"
+        },
+
+        {
+            "label": "Valor Pedágio",
+            "valor": "R$ %.2f"|format(atendimento.valor_pedagio)
+                    if atendimento.valor_pedagio is not none
+                    else "—"
+        },
+
+        {
+            "label": "Horas Paradas",
+            "valor": atendimento.quantidade_hora_parada
+                    if atendimento.quantidade_hora_parada is not none
+                    else "—"
+        },
+
+        {
+            "label": "Horas Trabalhadas",
+            "valor": atendimento.quantidade_hora_trabalhada
+                    if atendimento.quantidade_hora_trabalhada is not none
+                    else "—"
+        },
+
+        {
+            "label": "Quantidade de Patins",
+            "valor": atendimento.quantidade_patins
+                    if atendimento.quantidade_patins is not none
+                    else "—"
+        },
+
+        {
+            "label": "Status Operacional",
+            "valor": atendimento.status_operacional
+                    if atendimento.status_operacional
+                    else "—"
+        },
+
+        {
+            "label": "Status Financeiro",
+            "valor": atendimento.status_financeiro
+                    if atendimento.status_financeiro
+                    else "—"
+        },
+
+        {
+            "label": "Observação",
+            "valor": atendimento.observacao
+                    if atendimento.observacao
+                    else "—"
+        }
+
+    ] %}
+
+    {% include "components/details_table.html" %}
+
+    <div class="form-actions">
+
+        <a
+            href="{{ url_for('atendimento.listar') }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+        <a
+            href="{{ url_for(
+                'atendimento.editar',
+                id_atendimento=atendimento.id_atendimento
+            ) }}"
+            class="btn btn-primary">
+
+            Editar Atendimento
+
+        </a>
+
+        {% if session.get("perfil") == "Administrador" %}
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'atendimento.excluir',
+                    id_atendimento=atendimento.id_atendimento
+                ) }}"
+                style="display:inline;">
+
+                <button
+                    type="submit"
+                    class="btn btn-secondary"
+                    onclick="return confirm(
+                        'Deseja realmente excluir este atendimento? Isso não poderá ser desfeito.'
+                    );">
+
+                    Excluir
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -30,6 +30,11 @@ class Caminhao(db.Model):
         default=True
     )
 
+    atendimentos = db.relationship(
+        "Atendimento",
+        back_populates="caminhao"
+    )
+
     def __repr__(self):
 
         return (

@@ -18,93 +18,188 @@ class FilterService:
 
         }
 
-        campos = filtros.getlist("campo[]")
-        valores = filtros.getlist("valor[]")
+        campos = filtros.getlist(
+            "campo[]"
+        )
 
-        for campo, valor in zip(campos, valores):
+        valores = filtros.getlist(
+            "valor[]"
+        )
+
+        for campo, valor in zip(
+            campos,
+            valores
+        ):
 
             if not valor:
+
                 continue
 
-            configuracao = configuracoes.get(campo)
+            configuracao = configuracoes.get(
+                campo
+            )
 
             if configuracao is None:
+
                 continue
 
             atributo_config = configuracao.get(
+
                 "atributo",
+
                 configuracao["campo"]
+
             )
 
-            query, atributo = FilterService._obter_atributo(
+            query, atributo = (
 
-                query,
+                FilterService._obter_atributo(
 
-                modelo,
+                    query,
 
-                atributo_config
+                    modelo,
+
+                    atributo_config
+
+                )
 
             )
 
             operacao = configuracao.get(
+
                 "operacao",
+
                 "igual"
+
             )
 
             if (
+
                 configuracao.get("converter")
+
                 == "boolean"
+
             ):
 
-                valor = valor == "Ativo"
+                valor = (
+
+                    valor == "Ativo"
+
+                )
 
             if (
+
                 configuracao.get("converter")
+
                 == "cliente_proprio"
+
             ):
+
+                valor = (
+
+                    valor == "Sim"
+
+                )
+
+            if configuracao.get("converter") == "sim_nao":
 
                 valor = valor == "Sim"
 
             if operacao == "contains":
 
                 query = query.filter(
-                    atributo.ilike(f"%{valor}%")
+
+                    atributo.ilike(
+
+                        f"%{valor}%"
+
+                    )
+
                 )
 
             elif operacao == "igual":
 
                 query = query.filter(
+
                     atributo == valor
+
                 )
 
         atributo_ordenacao = getattr(
+
             modelo,
+
             ordenar_por
+
         )
 
         return query.order_by(
+
             atributo_ordenacao
+
         ).all()
 
     @staticmethod
-    def _obter_atributo(query, modelo, atributo_config):
+    def _obter_atributo(
 
-        if "." not in atributo_config:
+        query,
 
-            return query, getattr(modelo, atributo_config)
+        modelo,
 
-        relacionamento, coluna = atributo_config.split(".", 1)
+        atributo_config
 
-        relacionamento_modelo = getattr(
-            modelo,
-            relacionamento
-        ).property.mapper.class_
+    ):
 
-        query = query.join(
-            relacionamento_modelo
+        partes = atributo_config.split(".")
+
+        modelo_atual = modelo
+
+        for relacionamento in partes[:-1]:
+
+            atributo_relacionamento = getattr(
+
+                modelo_atual,
+
+                relacionamento
+
+            )
+
+            modelo_relacionado = (
+
+                atributo_relacionamento
+
+                .property
+
+                .mapper
+
+                .class_
+
+            )
+
+            query = query.join(
+
+                atributo_relacionamento
+
+            )
+
+            modelo_atual = (
+
+                modelo_relacionado
+
+            )
+
+        atributo = getattr(
+
+            modelo_atual,
+
+            partes[-1]
+
         )
 
         return (
+
             query,
-            getattr(relacionamento_modelo, coluna)
+
+            atributo
+
         )

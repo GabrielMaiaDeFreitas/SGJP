@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gerenciamento de Atendimentos
+{% endblock %}
+
+{% block content %}
+
+{% include "components/page_header.html" %}
+
+<div class="card">
+
+    {% set titulo = "Gerenciamento de Atendimentos" %}
+    {% set novo_url = url_for("atendimento.novo") %}
+    {% set novo_texto = "Novo Atendimento" %}
+    {% set visualizacao_url = url_for("atendimento.completo") %}
+    {% set exportar_url = url_for(
+        "exportacao.exportar_generico",
+        modulo="atendimento"
+    ) %}
+
+    {% include "components/list_header.html" %}
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Data</th>
+
+                <th>Administradora</th>
+
+                <th>Motorista</th>
+
+                <th>Valor</th>
+
+                <th>KM Rodado</th>
+
+                <th>Status Operacional</th>
+
+                <th>Ações</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for atendimento in atendimentos %}
+
+            <tr>
+
+                <td>
+
+                    {% if atendimento.data_atendimento %}
+
+                        {{ atendimento.data_atendimento.strftime("%d/%m/%Y") }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {{ atendimento.tabela_valores.administradora.nome }}
+
+                </td>
+
+                <td>
+
+                    {% if atendimento.motorista %}
+
+                        {{ atendimento.motorista.nome }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if atendimento.valor_total %}
+
+                        R$ {{ "%.2f"|format(atendimento.valor_total) }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if atendimento.km_total %}
+
+                        {{ "%.2f"|format(atendimento.km_total) }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {{ atendimento.status_operacional }}
+
+                </td>
+
+                <td>
+
+                    <a href="{{ url_for(
+                        'atendimento.detalhes',
+                        id_atendimento=atendimento.id_atendimento
+                    ) }}">
+
+                        Ver detalhes
+
+                    </a>
+
+                    |
+
+                    <a href="{{ url_for(
+                        'atendimento.editar',
+                        id_atendimento=atendimento.id_atendimento
+                    ) }}">
+
+                        Editar
+
+                    </a>
+
+                    {% if session.get("perfil") == "Administrador" %}
+
+                        |
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'atendimento.excluir',
+                                id_atendimento=atendimento.id_atendimento
+                            ) }}"
+                            style="display:inline;">
+
+                            <button
+                                type="submit"
+                                class="link-button"
+                                onclick="return confirm(
+                                    'Deseja realmente excluir este atendimento? Isso não poderá ser desfeito.'
+                                );">
+
+                                Excluir
+
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

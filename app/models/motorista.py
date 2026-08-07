@@ -51,5 +51,10 @@ class Motorista(db.Model):
         default=True
     )
 
+    atendimentos = db.relationship(
+        "Atendimento",
+        back_populates="motorista"
+    )
+
     def __repr__(self):
         return f"<Motorista {self.nome}>"
