@@ -68,6 +68,11 @@
                             {% if atendimento
                                 and atendimento.tabela_valores.fk_administradora_id_administradora == administradora.id_administradora %}
                                 selected
+                            {% elif not atendimento
+                                and administradora_inicial
+                                and administradora_inicial|string
+                                    == administradora.id_administradora|string %}
+                                selected
                             {% endif %}>
 
                             {{ administradora.nome }}
@@ -175,7 +180,12 @@
                         type="date"
                         id="data_atendimento"
                         name="data_atendimento"
-                        value="{{ atendimento.data_atendimento.isoformat() if atendimento else '' }}">
+                        value="{{
+                            atendimento.data_atendimento.isoformat()
+                            if atendimento
+                            else data_atendimento_inicial
+                            | default('')
+                        }}">
 
                 </div>
 
@@ -434,6 +444,26 @@
 
                         </div>
 
+                        <div class="checkbox-group">
+
+                            <input
+                                type="checkbox"
+                                id="pagamento_separado"
+                                name="pagamento_separado"
+
+                                {% if atendimento
+                                    and atendimento.status_financeiro != "Aguardando Fechamento" %}
+                                    checked
+                                {% endif %}>
+
+                            <label for="pagamento_separado">
+
+                                Vai Ser Pago Separadamente
+
+                            </label>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -470,6 +500,63 @@
                         </button>
 
                     </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+             PAGAMENTO
+        ====================================================== -->
+
+        <div class="form-section">
+
+            <h3>
+
+                Pagamento
+
+            </h3>
+
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="recebeu_pagamento"
+                    name="recebeu_pagamento"
+
+                    {% if atendimento and atendimento.valor_pago > 0 %}
+                        checked
+                    {% endif %}>
+
+                <label for="recebeu_pagamento">
+
+                    Recebeu pagamento durante o atendimento
+
+                </label>
+
+            </div>
+
+            <div
+                id="campo_valor_pago"
+                class="form-row oculto">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Valor Pago
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="valor_pago"
+                        name="valor_pago"
+                        min="0"
+                        step="0.01"
+                        value="{{ atendimento.valor_pago if atendimento else '0.00' }}">
 
                 </div>
 
@@ -691,62 +778,6 @@
 
         </div>
 
-        <!-- =====================================================
-             PAGAMENTO
-        ====================================================== -->
-
-        <div class="form-section">
-
-            <h3>
-
-                Pagamento
-
-            </h3>
-
-            <div class="checkbox-group">
-
-                <input
-                    type="checkbox"
-                    id="recebeu_pagamento"
-                    name="recebeu_pagamento"
-                    {% if atendimento and atendimento.valor_pago > 0 %}
-                        checked
-                    {% endif %}>
-
-                <label for="recebeu_pagamento">
-
-                    Recebeu pagamento durante o atendimento
-
-                </label>
-
-            </div>
-
-            <div
-                id="campo_valor_pago"
-                class="form-row oculto">
-
-                <div class="form-group">
-
-                    <label>
-
-                        Valor Pago
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="valor_pago"
-                        name="valor_pago"
-                        min="0"
-                        step="0.01"
-                        value="{{ atendimento.valor_pago if atendimento else '0.00' }}">
-
-                </div>
-
-            </div>
-
-        </div>
-
 
         <!-- =====================================================
             OBSERVAÇÕES
@@ -823,9 +854,15 @@
 
     };
 
-    const ATENDIMENTO = {{ atendimento_json | default(None) | tojson }};
+    const ATENDIMENTO =
+        {{ atendimento_json | default(None) | tojson }};
+
+    const RESETAR_NOVO_ATENDIMENTO =
+        {{ resetar_novo_atendimento | default(False) | tojson }};
 
 </script>
+
+{{ super() }}
 
 <script
     src="{{ url_for(

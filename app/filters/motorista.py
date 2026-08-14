@@ -6,7 +6,9 @@ from app.constants.common import (
     STATUS
 )
 
+
 FILTROS_MOTORISTA = [
+
     {
         "campo": "matricula",
         "atributo": "matricula",
@@ -14,6 +16,7 @@ FILTROS_MOTORISTA = [
         "tipo": "texto",
         "operacao": "contains"
     },
+
     {
         "campo": "nome",
         "atributo": "nome",
@@ -21,6 +24,7 @@ FILTROS_MOTORISTA = [
         "tipo": "texto",
         "operacao": "contains"
     },
+
     {
         "campo": "numero_cnh",
         "atributo": "numero_cnh",
@@ -28,6 +32,7 @@ FILTROS_MOTORISTA = [
         "tipo": "texto",
         "operacao": "contains"
     },
+
     {
         "campo": "categoria_cnh",
         "atributo": "categoria_cnh",
@@ -36,20 +41,23 @@ FILTROS_MOTORISTA = [
         "operacao": "igual",
         "opcoes": CATEGORIAS_CNH
     },
+
     {
         "campo": "validade_cnh",
         "atributo": "validade_cnh",
         "label": "Validade CNH",
-        "tipo": "data",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "data"
     },
+
     {
         "campo": "validade_toxicologico",
         "atributo": "validade_toxicologico",
         "label": "Validade Toxicológico",
-        "tipo": "data",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "data"
     },
+
     {
         "campo": "ativo",
         "atributo": "ativo",
@@ -59,4 +67,5 @@ FILTROS_MOTORISTA = [
         "converter": "boolean",
         "opcoes": STATUS
     }
+
 ]

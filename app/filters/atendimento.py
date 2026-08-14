@@ -10,8 +10,8 @@ FILTROS_ATENDIMENTO = [
         "campo": "data_atendimento",
         "atributo": "data_atendimento",
         "label": "Data",
-        "tipo": "data",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "data"
     },
 
     {
@@ -118,56 +118,64 @@ FILTROS_ATENDIMENTO = [
         "campo": "km_total",
         "atributo": "km_total",
         "label": "KM Rodado",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {
         "campo": "valor_total",
         "atributo": "valor_total",
         "label": "Valor Total",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
+    },
+
+    {
+        "campo": "valor_comissao",
+        "atributo": "valor_comissao",
+        "label": "Valor Comissão",
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {
         "campo": "valor_pago",
         "atributo": "valor_pago",
         "label": "Valor Pago",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {
         "campo": "valor_pedagio",
         "atributo": "valor_pedagio",
         "label": "Valor Pedágio",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
-        {
+    {
         "campo": "quantidade_hora_parada",
         "atributo": "quantidade_hora_parada",
         "label": "Quantidade Hora Parada",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {
         "campo": "quantidade_hora_trabalhada",
         "atributo": "quantidade_hora_trabalhada",
         "label": "Quantidade Hora Trabalhada",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {
         "campo": "quantidade_patins",
         "atributo": "quantidade_patins",
         "label": "Quantidade Patins",
-        "tipo": "numero",
-        "operacao": "igual"
+        "tipo": "intervalo",
+        "subtipo": "numero"
     },
 
     {

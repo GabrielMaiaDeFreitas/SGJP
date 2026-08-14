@@ -2,28 +2,70 @@
 
     <div class="header-container">
 
-        <div class="header-logo">
+        <div class="header-left">
 
-            <!-- Logo será adicionada futuramente -->
+            <button
+                type="button"
+                id="btn-sidebar"
+                class="btn-sidebar"
+                title="Minimizar menu">
 
-            <h1>SGJP</h1>
+                ☰
 
-            <span>Sistema de Gerenciamento da JP Transportes</span>
+            </button>
+
+            <div class="header-logo">
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='img/logo-jp-retangular.png'
+                    ) }}"
+                    alt="JP Transportes">
+
+            </div>
 
         </div>
+
+
+        <div class="header-title">
+
+            Sistema De Gestão Da JP Transportes
+
+        </div>
+
 
         <nav class="header-nav">
 
             {% if session.get("usuario_id") %}
 
-                <a href="{{ url_for('dashboard.dashboard') }}">
+                <a
+                    href="{{ url_for('dashboard.dashboard') }}">
+
                     Dashboard
+
                 </a>
 
-                |
+                <span class="header-separator">
+                    |
+                </span>
 
-                <a href="{{ url_for('autenticacao.logout') }}">
+                <a
+                    href="{{ url_for('usuario.meu_perfil') }}">
+
+                    Meu Perfil
+
+                </a>
+
+                <span class="header-separator">
+                    |
+                </span>
+
+                <a
+                    href="{{ url_for('autenticacao.logout') }}">
+
                     Sair
+
                 </a>
 
             {% endif %}

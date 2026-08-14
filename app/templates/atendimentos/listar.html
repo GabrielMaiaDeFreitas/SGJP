@@ -14,10 +14,19 @@ Gerenciamento de Atendimentos
     {% set novo_url = url_for("atendimento.novo") %}
     {% set novo_texto = "Novo Atendimento" %}
     {% set visualizacao_url = url_for("atendimento.completo") %}
-    {% set exportar_url = url_for(
-        "exportacao.exportar_generico",
-        modulo="atendimento"
-    ) %}
+
+    {% if session.get("perfil") == "Administrador" %}
+
+        {% set exportar_url = url_for(
+            "exportacao.exportar_generico",
+            modulo="atendimento"
+        ) %}
+
+    {% else %}
+
+        {% set exportar_url = none %}
+
+    {% endif %}
 
     {% include "components/list_header.html" %}
 
@@ -31,13 +40,11 @@ Gerenciamento de Atendimentos
 
                 <th>Administradora</th>
 
-                <th>Motorista</th>
-
                 <th>Valor</th>
 
-                <th>KM Rodado</th>
-
                 <th>Status Operacional</th>
+
+                <th>Status Financeiro</th>
 
                 <th>Ações</th>
 
@@ -73,37 +80,9 @@ Gerenciamento de Atendimentos
 
                 <td>
 
-                    {% if atendimento.motorista %}
-
-                        {{ atendimento.motorista.nome }}
-
-                    {% else %}
-
-                        -
-
-                    {% endif %}
-
-                </td>
-
-                <td>
-
                     {% if atendimento.valor_total %}
 
                         R$ {{ "%.2f"|format(atendimento.valor_total) }}
-
-                    {% else %}
-
-                        -
-
-                    {% endif %}
-
-                </td>
-
-                <td>
-
-                    {% if atendimento.km_total %}
-
-                        {{ "%.2f"|format(atendimento.km_total) }}
 
                     {% else %}
 
@@ -121,12 +100,18 @@ Gerenciamento de Atendimentos
 
                 <td>
 
+                    {{ atendimento.status_financeiro }}
+
+                </td>
+
+                <td>
+
                     <a href="{{ url_for(
                         'atendimento.detalhes',
                         id_atendimento=atendimento.id_atendimento
                     ) }}">
 
-                        Ver detalhes
+                        Detalhes
 
                     </a>
 
@@ -140,6 +125,39 @@ Gerenciamento de Atendimentos
                         Editar
 
                     </a>
+
+                    {% if session.get("perfil") == "Administrador"
+                          and atendimento.status_financeiro != "Pago" %}
+
+                        |
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'atendimento.registrar_pagamento',
+                                id_atendimento=atendimento.id_atendimento
+                            ) }}"
+                            style="display:inline;">
+
+                            <input
+                                type="hidden"
+                                name="origem"
+                                value="listar">
+
+                            <button
+                                type="submit"
+                                class="link-button"
+                                onclick="return confirm(
+                                    'Confirma o registro do pagamento deste atendimento?'
+                                );">
+
+                                Quitar
+
+                            </button>
+
+                        </form>
+
+                    {% endif %}
 
                     {% if session.get("perfil") == "Administrador" %}
 
@@ -179,5 +197,12 @@ Gerenciamento de Atendimentos
     </table>
 
 </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{{ super() }}
 
 {% endblock %}

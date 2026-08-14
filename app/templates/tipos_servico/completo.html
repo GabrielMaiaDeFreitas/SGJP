@@ -125,6 +125,8 @@
 
 {% block scripts %}
 
+{{ super() }}
+
 <script src="{{ url_for('static', filename='js/filter_panel.js') }}"></script>
 
 {% endblock %}

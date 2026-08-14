@@ -1,24 +1,39 @@
 {% extends "base_auth.html" %}
 
+
 {% block title %}
 
 Login - SGJP
 
 {% endblock %}
 
+
 {% block content %}
 
 <section class="login-card">
 
-    <h1>SGJP</h1>
+    <img
+        src="{{ url_for(
+            'static',
+            filename='img/logo-jp-circular.png'
+        ) }}"
+        alt="JP Transportes"
+        class="login-logo">
 
-    <p>
-        Sistema de Gerenciamento da JP Transportes
-    </p>
 
-    <form method="POST"action="{{ url_for('autenticacao.login') }}">
+    <h1 class="login-title">
 
-        <div class="form-group">
+        SGJP
+
+    </h1>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('autenticacao.login') }}">
+
+
+        <div class="login-form-group">
 
             <label for="login">
 
@@ -31,11 +46,12 @@ Login - SGJP
                 id="login"
                 name="login"
                 autocomplete="username"
-            >
+                required>
 
         </div>
 
-        <div class="form-group">
+
+        <div class="login-form-group">
 
             <label for="senha">
 
@@ -48,15 +64,19 @@ Login - SGJP
                 id="senha"
                 name="senha"
                 autocomplete="current-password"
-            >
+                required>
 
         </div>
 
-        <button type="submit">
+
+        <button
+            type="submit"
+            class="login-button">
 
             Entrar
 
         </button>
+
 
     </form>
 

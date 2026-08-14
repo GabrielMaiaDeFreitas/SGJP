@@ -22,6 +22,8 @@ from app.filters.tabela_valores import (
     FILTROS_TABELA_VALORES
 )
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
+
 from copy import deepcopy
 
 
@@ -35,6 +37,7 @@ tabela_valores_bp = Blueprint(
 
 )
 
+proteger_blueprint(tabela_valores_bp,"Administrador")
 
 @tabela_valores_bp.route("/")
 def listar():

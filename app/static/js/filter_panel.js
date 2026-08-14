@@ -11,14 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnLimpar = document.getElementById("btn-clear-filters");
 
     const filtrosIniciais = dados
-        ? {
-            campos: JSON.parse(dados.dataset.campos),
-            valores: JSON.parse(dados.dataset.valores)
-        }
-        : {
-            campos: [],
-            valores: []
-        };
+    ? {
+        campos: JSON.parse(dados.dataset.campos),
+        valores: JSON.parse(dados.dataset.valores),
+        valoresMin: JSON.parse(dados.dataset.valoresMin),
+        valoresMax: JSON.parse(dados.dataset.valoresMax)
+    }
+    : {
+        campos: [],
+        valores: [],
+        valoresMin: [],
+        valoresMax: []
+    };
 
     inicializar();
 
@@ -85,15 +89,47 @@ document.addEventListener("DOMContentLoaded", () => {
                 option
             );
 
-            const valor =
-                linha.querySelector(
-                    ".filter-value input, .filter-value select"
+            const inputs =
+
+                linha.querySelectorAll(
+
+                    ".filter-value input"
+
                 );
 
-            if (valor) {
+            const select =
 
-                valor.value =
-                    filtrosIniciais.valores[indice];
+                linha.querySelector(
+
+                    ".filter-value select"
+
+                );
+
+            if (inputs.length === 2) {
+
+                inputs[0].value =
+
+                    filtrosIniciais.valoresMin[indice] || "";
+
+                inputs[1].value =
+
+                    filtrosIniciais.valoresMax[indice] || "";
+
+            }
+
+            else if (inputs.length === 1) {
+
+                inputs[0].value =
+
+                    filtrosIniciais.valores[indice] || "";
+
+            }
+
+            else if (select) {
+
+                select.value =
+
+                    filtrosIniciais.valores[indice] || "";
 
             }
 
@@ -143,19 +179,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    function atualizarCampoValor(linha, option) {
+    function atualizarCampoValor(
+        linha,
+        option
+    ) {
 
-        const tipo = option.dataset.tipo;
+        const tipo =
+
+            option.dataset.tipo;
+
+        const subtipo =
+
+            option.dataset.subtipo;
 
         const opcoes = JSON.parse(
+
             option.dataset.opcoes || "[]"
+
         );
 
+        if (tipo === "intervalo") {
+
+            opcoes.subtipo =
+
+                subtipo;
+
+        }
+
         const valueContainer =
-            linha.querySelector(".filter-value");
+
+            linha.querySelector(
+
+                ".filter-value"
+
+            );
 
         valueContainer.replaceChildren(
-            criarCampoValor(tipo, opcoes)
+
+            criarCampoValor(
+
+                tipo,
+
+                opcoes
+
+            )
+
         );
 
     }
@@ -186,35 +254,100 @@ document.addEventListener("DOMContentLoaded", () => {
     function atualizarPainel() {
 
         const filtros =
-            container.querySelectorAll(".filter-row");
+
+            container.querySelectorAll(
+
+                ".filter-row"
+
+            );
 
         actions.style.display =
+
             filtros.length === 0
+
                 ? "none"
+
                 : "flex";
 
         let podeAdicionar =
+
             filtros.length === 0;
 
         filtros.forEach(filtro => {
 
             const campo =
-                filtro.querySelector(".filter-field");
 
-            const valor =
                 filtro.querySelector(
-                    ".filter-value input, .filter-value select"
+
+                    ".filter-field"
+
                 );
 
+            const intervalo =
+
+                filtro.querySelectorAll(
+
+                    ".filter-value input"
+
+                );
+
+            const select =
+
+                filtro.querySelector(
+
+                    ".filter-value select"
+
+                );
+
+            let preenchido = false;
+
             if (
+
+                intervalo.length === 2
+
+            ) {
+
+                preenchido =
+
+                    intervalo[0].value.trim() ||
+
+                    intervalo[1].value.trim();
+
+            }
+
+            else if (select) {
+
+                preenchido =
+
+                    select.value.trim();
+
+            }
+
+            else if (
+
+                intervalo.length === 1
+
+            ) {
+
+                preenchido =
+
+                    intervalo[0].value.trim();
+
+            }
+
+            if (
+
                 campo.value &&
-                valor &&
-                valor.value.trim()
+
+                preenchido
+
             ) {
 
                 podeAdicionar = true;
 
-            } else {
+            }
+
+            else {
 
                 podeAdicionar = false;
 
@@ -223,27 +356,31 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         btnAdicionar.disabled =
+
             !podeAdicionar;
 
     }
 
     function pesquisar() {
 
-    const filtros =container.querySelectorAll(".filter-row");
+        const filtros =container.querySelectorAll(".filter-row");
 
-    if (filtros.length === 0) {
+        if (filtros.length === 0) {
 
-        window.location = window.location.pathname;
-        return;
+            window.location = window.location.pathname;
+            return;
 
+        }
+
+        container.closest("form").requestSubmit();
     }
-
-    container.closest("form").requestSubmit();
-}
 
 });
 
-function criarCampoValor(tipo, opcoes = []) {
+function criarCampoValor(
+    tipo,
+    opcoes = []
+) {
 
     if (tipo === "texto") {
 
@@ -251,7 +388,9 @@ function criarCampoValor(tipo, opcoes = []) {
             document.createElement("input");
 
         input.type = "text";
+
         input.name = "valor[]";
+
         input.placeholder = "Digite um valor";
 
         return input;
@@ -264,6 +403,7 @@ function criarCampoValor(tipo, opcoes = []) {
             document.createElement("input");
 
         input.type = "date";
+
         input.name = "valor[]";
 
         return input;
@@ -272,15 +412,94 @@ function criarCampoValor(tipo, opcoes = []) {
 
     if (tipo === "numero") {
 
-        const input = document.createElement("input");
+        const input =
+            document.createElement("input");
 
         input.type = "number";
+
         input.name = "valor[]";
+
         input.min = "0";
+
         input.step = "0.01";
+
         input.placeholder = "Digite um valor";
 
         return input;
+
+    }
+
+    if (tipo === "intervalo") {
+
+        const container =
+            document.createElement("div");
+
+        container.className =
+            "filter-range";
+
+        const subtipo =
+
+            opcoes.subtipo || "text";
+
+        const minimo =
+            document.createElement("input");
+
+        minimo.name = "valor_min[]";
+
+        minimo.placeholder = "De";
+
+        const maximo =
+            document.createElement("input");
+
+        maximo.name = "valor_max[]";
+
+        maximo.placeholder = "Até";
+
+        if (subtipo === "data") {
+
+            minimo.type = "date";
+
+            maximo.type = "date";
+
+        }
+
+        else if (subtipo === "numero") {
+
+            minimo.type = "number";
+
+            maximo.type = "number";
+
+            minimo.step = "0.01";
+
+            maximo.step = "0.01";
+
+            minimo.min = "0";
+
+            maximo.min = "0";
+
+        }
+
+        else {
+
+            minimo.type = "text";
+
+            maximo.type = "text";
+
+        }
+
+        container.appendChild(
+
+            minimo
+
+        );
+
+        container.appendChild(
+
+            maximo
+
+        );
+
+        return container;
 
     }
 
@@ -295,9 +514,15 @@ function criarCampoValor(tipo, opcoes = []) {
             document.createElement("option");
 
         vazio.value = "";
-        vazio.textContent = "Selecione";
 
-        select.appendChild(vazio);
+        vazio.textContent =
+            "Selecione";
+
+        select.appendChild(
+
+            vazio
+
+        );
 
         opcoes.forEach(opcao => {
 
@@ -305,22 +530,34 @@ function criarCampoValor(tipo, opcoes = []) {
                 document.createElement("option");
 
             if (
+
                 typeof opcao === "object"
+
             ) {
 
-                option.value = opcao.id;
+                option.value =
+                    opcao.id;
 
-                option.textContent = opcao.label;
-
-            } else {
-
-                option.value = opcao;
-
-                option.textContent = opcao;
+                option.textContent =
+                    opcao.label;
 
             }
 
-            select.appendChild(option);
+            else {
+
+                option.value =
+                    opcao;
+
+                option.textContent =
+                    opcao;
+
+            }
+
+            select.appendChild(
+
+                option
+
+            );
 
         });
 
@@ -332,6 +569,7 @@ function criarCampoValor(tipo, opcoes = []) {
         document.createElement("input");
 
     input.type = "text";
+
     input.name = "valor[]";
 
     return input;

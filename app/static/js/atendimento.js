@@ -22,6 +22,10 @@ const elementos = {
         "recebeu_pagamento"
     ),
 
+    pagamentoSeparado: document.getElementById(
+        "pagamento_separado"
+    ),
+
     campoValorPago: document.getElementById(
         "campo_valor_pago"
     ),
@@ -143,6 +147,12 @@ const tabelaValores = {
 };
 
 /* =====================================================
+   Caso da Administradora Ser Cliente Próprio
+===================================================== */
+
+let administradoraClienteProprio = false;
+
+/* =====================================================
    INICIALIZAÇÃO
 ===================================================== */
 
@@ -174,7 +184,15 @@ function inicializar() {
 
     else {
 
-        atualizarFormulario();
+        atualizarFormulario().then(() => {
+
+            if (RESETAR_NOVO_ATENDIMENTO) {
+
+                resetarNovoAtendimento();
+
+            }
+
+        });
 
     }
 
@@ -303,7 +321,13 @@ function configurarAdministradora() {
 
         "change",
 
-        atualizarFormulario
+        async function () {
+
+            await carregarClientes();
+
+            await buscarTabelaValores();
+
+        }
 
     );
 
@@ -311,7 +335,7 @@ function configurarAdministradora() {
 
         "change",
 
-        atualizarFormulario
+        buscarTabelaValores
 
     );
 
@@ -361,13 +385,18 @@ function preencherClientes(dados) {
 
     }
 
-    const clientes = dados.clientes || [];
+    administradoraClienteProprio =
+        dados.cliente_proprio === true;
+
+    const clientes =
+        dados.clientes || [];
 
     elementos.cliente.innerHTML = "";
 
     elementos.cliente.disabled = true;
 
-    const opcaoPadrao = document.createElement("option");
+    const opcaoPadrao =
+        document.createElement("option");
 
     opcaoPadrao.value = "";
 
@@ -376,7 +405,6 @@ function preencherClientes(dados) {
     if (!elementos.administradora.value) {
 
         opcaoPadrao.textContent =
-
             "Selecione uma administradora...";
 
     }
@@ -384,7 +412,6 @@ function preencherClientes(dados) {
     else if (clientes.length === 0) {
 
         opcaoPadrao.textContent =
-
             "Não há clientes cadastrados para esta administradora.";
 
     }
@@ -392,22 +419,28 @@ function preencherClientes(dados) {
     else {
 
         opcaoPadrao.textContent =
-
             "Selecione um cliente";
 
     }
 
-    elementos.cliente.appendChild(opcaoPadrao);
+    elementos.cliente.appendChild(
+        opcaoPadrao
+    );
 
     clientes.forEach(cliente => {
 
-        const option = document.createElement("option");
+        const option =
+            document.createElement("option");
 
-        option.value = cliente.id;
+        option.value =
+            cliente.id;
 
-        option.textContent = cliente.nome;
+        option.textContent =
+            cliente.nome;
 
-        elementos.cliente.appendChild(option);
+        elementos.cliente.appendChild(
+            option
+        );
 
     });
 
@@ -420,7 +453,6 @@ function preencherClientes(dados) {
     if (ATENDIMENTO) {
 
         elementos.cliente.value =
-
             ATENDIMENTO.fk_cliente_id_cliente;
 
     }
@@ -434,7 +466,6 @@ function preencherClientes(dados) {
     ) {
 
         elementos.cliente.value =
-
             clientes[0].id;
 
     }
@@ -457,12 +488,11 @@ async function buscarTabelaValores() {
     const tipo =
         elementos.tipoServico.value;
 
+    removerAvisoTabelaValores();
+
     if (
-
         !administradora ||
-
         !tipo
-
     ) {
 
         tabelaValores.valorSaida = 0;
@@ -489,13 +519,17 @@ async function buscarTabelaValores() {
 
         tabelaValores.kmExcedente = 0;
 
-    } else {
+        mostrarAvisoTabelaValores();
+
+    }
+
+    else {
 
         tabelaValores.valorSaida =
-            dados.valor_saida;
+            Number(dados.valor_saida) || 0;
 
         tabelaValores.kmExcedente =
-            dados.valor_km_excedente;
+            Number(dados.valor_km_excedente) || 0;
 
     }
 
@@ -513,6 +547,8 @@ function configurarPagamento() {
 
         !elementos.recebeuPagamento ||
 
+        !elementos.pagamentoSeparado ||
+
         !elementos.campoValorPago ||
 
         !elementos.valorPago
@@ -523,23 +559,43 @@ function configurarPagamento() {
 
     }
 
+    let pagamentoSeparadoAnterior =
+
+        elementos.pagamentoSeparado.checked;
+
     function atualizar() {
 
-        const mostrar =
+        const recebeuPagamento =
+
             elementos.recebeuPagamento.checked;
 
         elementos.campoValorPago.classList.toggle(
 
             "oculto",
 
-            !mostrar
+            !recebeuPagamento
 
         );
 
         elementos.valorPago.disabled =
-            !mostrar;
 
-        if (!mostrar) {
+            !recebeuPagamento;
+
+        if (recebeuPagamento) {
+
+            elementos.pagamentoSeparado.checked = true;
+
+            elementos.pagamentoSeparado.disabled = true;
+
+        }
+
+        else {
+
+            elementos.pagamentoSeparado.disabled = false;
+
+            elementos.pagamentoSeparado.checked =
+
+                pagamentoSeparadoAnterior;
 
             elementos.valorPago.value = "0.00";
 
@@ -551,7 +607,25 @@ function configurarPagamento() {
 
         "change",
 
-        atualizar
+        function () {
+
+            if (
+
+                elementos.recebeuPagamento.checked &&
+
+                !elementos.pagamentoSeparado.disabled
+
+            ) {
+
+                pagamentoSeparadoAnterior =
+
+                    elementos.pagamentoSeparado.checked;
+
+            }
+
+            atualizar();
+
+        }
 
     );
 
@@ -1134,5 +1208,158 @@ async function calcularDistancia() {
         );
 
     }
+
+}
+
+function mostrarAvisoTabelaValores() {
+
+    let aviso =
+        document.getElementById("aviso-tabela-valores");
+
+    if (aviso) {
+        return;
+    }
+
+    aviso = document.createElement("div");
+
+    aviso.id = "aviso-tabela-valores";
+
+    aviso.className = "alert alert-warning";
+
+    aviso.textContent =
+        "Não existe uma tabela de valores cadastrada para esta Administradora e Tipo de Serviço. O valor deverá ser preenchido manualmente.";
+
+    const campoValor =
+        elementos.valorTotal.closest(".form-group");
+
+    campoValor.appendChild(aviso);
+}
+
+function removerAvisoTabelaValores() {
+
+    const aviso =
+        document.getElementById("aviso-tabela-valores");
+
+    if (aviso) {
+
+        aviso.remove();
+
+    }
+
+}
+
+function resetarNovoAtendimento() {
+
+    if (ATENDIMENTO) {
+
+        return;
+
+    }
+
+    elementos.tipoServico.value = "";
+
+    if (elementos.cliente) {
+
+        if (!administradoraClienteProprio) {
+
+            elementos.cliente.value = "";
+
+        }
+
+    }
+
+    elementos.protocolo.value = "";
+
+    elementos.motorista.value = "";
+
+    elementos.caminhao.value = "";
+
+    elementos.placaVeiculoRebocado.value = "";
+
+    elementos.modeloVeiculoRebocado.value = "";
+
+    elementos.origem.value = "";
+
+    elementos.destino.value = "";
+
+    elementos.valorNegociado.checked = false;
+
+    elementos.valorTotal.value = "0.00";
+
+    elementos.kmTotal.value = "0";
+
+    elementos.recebeuPagamento.checked = false;
+
+    elementos.pagamentoSeparado.checked = false;
+
+    elementos.valorPago.value = "0.00";
+
+    elementos.houvePedagio.checked = false;
+
+    elementos.valorPedagio.value = "0.00";
+
+    elementos.cobrarPedagio.checked = false;
+
+    elementos.cobrarHoraParada.checked = false;
+
+    elementos.quantidadeHoraParada.value = "0";
+
+    elementos.cobrarHoraTrabalhada.checked = false;
+
+    elementos.quantidadeHoraTrabalhada.value = "0";
+
+    elementos.usarPatins.checked = false;
+
+    elementos.quantidadePatins.value = "0";
+
+    elementos.observacao.value = "";
+
+    removerAvisoTabelaValores();
+
+    tabelaValores.valorSaida = 0;
+
+    tabelaValores.kmExcedente = 0;
+
+    elementos.recebeuPagamento.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.houvePedagio.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.cobrarHoraParada.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.cobrarHoraTrabalhada.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.usarPatins.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.valorNegociado.dispatchEvent(
+
+        new Event("change")
+
+    );
+
+    elementos.pagamentoSeparado.checked = false;
+
+    elementos.pagamentoSeparado.disabled = false;
+
+    calcularValores();
 
 }

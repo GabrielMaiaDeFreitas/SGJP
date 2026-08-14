@@ -13,6 +13,7 @@ from app.models import TipoServico
 from app.filters.tipo_servico import FILTROS_TIPO_SERVICO
 from app.services.tipo_servico_service import TipoServicoService
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
 
 tipo_servico_bp = Blueprint(
     "tipo_servico",
@@ -20,6 +21,7 @@ tipo_servico_bp = Blueprint(
     url_prefix="/tipos-servico"
 )
 
+proteger_blueprint(tipo_servico_bp,"Administrador")
 
 @tipo_servico_bp.route("/")
 def listar():

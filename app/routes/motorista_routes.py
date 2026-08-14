@@ -15,6 +15,8 @@ from app.constants.motorista import CATEGORIAS_CNH
 from app.filters.motorista import FILTROS_MOTORISTA
 from app.services.motorista_service import MotoristaService
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
+
 from datetime import datetime
 
 motorista_bp = Blueprint(
@@ -22,6 +24,8 @@ motorista_bp = Blueprint(
     __name__,
     url_prefix="/motoristas"
 )
+
+proteger_blueprint(motorista_bp,"Administrador")
 
 @motorista_bp.route("/")
 def listar():

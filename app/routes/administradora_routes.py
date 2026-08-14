@@ -13,12 +13,15 @@ from app.models import Administradora
 from app.filters.administradora import FILTROS_ADMINISTRADORA
 from app.services.administradora_service import AdministradoraService
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
 
 administradora_bp = Blueprint(
     "administradora",
     __name__,
     url_prefix="/administradoras"
 )
+
+proteger_blueprint(administradora_bp,"Administrador")
 
 
 @administradora_bp.route("/")
@@ -148,35 +151,50 @@ def novo():
 def editar(id_administradora):
 
     if "usuario_id" not in session:
+
         return redirect(
+
             url_for("autenticacao.login")
+
         )
 
     administradora = Administradora.query.get_or_404(
+
         id_administradora
+
     )
 
     if request.method == "POST":
 
         administradora_existente = Administradora.query.filter(
+
             Administradora.nome.ilike(
+
                 request.form["nome"]
+
             ),
+
             Administradora.id_administradora != id_administradora
+
         ).first()
 
         if administradora_existente:
 
             flash(
+
                 "Já existe uma administradora com esse nome.",
+
                 "warning"
+
             )
 
             administradora.nome = request.form["nome"]
 
             administradora.cliente_proprio = (
+
                 request.form.get("cliente_proprio")
                 == "Sim"
+
             )
 
             return render_template(
@@ -194,26 +212,75 @@ def editar(id_administradora):
         administradora.nome = request.form["nome"]
 
         administradora.cliente_proprio = (
+
             request.form.get("cliente_proprio")
             == "Sim"
+
         )
+
+        if administradora.cliente_proprio:
+
+            quantidade_clientes_ativos = sum(
+
+                1
+
+                for cliente in administradora.clientes
+
+                if cliente.ativo
+
+            )
+
+            if quantidade_clientes_ativos > 1:
+
+                flash(
+
+                    (
+                        "Não é possível definir esta "
+                        "administradora como Cliente Próprio "
+                        "porque ela possui mais de um cliente "
+                        "ativo cadastrado."
+                    ),
+
+                    "warning"
+
+                )
+
+                return render_template(
+
+                    "administradoras/form.html",
+
+                    titulo="Editar Administradora",
+
+                    administradora=administradora,
+
+                    origem=request.args.get("origem")
+
+                )
 
         db.session.commit()
 
         flash(
+
             "Administradora atualizada com sucesso.",
+
             "success"
+
         )
 
         origem = request.form.get("origem")
 
         if origem == "completo":
+
             return redirect(
+
                 url_for("administradora.completo")
+
             )
 
         return redirect(
+
             url_for("administradora.listar")
+
         )
 
     return render_template(
@@ -227,7 +294,6 @@ def editar(id_administradora):
         origem=request.args.get("origem")
 
     )
-
 
 @administradora_bp.route("/<int:id_administradora>/toggle")
 def toggle(id_administradora):

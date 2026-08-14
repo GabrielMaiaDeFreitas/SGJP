@@ -228,6 +228,13 @@
 
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+
+{{ super() }}
+
 <script src="{{ url_for('static', filename='js/tabela_valores.js') }}"></script>
+
 
 {% endblock %}

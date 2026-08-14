@@ -2,88 +2,191 @@
 
     <nav>
 
-    <h3>Menu</h3>
+        <!-- =====================================================
+             CABEÇALHO DA SIDEBAR
+        ====================================================== -->
+
+        <div class="sidebar-header">
+
+            <h3>
+
+                Menu
+
+            </h3>
+
+        </div>
 
         <ul class="sidebar-menu">
+
+            <!-- =================================================
+                 DASHBOARD
+                 TODOS OS PERFIS
+            ================================================== -->
 
             <a
                 href="{{ url_for('dashboard.dashboard') }}"
                 class="{% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}">
+
                 Dashboard
+
             </a>
 
-        <li class="sidebar-title">Cadastros</li>
+             <!-- =================================================
+                 MEU PERFIL
+                 TODOS OS PERFIS
+            ================================================== -->
+
+             <li class="sidebar-title">
+
+                Conta
+
+            </li>
 
             <a
-                href="{{ url_for('usuario.listar') }}"
-                class="{% if request.endpoint == 'usuario.listar' %}active{% endif %}">
-                Usuários
-            </a>
+                href="{{ url_for('usuario.meu_perfil') }}"
+                class="{% if request.endpoint == 'usuario.meu_perfil' %}active{% endif %}">
 
-        <li>
-            <a
-                href="{{ url_for('motorista.listar') }}"
-                class="{% if request.endpoint.startswith('motorista.') %}active{% endif %}">
-
-                Motoristas
+                Meu Perfil
 
             </a>
 
-        <a
-            href="{{ url_for('caminhao.listar') }}"
-            class="{% if request.endpoint.startswith('caminhao.') %}active{% endif %}">
 
-            Caminhões
+            <!-- =================================================
+                 CADASTROS
+                 SOMENTE ADMINISTRADOR
+            ================================================== -->
 
-        </a>
+            {% if session.get("perfil") == "Administrador" %}
 
-        <a
-            href="{{ url_for('cliente.listar') }}"
-            class="{% if request.endpoint.startswith('cliente.') %}active{% endif %}">
+                <li class="sidebar-title">
 
-            Clientes
+                    Cadastros
 
-        </a>
+                </li>
 
-        <a
-            href="{{ url_for('administradora.listar') }}"
-            class="{% if request.endpoint.startswith('administradora.') %}active{% endif %}">
 
-            Administradoras
+                <a
+                    href="{{ url_for('usuario.listar') }}"
+                    class="{% if request.endpoint in [
+                        'usuario.listar',
+                        'usuario.novo',
+                        'usuario.editar',
+                        'usuario.detalhes',
+                        'usuario.completo',
+                        'usuario.toggle'
+                    ] %}active{% endif %}">
 
-        </a>
+                    Usuários
 
-        <a
-            href="{{ url_for('tipo_servico.listar') }}"
-            class="{% if request.endpoint.startswith('tipo_servico.') %}active{% endif %}">
+                </a>
 
-            Tipos de Serviço
 
-        </a>
+                <a
+                    href="{{ url_for('motorista.listar') }}"
+                    class="{% if request.endpoint.startswith('motorista.') %}active{% endif %}">
 
-        <a
-            href="{{ url_for('tabela_valores.listar') }}"
-            class="{% if request.endpoint.startswith('tabela_valores.') %}active{% endif %}">
+                    Motoristas
 
-            Tabela de Valores
+                </a>
 
-        </a>
 
-        <li class="sidebar-title">Operações</li>
+                <a
+                    href="{{ url_for('caminhao.listar') }}"
+                    class="{% if request.endpoint.startswith('caminhao.') %}active{% endif %}">
 
-        <a
-            href="{{ url_for('atendimento.listar') }}"
-            class="{% if request.endpoint.startswith('atendimento.') %}active{% endif %}">
+                    Caminhões
 
-            Atendimentos
+                </a>
 
-        </a>
 
-        <li class="sidebar-title">Relatórios</li>
+                <a
+                    href="{{ url_for('cliente.listar') }}"
+                    class="{% if request.endpoint.startswith('cliente.') %}active{% endif %}">
 
-        <li>
-            <a href="#">Em desenvolvimento...</a>
-        </li>
+                    Clientes
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('administradora.listar') }}"
+                    class="{% if request.endpoint.startswith('administradora.') %}active{% endif %}">
+
+                    Administradoras
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('tipo_servico.listar') }}"
+                    class="{% if request.endpoint.startswith('tipo_servico.') %}active{% endif %}">
+
+                    Tipos de Serviço
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('tabela_valores.listar') }}"
+                    class="{% if request.endpoint.startswith('tabela_valores.') %}active{% endif %}">
+
+                    Tabela de Valores
+
+                </a>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 OPERAÇÕES
+                 ADMINISTRADOR + OPERADOR
+            ================================================== -->
+
+            {% if session.get("perfil") in [
+                "Administrador",
+                "Operador"
+            ] %}
+
+                <li class="sidebar-title">
+
+                    Operações
+
+                </li>
+
+
+                <a
+                    href="{{ url_for('atendimento.listar') }}"
+                    class="{% if request.endpoint.startswith('atendimento.') %}active{% endif %}">
+
+                    Atendimentos
+
+                </a>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 RELATÓRIOS
+                 TODOS OS PERFIS
+            ================================================== -->
+
+            <li class="sidebar-title">
+
+                Relatórios
+
+            </li>
+
+
+            <li>
+
+                <a href="#">
+
+                    Em desenvolvimento...
+
+                </a>
+
+            </li>
+
 
         </ul>
 

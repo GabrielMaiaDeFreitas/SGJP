@@ -2,13 +2,26 @@
 
     <h3>Pesquisar</h3>
 
-    <div id="filters-container"></div>
+        <div
+            id="filters-data"
 
-    <template id="filter-template">
+            data-campos='{{ request.args.getlist("campo[]") | tojson }}'
 
-        {% include "components/filter_row.html" %}
+            data-valores='{{ request.args.getlist("valor[]") | tojson }}'
 
-    </template>
+            data-valores-min='{{ request.args.getlist("valor_min[]") | tojson }}'
+
+            data-valores-max='{{ request.args.getlist("valor_max[]") | tojson }}'>
+
+        </div>
+
+        <div id="filters-container"></div>
+
+        <template id="filter-template">
+
+            {% include "components/filter_row.html" %}
+
+        </template>
 
     <div class="filter-buttons">
 

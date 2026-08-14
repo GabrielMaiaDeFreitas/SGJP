@@ -20,12 +20,16 @@ from app.services.cliente_service import ClienteService
 
 from copy import deepcopy
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
+
 
 cliente_bp = Blueprint(
     "cliente",
     __name__,
     url_prefix="/clientes"
 )
+
+proteger_blueprint(cliente_bp,"Administrador")
 
 
 @cliente_bp.route("/")

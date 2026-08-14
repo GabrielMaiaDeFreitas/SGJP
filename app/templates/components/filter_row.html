@@ -13,6 +13,7 @@
         <option
             value="{{ campo.campo }}"
             data-tipo="{{ campo.tipo }}"
+             data-subtipo="{{ campo.subtipo | default('') }}"
             data-opcoes='{{ campo.opcoes | default([]) | tojson }}'>
 
             {{ campo.label }}

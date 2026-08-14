@@ -33,6 +33,10 @@ from app.services.cliente_service import (
     ClienteService
 )
 
+from app.helpers.autorizacao_helper import (
+    requer_perfil
+)
+
 from app.constants.atendimento import (
     VALOR_PATINS,
     VALOR_HORA_PARADA,
@@ -52,6 +56,7 @@ atendimento_bp = Blueprint(
 )
 
 @atendimento_bp.route("/")
+@requer_perfil("Administrador","Operador")
 def listar():
 
     if "usuario_id" not in session:
@@ -88,6 +93,7 @@ def listar():
     )
 
 @atendimento_bp.route("/novo",methods=["GET", "POST"])
+@requer_perfil("Administrador","Operador")
 def novo():
 
     if "usuario_id" not in session:
@@ -150,7 +156,9 @@ def novo():
                     VALOR_HORA_TRABALHADA
                 ),
 
-                KM_FRANQUIA=KM_FRANQUIA
+                KM_FRANQUIA=KM_FRANQUIA,
+
+                resetar_novo_atendimento=False
 
             )
 
@@ -162,10 +170,36 @@ def novo():
 
         )
 
-        return redirect(
+        return render_template(
 
-            url_for(
-                "atendimento.listar"
+            "atendimentos/form.html",
+
+            titulo="Novo Atendimento",
+
+            **dados_formulario,
+
+            VALOR_PATINS=float(
+                VALOR_PATINS
+            ),
+
+            VALOR_HORA_PARADA=float(
+                VALOR_HORA_PARADA
+            ),
+
+            VALOR_HORA_TRABALHADA=float(
+                VALOR_HORA_TRABALHADA
+            ),
+
+            KM_FRANQUIA=KM_FRANQUIA,
+
+            resetar_novo_atendimento=True,
+
+            administradora_inicial=(
+                dados["id_administradora"]
+            ),
+
+            data_atendimento_inicial=(
+                dados["data_atendimento"]
             )
 
         )
@@ -190,7 +224,9 @@ def novo():
             VALOR_HORA_TRABALHADA
         ),
 
-        KM_FRANQUIA=KM_FRANQUIA
+        KM_FRANQUIA=KM_FRANQUIA,
+
+        resetar_novo_atendimento=False
 
     )
 
@@ -198,6 +234,7 @@ def novo():
     "/<int:id_atendimento>/editar",
     methods=["GET", "POST"]
 )
+@requer_perfil("Administrador","Operador")
 def editar(id_atendimento):
 
     if "usuario_id" not in session:
@@ -365,6 +402,7 @@ def editar(id_atendimento):
     )
 
 @atendimento_bp.route("/<int:id_atendimento>")
+@requer_perfil("Administrador","Operador")
 def detalhes(id_atendimento):
 
     if "usuario_id" not in session:
@@ -390,6 +428,7 @@ def detalhes(id_atendimento):
     )
 
 @atendimento_bp.route("/completo")
+@requer_perfil("Administrador","Operador")
 def completo():
 
     if "usuario_id" not in session:
@@ -596,6 +635,7 @@ def completo():
     "/<int:id_atendimento>/excluir",
     methods=["POST"]
 )
+@requer_perfil("Administrador")
 def excluir(id_atendimento):
 
     if "usuario_id" not in session:
@@ -603,22 +643,6 @@ def excluir(id_atendimento):
         return redirect(
 
             url_for("autenticacao.login")
-
-        )
-
-    if session.get("perfil") != "Administrador":
-
-        flash(
-
-            "Apenas administradores podem excluir atendimentos.",
-
-            "warning"
-
-        )
-
-        return redirect(
-
-            url_for("atendimento.listar")
 
         )
 
@@ -642,7 +666,87 @@ def excluir(id_atendimento):
 
     )
 
+@atendimento_bp.route("/<int:id_atendimento>/registrar-pagamento",methods=["POST"])
+@requer_perfil("Administrador")
+def registrar_pagamento(id_atendimento):
+
+    if "usuario_id" not in session:
+
+        return redirect(
+
+            url_for("autenticacao.login")
+
+        )
+
+    atendimento = AtendimentoService.detalhes(
+
+        id_atendimento
+
+    )
+
+    AtendimentoService.registrar_pagamento(
+
+        [atendimento]
+
+    )
+
+    flash(
+
+        "Pagamento registrado com sucesso.",
+
+        "success"
+
+    )
+
+    origem = request.form.get("origem")
+
+    if origem == "detalhes":
+
+        return redirect(
+
+            url_for(
+
+                "atendimento.detalhes",
+
+                id_atendimento=id_atendimento
+
+            )
+
+        )
+
+    if origem == "completo":
+
+        return redirect(
+
+            request.referrer
+            or url_for(
+                "atendimento.completo"
+            )
+
+        )
+
+    if origem == "listar":
+
+        return redirect(
+
+            request.referrer
+            or url_for(
+                "atendimento.listar"
+            )
+
+        )
+
+    return redirect(
+
+        request.referrer
+        or url_for(
+            "atendimento.listar"
+        )
+
+    )
+
 @atendimento_bp.route("/tabela-valores")
+@requer_perfil("Administrador","Operador")
 def tabela_valores():
 
     if "usuario_id" not in session:
@@ -696,6 +800,7 @@ def tabela_valores():
     })
 
 @atendimento_bp.route("/clientes")
+@requer_perfil("Administrador","Operador")
 def clientes():
 
     if "usuario_id" not in session:

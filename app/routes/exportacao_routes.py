@@ -10,6 +10,7 @@ from app.exports.config import MODELOS_MAPEADOS
 from app.exports.export_service import ExportService
 from app.services.filter_service import FilterService
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
 
 exportacao_bp = Blueprint(
 
@@ -21,6 +22,7 @@ exportacao_bp = Blueprint(
 
 )
 
+proteger_blueprint(exportacao_bp,"Administrador")
 
 @exportacao_bp.route(
     "/<string:modulo>",

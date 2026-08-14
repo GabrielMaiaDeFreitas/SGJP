@@ -312,13 +312,11 @@ MODELOS_MAPEADOS = {
 
             "tabela_valores.administradora.nome",
 
-            "motorista.nome",
-
             "valor_total",
 
-            "km_total",
+            "status_operacional",
 
-            "status_operacional"
+            "status_financeiro"
 
         ],
 
@@ -328,13 +326,11 @@ MODELOS_MAPEADOS = {
 
             "tabela_valores.administradora.nome": "Administradora",
 
-            "motorista.nome": "Motorista",
-
             "valor_total": "Valor",
 
-            "km_total": "KM Rodado",
-
-            "status_operacional": "Status Operacional"
+            "status_operacional": "Status Operacional",
+            
+            "status_financeiro": "Status Financeiro"
 
         }
 
@@ -381,6 +377,8 @@ MODELOS_MAPEADOS = {
             "km_total",
 
             "valor_total",
+
+            "valor_comissao",
 
             "valor_pago",
 
@@ -431,6 +429,8 @@ MODELOS_MAPEADOS = {
             "valor_total": "Valor Total",
 
             "valor_pago": "Valor Pago",
+            
+            "valor_comissao": "Valor Comissão",
 
             "valor_pedagio": "Valor Pedágio",
 

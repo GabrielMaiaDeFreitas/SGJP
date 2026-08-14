@@ -36,6 +36,7 @@ from app.constants.atendimento import (
     VALOR_HORA_TRABALHADA,
     STATUS_OPERACIONAL_PENDENTE,
     STATUS_OPERACIONAL_COMPLETO,
+    STATUS_FINANCEIRO_AGUARDANDO_FECHAMENTO,
     STATUS_FINANCEIRO_AGUARDANDO_PAGAMENTO,
     STATUS_FINANCEIRO_PAGAMENTO_PARCIAL,
     STATUS_FINANCEIRO_PAGO
@@ -118,6 +119,10 @@ class AtendimentoService:
 
             valor_pedagio=(
                 dados["valor_pedagio"]
+            ),
+
+            valor_comissao=(
+                dados["valor_comissao"]
             ),
 
             quantidade_hora_parada=(
@@ -394,6 +399,11 @@ class AtendimentoService:
                 or None
             ),
 
+            "pagamento_separado": (
+                formulario.get("pagamento_separado")
+                == "on"
+            ),
+
             "modelo_veiculo_rebocado": (
 
                 formulario.get("modelo_veiculo_rebocado")
@@ -585,6 +595,12 @@ class AtendimentoService:
         atendimento.valor_pedagio = (
 
             dados["valor_pedagio"]
+
+        )
+
+        atendimento.valor_comissao = (
+
+            dados["valor_comissao"]
 
         )
 
@@ -859,15 +875,33 @@ class AtendimentoService:
 
         )
 
-        if dados["valor_pago"] <= 0:
+        # ==================================================
+        # COMISSÃO
+        # ==================================================
+
+        dados["valor_comissao"] = (
+
+            (dados["valor_total"] or Decimal("0"))
+
+            -
+
+            (dados["valor_pedagio"] or Decimal("0"))
+
+        )
+
+        # ==================================================
+        # STATUS FINANCEIRO
+        # ==================================================
+
+        if dados["valor_pago"] >= dados["valor_total"] and dados["valor_total"] > 0:
 
             dados["status_financeiro"] = (
 
-                STATUS_FINANCEIRO_AGUARDANDO_PAGAMENTO
+                STATUS_FINANCEIRO_PAGO
 
             )
 
-        elif dados["valor_pago"] < dados["valor_total"]:
+        elif dados["valor_pago"] > 0:
 
             dados["status_financeiro"] = (
 
@@ -875,13 +909,21 @@ class AtendimentoService:
 
             )
 
+        elif dados.get("pagamento_separado"):
+
+            dados["status_financeiro"] = (
+
+                STATUS_FINANCEIRO_AGUARDANDO_PAGAMENTO
+
+            )
+
         else:
 
             dados["status_financeiro"] = (
 
-                STATUS_FINANCEIRO_PAGO
+                STATUS_FINANCEIRO_AGUARDANDO_FECHAMENTO
 
-            )
+        )
 
     @staticmethod
     def _calcular_status_operacional(
@@ -919,3 +961,30 @@ class AtendimentoService:
             return STATUS_OPERACIONAL_COMPLETO
 
         return STATUS_OPERACIONAL_PENDENTE
+
+    @staticmethod
+    def registrar_pagamento(
+
+        atendimentos,
+
+        commit=True
+
+    ):
+
+        for atendimento in atendimentos:
+
+            atendimento.valor_pago = (
+
+                atendimento.valor_total
+
+            )
+
+            atendimento.status_financeiro = (
+
+                STATUS_FINANCEIRO_PAGO
+
+            )
+
+        if commit:
+
+             db.session.commit()

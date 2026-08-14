@@ -19,21 +19,92 @@ class FilterService:
         }
 
         campos = filtros.getlist(
+
             "campo[]"
+
         )
 
         valores = filtros.getlist(
+
             "valor[]"
+
         )
 
-        for campo, valor in zip(
-            campos,
-            valores
+        valores_min = filtros.getlist(
+
+            "valor_min[]"
+
+        )
+
+        valores_max = filtros.getlist(
+
+            "valor_max[]"
+
+        )
+
+        for indice, campo in enumerate(
+
+            campos
+
         ):
 
-            if not valor:
+            valor = (
+
+                valores[indice]
+
+                if indice < len(valores)
+
+                else ""
+
+            )
+
+            valor_min = (
+
+                valores_min[indice]
+
+                if indice < len(valores_min)
+
+                else ""
+
+            )
+
+            valor_max = (
+
+                valores_max[indice]
+
+                if indice < len(valores_max)
+
+                else ""
+
+            )
+
+            configuracao = configuracoes.get(
+
+                campo
+
+            )
+
+            if configuracao is None:
 
                 continue
+
+            tipo = configuracao.get(
+
+                "tipo"
+
+            )
+
+            if tipo == "intervalo":
+
+                if not valor_min and not valor_max:
+
+                    continue
+
+            else:
+
+                if not valor:
+
+                    continue
 
             configuracao = configuracoes.get(
                 campo
@@ -105,7 +176,25 @@ class FilterService:
 
                 valor = valor == "Sim"
 
-            if operacao == "contains":
+            if tipo == "intervalo":
+
+                if valor_min:
+
+                    query = query.filter(
+
+                        atributo >= valor_min
+
+                    )
+
+                if valor_max:
+
+                    query = query.filter(
+
+                        atributo <= valor_max
+
+                    )
+
+            elif operacao == "contains":
 
                 query = query.filter(
 
