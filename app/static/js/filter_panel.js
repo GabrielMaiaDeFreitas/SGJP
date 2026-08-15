@@ -70,7 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        filtrosIniciais.campos.forEach((campo, indice) => {
+        let indiceValor = 0;
+        let indiceMin = 0;
+        let indiceMax = 0;
+
+        filtrosIniciais.campos.forEach((campo) => {
 
             const linha = adicionarFiltro();
 
@@ -90,46 +94,64 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             const inputs =
-
                 linha.querySelectorAll(
-
                     ".filter-value input"
-
                 );
 
             const select =
-
                 linha.querySelector(
-
                     ".filter-value select"
-
                 );
+
+            /*
+            * Filtro de intervalo
+            *
+            * Usa os arrays separados
+            * de valor mínimo e máximo.
+            */
 
             if (inputs.length === 2) {
 
                 inputs[0].value =
-
-                    filtrosIniciais.valoresMin[indice] || "";
+                    filtrosIniciais.valoresMin[indiceMin] || "";
 
                 inputs[1].value =
+                    filtrosIniciais.valoresMax[indiceMax] || "";
 
-                    filtrosIniciais.valoresMax[indice] || "";
+                indiceMin++;
+                indiceMax++;
 
             }
+
+            /*
+            * Filtro simples
+            *
+            * Usa o próximo valor disponível
+            * no array valor[].
+            */
 
             else if (inputs.length === 1) {
 
                 inputs[0].value =
+                    filtrosIniciais.valores[indiceValor] || "";
 
-                    filtrosIniciais.valores[indice] || "";
+                indiceValor++;
 
             }
+
+            /*
+            * Filtro select
+            *
+            * Também usa o próximo valor disponível
+            * no array valor[].
+            */
 
             else if (select) {
 
                 select.value =
+                    filtrosIniciais.valores[indiceValor] || "";
 
-                    filtrosIniciais.valores[indice] || "";
+                indiceValor++;
 
             }
 

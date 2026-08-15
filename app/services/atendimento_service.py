@@ -51,6 +51,11 @@ class AtendimentoService:
         return Decimal(valor or "0")
 
     @staticmethod
+    def _decimal_ou_none(valor):
+
+        return Decimal(valor) if valor else None
+
+    @staticmethod
     def _inteiro(valor):
 
         return int(valor) if valor else 0
@@ -332,7 +337,7 @@ class AtendimentoService:
                 ""
             ).strip() or None,
 
-            "km_total": AtendimentoService._decimal(
+            "km_total": AtendimentoService._decimal_ou_none(
                 formulario.get("km_total")
             ),
 
@@ -439,7 +444,7 @@ class AtendimentoService:
 
             raise ValueError(
 
-                "Não existe uma tabela de valores ativa para esta administradora e tipo de serviço."
+                "Erro. Não existe uma tabela de valores ativa para esta administradora e tipo de serviço. Solicite ao administrador para configurar"
 
             )
 
@@ -681,11 +686,7 @@ class AtendimentoService:
 
         return {
 
-            "administradoras": Administradora.query.filter_by(
-                ativo=True
-            ).order_by(
-                Administradora.nome
-            ).all(),
+            "administradoras": TabelaValoresService.administradoras_configuradas(),
 
             "tipos_servico": TipoServico.query.filter_by(
                 ativo=True
@@ -780,14 +781,12 @@ class AtendimentoService:
 
             configuracoes=FILTROS_ATENDIMENTO,
 
-            ordenar_por="data_cadastro"
+            ordenar_por="data_atendimento"
 
         )
 
         return atendimentos
 
-    # Futuramente será aplicado aqui o filtro
-    # por Administradora utilizando a TabelaValores.
 
     @staticmethod
     def buscar_tabela_valores(

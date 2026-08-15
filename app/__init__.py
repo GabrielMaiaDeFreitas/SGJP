@@ -28,6 +28,7 @@ def create_app():
     from app.routes.cliente_routes import cliente_bp
     from app.routes.tabela_valores_routes import tabela_valores_bp
     from app.routes.atendimento_routes import atendimento_bp
+    from app.routes.relatorios.caminhoes_routes import caminhoes_relatorio_bp
     
 
     # Registra os blueprints
@@ -42,5 +43,6 @@ def create_app():
     app.register_blueprint(cliente_bp)
     app.register_blueprint(tabela_valores_bp)
     app.register_blueprint(atendimento_bp)
+    app.register_blueprint(caminhoes_relatorio_bp)
     
     return app

@@ -1,0 +1,151 @@
+/* =====================================================
+   RELATÓRIOS
+===================================================== */
+
+.report-filters {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: flex-end;
+
+    gap: 20px;
+
+    margin-bottom: 24px;
+
+}
+
+/* =====================================================
+   CAMPOS DE DATA
+===================================================== */
+
+.report-date-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+}
+
+.report-date-group label {
+
+    font-weight: 600;
+
+}
+
+.report-date-group input {
+
+    min-width: 180px;
+
+}
+
+
+/* =====================================================
+   AÇÃO DO FILTRO
+===================================================== */
+
+.report-filter-actions {
+
+    flex-basis: 100%;
+
+    margin-top: 0;
+
+    padding-top: 0;
+
+    border-top: none;
+
+}
+
+
+/* =====================================================
+   TABELA DO RELATÓRIO
+===================================================== */
+
+.report-table {
+
+    width: 100%;
+
+}
+
+.report-summary {
+    margin-top: 32px;
+}
+
+
+/* =====================================================
+   COLUNA DE AÇÕES
+===================================================== */
+
+.report-actions {
+
+    white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   AÇÕES FINAIS DO RELATÓRIO
+===================================================== */
+
+.report-footer-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 24px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid var(--border-color);
+
+}
+
+
+/* =====================================================
+   RESPONSIVIDADE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .report-filters {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .report-date-group input {
+
+        width: 100%;
+
+    }
+
+
+    .report-filter-actions {
+
+        flex-basis: auto;
+
+        width: 100%;
+
+    }
+
+
+    .report-footer-actions {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+}

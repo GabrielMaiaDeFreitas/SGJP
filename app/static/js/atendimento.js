@@ -140,6 +140,8 @@ const elementos = {
 
 const tabelaValores = {
 
+    existe: false,
+
     valorSaida: 0,
 
     kmExcedente: 0
@@ -171,6 +173,8 @@ function inicializar() {
     configurarCalculo();
 
     configurarCalculoDistancia();
+
+    configurarConfirmacaoValorZero();
 
     if (ATENDIMENTO) {
 
@@ -515,6 +519,8 @@ async function buscarTabelaValores() {
 
     if (!dados) {
 
+        tabelaValores.existe = false;
+
         tabelaValores.valorSaida = 0;
 
         tabelaValores.kmExcedente = 0;
@@ -525,11 +531,23 @@ async function buscarTabelaValores() {
 
     else {
 
+        tabelaValores.existe = true;
+
         tabelaValores.valorSaida =
-            Number(dados.valor_saida) || 0;
+            dados.valor_saida !== null
+                ? Number(dados.valor_saida)
+                : 0;
 
         tabelaValores.kmExcedente =
-            Number(dados.valor_km_excedente) || 0;
+            dados.valor_km_excedente !== null
+                ? Number(dados.valor_km_excedente)
+                : 0;
+
+        if (dados.valor_zero) {
+
+            mostrarAvisoValorZero();
+
+        }
 
     }
 
@@ -1227,7 +1245,7 @@ function mostrarAvisoTabelaValores() {
     aviso.className = "alert alert-warning";
 
     aviso.textContent =
-        "Não existe uma tabela de valores cadastrada para esta Administradora e Tipo de Serviço. O valor deverá ser preenchido manualmente.";
+        "Não existe uma tabela de valores configurada para esta Administradora e Tipo de Serviço. Solicite ao administrador para configurar.";
 
     const campoValor =
         elementos.valorTotal.closest(".form-group");
@@ -1235,16 +1253,104 @@ function mostrarAvisoTabelaValores() {
     campoValor.appendChild(aviso);
 }
 
-function removerAvisoTabelaValores() {
+function mostrarAvisoValorZero() {
 
-    const aviso =
-        document.getElementById("aviso-tabela-valores");
+    let aviso =
+        document.getElementById(
+            "aviso-valor-zero"
+        );
 
     if (aviso) {
 
-        aviso.remove();
+        return;
 
     }
+
+    aviso = document.createElement("div");
+
+    aviso.id = "aviso-valor-zero";
+
+    aviso.className = "alert alert-warning";
+
+    aviso.textContent =
+        "Valor configurado como 0. O valor deverá ser preenchido manualmente.";
+
+    const campoValor =
+        elementos.valorTotal.closest(".form-group");
+
+    campoValor.appendChild(aviso);
+
+}
+
+function removerAvisoTabelaValores() {
+
+    const avisoTabela =
+        document.getElementById(
+            "aviso-tabela-valores"
+        );
+
+    if (avisoTabela) {
+
+        avisoTabela.remove();
+
+    }
+
+    const avisoZero =
+        document.getElementById(
+            "aviso-valor-zero"
+        );
+
+    if (avisoZero) {
+
+        avisoZero.remove();
+
+    }
+
+}
+
+function configurarConfirmacaoValorZero() {
+
+    const formulario =
+        document.getElementById(
+            "form-atendimento"
+        );
+
+    if (!formulario) {
+
+        return;
+
+    }
+
+    formulario.addEventListener(
+        "submit",
+        function (evento) {
+
+            if (
+                tabelaValores.existe
+                &&
+                tabelaValores.valorSaida === 0
+                &&
+                tabelaValores.kmExcedente === 0
+            ) {
+
+                const confirmar = confirm(
+
+                    "O valor está configurado como 0. " +
+                    "O valor deverá ser preenchido manualmente. " +
+                    "Deseja continuar?"
+
+                );
+
+                if (!confirmar) {
+
+                    evento.preventDefault();
+
+                }
+
+            }
+
+        }
+    );
 
 }
 
@@ -1315,6 +1421,8 @@ function resetarNovoAtendimento() {
     elementos.observacao.value = "";
 
     removerAvisoTabelaValores();
+    
+    tabelaValores.existe = false;
 
     tabelaValores.valorSaida = 0;
 

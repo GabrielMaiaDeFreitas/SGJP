@@ -8,11 +8,28 @@
 
 <div class="card">
 
-    {% set voltar = url_for("atendimento.listar") %}
+    {% if request.args.get("origem") == "relatorio_caminhoes" %}
+
+        {% set voltar = url_for("relatorio_caminhoes.listar") %}
+
+    {% else %}
+
+        {% set voltar = url_for("atendimento.listar") %}
+
+    {% endif %}
 
     {% include "components/view_header.html" %}
 
     <form method="GET">
+
+        {% if request.args.get("origem") %}
+
+            <input
+                type="hidden"
+                name="origem"
+                value="{{ request.args.get('origem') }}">
+
+        {% endif %}
 
         {% include "components/filter_panel.html" %}
 
@@ -143,16 +160,18 @@
                     <td>
 
                         {{ atendimento.veiculo_rebocado.placa
-                           if atendimento.veiculo_rebocado
-                           else "—" }}
+                        if atendimento.veiculo_rebocado
+                        and atendimento.veiculo_rebocado.placa
+                        else "—" }}
 
                     </td>
 
                     <td>
 
                         {{ atendimento.veiculo_rebocado.modelo
-                           if atendimento.veiculo_rebocado
-                           else "—" }}
+                        if atendimento.veiculo_rebocado
+                        and atendimento.veiculo_rebocado.modelo
+                        else "—" }}
 
                     </td>
 
@@ -340,7 +359,7 @@
     <div class="form-actions">
 
         <a
-            href="{{ url_for('atendimento.listar') }}"
+            href="{{ voltar }}"
             class="btn btn-secondary">
 
             Voltar

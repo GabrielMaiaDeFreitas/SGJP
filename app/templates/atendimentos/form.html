@@ -26,7 +26,8 @@
 
     <form
         method="POST"
-        class="form">
+        class="form"
+        id="form-atendimento">
 
         <!-- =====================================================
             DADOS DO SERVIÇO
@@ -182,9 +183,8 @@
                         name="data_atendimento"
                         value="{{
                             atendimento.data_atendimento.isoformat()
-                            if atendimento
-                            else data_atendimento_inicial
-                            | default('')
+                            if atendimento and atendimento.data_atendimento
+                            else data_atendimento_inicial | default('')
                         }}">
 
                 </div>
@@ -201,7 +201,7 @@
                         type="text"
                         id="protocolo"
                         name="protocolo"
-                        value="{{ atendimento.protocolo if atendimento else '' }}">
+                        value="{{ atendimento.protocolo or '' if atendimento else '' }}">
 
                 </div>
 
@@ -329,7 +329,7 @@
                         name="placa_veiculo_rebocado"
                         maxlength="10"
                         placeholder="ABC1D23"
-                        value="{{ atendimento.veiculo_rebocado.placa if atendimento and atendimento.veiculo_rebocado else '' }}">
+                        value="{{ atendimento.veiculo_rebocado.placa or '' if atendimento and atendimento.veiculo_rebocado else '' }}">
 
                 </div>
 
@@ -382,7 +382,7 @@
                         id="origem"
                         name="origem"
                         placeholder="Endereço ou coordenadas"
-                        value="{{ atendimento.origem if atendimento else '' }}">
+                        value="{{ atendimento.origem or '' if atendimento else '' }}">
 
                 </div>
 
@@ -399,7 +399,7 @@
                         id="destino"
                         name="destino"
                         placeholder="Endereço ou coordenadas"
-                        value="{{ atendimento.destino if atendimento else '' }}">
+                        value="{{ atendimento.destino or '' if atendimento else '' }}">
 
                 </div>
 
@@ -798,7 +798,7 @@
                     <textarea
                         id="observacao"
                         name="observacao"
-                        rows="5">{{ atendimento.observacao if atendimento else '' }}</textarea>
+                        rows="5">{{ atendimento.observacao or '' if atendimento else '' }}</textarea>
 
                 </div>
 

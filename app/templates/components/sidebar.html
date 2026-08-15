@@ -16,7 +16,9 @@
 
         </div>
 
+
         <ul class="sidebar-menu">
+
 
             <!-- =================================================
                  DASHBOARD
@@ -31,16 +33,18 @@
 
             </a>
 
-             <!-- =================================================
+
+            <!-- =================================================
                  MEU PERFIL
                  TODOS OS PERFIS
             ================================================== -->
 
-             <li class="sidebar-title">
+            <li class="sidebar-title">
 
                 Conta
 
             </li>
+
 
             <a
                 href="{{ url_for('usuario.meu_perfil') }}"
@@ -156,7 +160,10 @@
 
                 <a
                     href="{{ url_for('atendimento.listar') }}"
-                    class="{% if request.endpoint.startswith('atendimento.') %}active{% endif %}">
+                    class="{%
+                        if request.endpoint.startswith('atendimento.')
+                        and request.args.get('origem') != 'relatorio_caminhoes'
+                    %}active{% endif %}">
 
                     Atendimentos
 
@@ -179,9 +186,14 @@
 
             <li>
 
-                <a href="#">
+                <a
+                    href="{{ url_for('relatorio_caminhoes.listar') }}"
+                    class="{%
+                        if request.endpoint.startswith('relatorio_caminhoes.')
+                        or request.args.get('origem') == 'relatorio_caminhoes'
+                    %}active{% endif %}">
 
-                    Em desenvolvimento...
+                    Por Caminhão
 
                 </a>
 

@@ -6,11 +6,17 @@ from flask import (
     redirect
 )
 
+from app.models import Caminhao
+
 from app.exports.config import MODELOS_MAPEADOS
 from app.exports.export_service import ExportService
 from app.services.filter_service import FilterService
+from app.services.relatorios.caminhoes.caminhoes_service import CaminhoesRelatorioService
+
 
 from app.helpers.autorizacao_helper import (proteger_blueprint)
+
+from datetime import date
 
 exportacao_bp = Blueprint(
 
@@ -59,6 +65,28 @@ def exportar_generico(modulo):
     colunas = mapeamento["colunas_exportacao"]
 
     labels = mapeamento["labels"]
+
+    titulo_exportacao = f"Exportar {mapeamento['titulo']}"
+
+    if modulo == "relatorio_caminhao_detalhes":
+
+        id_caminhao = request.values.get(
+            "id_caminhao",
+            type=int
+        )
+
+        if id_caminhao:
+
+            caminhao = Caminhao.query.get(
+                id_caminhao
+            )
+
+            if caminhao:
+
+                titulo_exportacao = (
+                    f"Atendimentos do Caminhão "
+                    f"{caminhao.modelo} - {caminhao.placa}"
+                )
 
     if request.method == "POST":
 
@@ -128,14 +156,56 @@ def exportar_generico(modulo):
 
         )
 
-        if "listar_service" in mapeamento:
+        if modulo == "relatorio_caminhao_detalhes":
+
+            id_caminhao = request.values.get(
+                "id_caminhao",
+                type=int
+            )
+
+            data_inicial = request.values.get(
+                "data_inicial"
+            )
+
+            data_final = request.values.get(
+                "data_final"
+            )
+
+            if not id_caminhao or not data_inicial or not data_final:
+
+                flash(
+                    "Dados do relatório do caminhão não foram informados.",
+                    "warning"
+                )
+
+                return redirect(
+                    request.referrer or "/"
+                )
+
+            data_inicial = date.fromisoformat(
+                data_inicial
+            )
+
+            data_final = date.fromisoformat(
+                data_final
+            )
+
+            dados = CaminhoesRelatorioService.buscar_detalhes(
+
+                id_caminhao,
+
+                data_inicial,
+
+                data_final
+
+            )
+
+        elif "listar_service" in mapeamento:
 
             try:
 
                 dados = mapeamento["listar_service"](
-
                     request.values
-
                 )
 
             except TypeError:
@@ -178,7 +248,7 @@ def exportar_generico(modulo):
 
         modulo=modulo,
 
-        titulo=f"Exportar {mapeamento['titulo']}",
+        titulo=titulo_exportacao,
 
         colunas=colunas,
 

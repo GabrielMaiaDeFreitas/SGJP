@@ -80,7 +80,7 @@ Gerenciamento de Atendimentos
 
                 <td>
 
-                    {% if atendimento.valor_total %}
+                    {% if atendimento.valor_total is not none %}
 
                         R$ {{ "%.2f"|format(atendimento.valor_total) }}
 

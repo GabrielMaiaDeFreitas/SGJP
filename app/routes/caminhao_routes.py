@@ -13,12 +13,16 @@ from app.models import Caminhao
 from app.filters.caminhao import FILTROS_CAMINHAO
 from app.services.caminhao_service import CaminhaoService
 
+from app.helpers.autorizacao_helper import (proteger_blueprint)
+
 
 caminhao_bp = Blueprint(
     "caminhao",
     __name__,
     url_prefix="/caminhoes"
 )
+
+proteger_blueprint(caminhao_bp,"Administrador")
 
 @caminhao_bp.route("/")
 def listar():

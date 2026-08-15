@@ -8,31 +8,10 @@
 
 <div class="card">
 
+    {% set titulo = "Detalhes da Tabela de Valores - " ~ administradora.nome %}
     {% set voltar = url_for("tabela_valores.listar") %}
 
     {% include "components/card_header.html" %}
-
-    <div class="details-container">
-
-        <div class="detail-item">
-
-            <strong>
-
-                Administradora
-
-            </strong>
-
-            <p>
-
-                {{ administradora.nome }}
-
-            </p>
-
-        </div>
-
-    </div>
-
-    <hr>
 
     <table class="table">
 
@@ -76,7 +55,7 @@
 
                 <td>
 
-                    {% if linha.valor_saida == 0 %}
+                    {% if linha.valor_saida is none %}
 
                         —
 
@@ -90,7 +69,7 @@
 
                 <td>
 
-                    {% if linha.valor_km_excedente == 0 %}
+                    {% if linha.valor_km_excedente is none %}
 
                         —
 

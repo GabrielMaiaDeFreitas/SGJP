@@ -19,100 +19,87 @@ class FilterService:
         }
 
         campos = filtros.getlist(
-
             "campo[]"
-
         )
 
         valores = filtros.getlist(
-
             "valor[]"
-
         )
 
         valores_min = filtros.getlist(
-
             "valor_min[]"
-
         )
 
         valores_max = filtros.getlist(
-
             "valor_max[]"
-
         )
 
-        for indice, campo in enumerate(
+        indice_valor = 0
+        indice_min = 0
+        indice_max = 0
 
-            campos
-
-        ):
-
-            valor = (
-
-                valores[indice]
-
-                if indice < len(valores)
-
-                else ""
-
-            )
-
-            valor_min = (
-
-                valores_min[indice]
-
-                if indice < len(valores_min)
-
-                else ""
-
-            )
-
-            valor_max = (
-
-                valores_max[indice]
-
-                if indice < len(valores_max)
-
-                else ""
-
-            )
+        for campo in campos:
 
             configuracao = configuracoes.get(
-
                 campo
-
             )
 
             if configuracao is None:
-
                 continue
 
             tipo = configuracao.get(
-
                 "tipo"
-
             )
 
             if tipo == "intervalo":
 
-                if not valor_min and not valor_max:
+                valor_min = (
 
+                    valores_min[indice_min]
+
+                    if indice_min < len(valores_min)
+
+                    else ""
+
+                )
+
+                valor_max = (
+
+                    valores_max[indice_max]
+
+                    if indice_max < len(valores_max)
+
+                    else ""
+
+                )
+
+                indice_min += 1
+                indice_max += 1
+
+                if not valor_min and not valor_max:
                     continue
+
+                valor = ""
 
             else:
 
-                if not valor:
+                valor = (
 
+                    valores[indice_valor]
+
+                    if indice_valor < len(valores)
+
+                    else ""
+
+                )
+
+                indice_valor += 1
+
+                if not valor:
                     continue
 
-            configuracao = configuracoes.get(
-                campo
-            )
-
-            if configuracao is None:
-
-                continue
+                valor_min = ""
+                valor_max = ""
 
             atributo_config = configuracao.get(
 
@@ -172,7 +159,11 @@ class FilterService:
 
                 )
 
-            if configuracao.get("converter") == "sim_nao":
+            if configuracao.get(
+
+                "converter"
+
+            ) == "sim_nao":
 
                 valor = valor == "Sim"
 

@@ -6,7 +6,22 @@
 
 {% block content %}
 
-{% set voltar = url_for("atendimento.listar") %}
+{% if request.args.get("origem") == "relatorio_caminhoes" %}
+
+    {% set voltar = url_for(
+        "relatorio_caminhoes.detalhes",
+        id_caminhao=request.args.get("id_caminhao"),
+        data_inicial=request.args.get("data_inicial"),
+        data_final=request.args.get("data_final")
+    ) %}
+
+{% else %}
+
+    {% set voltar = url_for(
+        "atendimento.listar"
+    ) %}
+
+{% endif %}
 
 {% include "components/card_header.html" %}
 
@@ -65,6 +80,7 @@
         "label": "Placa do Veículo Rebocado",
         "valor": atendimento.veiculo_rebocado.placa
                 if atendimento.veiculo_rebocado
+                and atendimento.veiculo_rebocado.placa
                 else "—"
     },
 
@@ -72,6 +88,7 @@
         "label": "Modelo do Veículo Rebocado",
         "valor": atendimento.veiculo_rebocado.modelo
                 if atendimento.veiculo_rebocado
+                and atendimento.veiculo_rebocado.modelo
                 else "—"
     },
 
@@ -203,7 +220,7 @@
 <div class="form-actions">
 
     <a
-        href="{{ url_for('atendimento.listar') }}"
+        href="{{ voltar }}"
         class="btn btn-secondary">
 
         Voltar

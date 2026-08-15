@@ -23,7 +23,7 @@ class VeiculoRebocado(db.Model):
 
         db.String(10),
 
-        nullable=False
+        nullable=True
 
     )
 
@@ -31,7 +31,7 @@ class VeiculoRebocado(db.Model):
 
         db.String(100),
 
-        nullable=False
+        nullable=True
 
     )
 

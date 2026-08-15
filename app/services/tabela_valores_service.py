@@ -122,7 +122,7 @@ class TabelaValoresService:
 
                     if registro
 
-                    else Decimal("0.00")
+                    else None
 
                 ),
 
@@ -132,7 +132,7 @@ class TabelaValoresService:
 
                     if registro
 
-                    else Decimal("0.00")
+                    else None
 
                 )
 
@@ -151,11 +151,11 @@ class TabelaValoresService:
 
         return (
 
-            valor_saida > 0
+            valor_saida is not None
 
             or
 
-            valor_km_excedente > 0
+            valor_km_excedente is not None
 
         )
 
@@ -269,12 +269,16 @@ class TabelaValoresService:
 
                 "id_tipo_servico": int(id_tipo),
 
-                "valor_saida": Decimal(
-                    saida or "0"
+                "valor_saida": (
+                    Decimal(saida)
+                    if saida
+                    else None
                 ),
 
-                "valor_km_excedente": Decimal(
-                    km or "0"
+                "valor_km_excedente": (
+                    Decimal(km)
+                    if km
+                    else None
                 )
 
             })
@@ -358,6 +362,34 @@ class TabelaValoresService:
             ativo=True
 
         ).first() is not None
+
+    @staticmethod
+    def administradoras_configuradas():
+
+        return Administradora.query.join(
+
+            TabelaValores,
+
+            TabelaValores.fk_administradora_id_administradora
+            == Administradora.id_administradora
+
+        ).filter(
+
+            Administradora.ativo.is_(True),
+
+            TabelaValores.ativo.is_(True),
+
+            (
+                TabelaValores.valor_saida.isnot(None)
+                |
+                TabelaValores.valor_km_excedente.isnot(None)
+            )
+
+        ).distinct().order_by(
+
+            Administradora.nome
+
+        ).all()
 
     @staticmethod
     def buscar_tabela(

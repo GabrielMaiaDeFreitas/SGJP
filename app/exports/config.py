@@ -12,6 +12,8 @@ from app.filters.atendimento import FILTROS_ATENDIMENTO
 
 from app.services.tabela_valores_service import TabelaValoresService
 from app.services.atendimento_service import AtendimentoService
+from app.services.relatorios.caminhoes.caminhoes_service import CaminhoesRelatorioService
+
 
 
 
@@ -448,5 +450,99 @@ MODELOS_MAPEADOS = {
 
         }
 
+    },
+
+    "relatorio_caminhoes": {
+
+        "modelo": Caminhao,
+
+        "titulo": "Relatório por Caminhão",
+
+        "ordenar_por": "modelo",
+
+        "listar_service": CaminhoesRelatorioService.listar_para_exportacao,
+
+        "filtros_config": [],
+
+        "colunas_exportacao": [
+
+            "modelo",
+            "placa",
+            "faturamento_bruto",
+            "km_total",
+            "quantidade_atendimentos"
+
+        ],
+
+        "labels": {
+
+            "modelo": "Caminhão",
+
+            "placa": "Placa",
+
+            "faturamento_bruto": "Faturamento Bruto",
+
+            "km_total": "KM Rodado",
+
+            "quantidade_atendimentos": "Quantidade de Atendimentos"
+
+
+
+        }
+
+    },
+
+    "relatorio_caminhao_detalhes": {
+
+        "modelo": Atendimento,
+
+        "titulo": "Atendimentos do Caminhão",
+
+        "ordenar_por": "data_atendimento",
+
+        "filtros_config": FILTROS_ATENDIMENTO,
+
+        "colunas_exportacao": [
+
+            "data_atendimento",
+
+            "tabela_valores.administradora.nome",
+
+            "cliente.nome_fantasia",
+
+            "motorista.nome",
+
+            "protocolo",
+
+            "tabela_valores.tipo_servico.nome",
+
+            "km_total",
+
+            "valor_total"
+
+        ],
+
+        "labels": {
+
+            "data_atendimento": "Data",
+
+            "tabela_valores.administradora.nome": "Administradora",
+
+            "cliente.nome_fantasia": "Cliente",
+
+            "motorista.nome": "Motorista",
+
+            "protocolo": "Protocolo",
+
+            "tabela_valores.tipo_servico.nome": "Tipo de Serviço",
+
+            "km_total": "KM",
+
+            "valor_total": "Valor"
+
+        }
+
     }
+
 }
+

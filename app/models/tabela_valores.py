@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from app import db
 
 
@@ -14,14 +12,12 @@ class TabelaValores(db.Model):
 
     valor_saida = db.Column(
         db.Numeric(10, 2),
-        nullable=False,
-        default=Decimal("0.00")
+        nullable=True
     )
 
     valor_km_excedente = db.Column(
         db.Numeric(10, 2),
-        nullable=False,
-        default=Decimal("0.00")
+        nullable=True
     )
 
     ativo = db.Column(

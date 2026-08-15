@@ -785,16 +785,22 @@ def tabela_valores():
 
     return jsonify({
 
-        "valor_saida": float(
-
-            tabela.valor_saida
-
+        "valor_saida": (
+            float(tabela.valor_saida)
+            if tabela.valor_saida is not None
+            else None
         ),
 
-        "valor_km_excedente": float(
+        "valor_km_excedente": (
+            float(tabela.valor_km_excedente)
+            if tabela.valor_km_excedente is not None
+            else None
+        ),
 
-            tabela.valor_km_excedente
-
+        "valor_zero": (
+            tabela.valor_saida == 0
+            and
+            tabela.valor_km_excedente == 0
         )
 
     })
