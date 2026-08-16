@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-
 {% block title %}
 
 {{ titulo }}
@@ -10,37 +9,69 @@
 
 {% block content %}
 
-
-{% if request.args.get("origem") == "relatorio_caminhoes" %}
-
-    {% set voltar = url_for(
-        "relatorio_caminhoes.detalhes",
-        id_caminhao=request.args.get("id_caminhao"),
-        data_inicial=request.args.get("data_inicial"),
-        data_final=request.args.get("data_final")
-    ) %}
-
-{% elif request.args.get("origem") == "relatorio_motoristas" %}
-
-    {% set voltar = url_for(
-        "relatorio_motoristas.detalhes",
-        id_motorista=request.args.get("id_motorista"),
-        data_inicial=request.args.get("data_inicial"),
-        data_final=request.args.get("data_final")
-    ) %}
-
-{% else %}
-
-    {% set voltar = url_for(
-        "atendimento.listar"
-    ) %}
-
-{% endif %}
-
-
 <div class="card">
 
-    {% include "components/card_header.html" %}
+    {% if request.args.get("origem") == "relatorio_caminhoes" %}
+
+        {% set voltar = url_for(
+            "relatorio_caminhoes.detalhes",
+            id_caminhao=request.args.get("id_caminhao"),
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_motoristas" %}
+
+        {% set voltar = url_for(
+            "relatorio_motoristas.detalhes",
+            id_motorista=request.args.get("id_motorista"),
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_parceiros" %}
+
+        {% set voltar = url_for(
+            "relatorio_parceiros.detalhes",
+            id_administradora=request.args.get(
+                "id_administradora"
+            ),
+            data_inicial=request.args.get(
+                "data_inicial"
+            ),
+            data_final=request.args.get(
+                "data_final"
+            )
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_parceiros_clientes" %}
+
+        {% set voltar = url_for(
+            "relatorio_parceiros.clientes_detalhes",
+            id_administradora=request.args.get(
+                "id_administradora"
+            ),
+            id_cliente=request.args.get(
+                "id_cliente"
+            ),
+            data_inicial=request.args.get(
+                "data_inicial"
+            ),
+            data_final=request.args.get(
+                "data_final"
+            )
+        ) %}
+
+    {% else %}
+
+        {% set voltar = url_for(
+            "atendimento.listar"
+        ) %}
+
+    {% endif %}
+
+
+    {% include "components/view_header.html" %}
 
 
     {% set detalhes = [
@@ -48,7 +79,9 @@
         {
             "label": "Data do Atendimento",
             "valor":
-                atendimento.data_atendimento.strftime("%d/%m/%Y")
+                atendimento.data_atendimento.strftime(
+                    "%d/%m/%Y"
+                )
                 if atendimento.data_atendimento
                 else "—"
         },
@@ -154,7 +187,9 @@
         {
             "label": "Valor Total",
             "valor":
-                "R$ %.2f"|format(atendimento.valor_total)
+                "R$ %.2f"|format(
+                    atendimento.valor_total
+                )
                 if atendimento.valor_total is not none
                 else "—"
         },
@@ -162,7 +197,9 @@
         {
             "label": "Valor Pago",
             "valor":
-                "R$ %.2f"|format(atendimento.valor_pago)
+                "R$ %.2f"|format(
+                    atendimento.valor_pago
+                )
                 if atendimento.valor_pago is not none
                 else "—"
         },
@@ -192,7 +229,9 @@
         {
             "label": "Valor Pedágio",
             "valor":
-                "R$ %.2f"|format(atendimento.valor_pedagio)
+                "R$ %.2f"|format(
+                    atendimento.valor_pedagio
+                )
                 if atendimento.valor_pedagio is not none
                 else "—"
         },
@@ -200,7 +239,9 @@
         {
             "label": "Valor Comissão",
             "valor":
-                "R$ %.2f"|format(atendimento.valor_comissao)
+                "R$ %.2f"|format(
+                    atendimento.valor_comissao
+                )
                 if atendimento.valor_comissao is not none
                 else "—"
         },
@@ -342,7 +383,6 @@
     </div>
 
 </div>
-
 
 {% endblock %}
 

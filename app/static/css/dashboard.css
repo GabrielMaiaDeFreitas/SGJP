@@ -1,0 +1,404 @@
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+
+/* =====================================================
+   CAMPOS DE DATA
+===================================================== */
+
+.dashboard-filter .report-date-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.dashboard-filter .report-date-group label {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #17324F;
+
+}
+
+
+.dashboard-filter .report-date-group input[type="date"] {
+
+    width: 180px;
+
+    height: 40px;
+
+    padding: 0 10px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cfd6dc;
+
+    border-radius: 5px;
+
+    background-color: #ffffff;
+
+    color: #17324F;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+}
+
+
+.dashboard-filter .report-date-group input[type="date"]:focus {
+
+    outline: none;
+
+    border-color: #17324F;
+
+    box-shadow: 0 0 0 2px rgba(23, 50, 79, 0.12);
+
+}
+
+/* =====================================================
+   FILTRO DE PERÍODO
+===================================================== */
+
+.dashboard-filter {
+
+    margin-top: 24px;
+
+    margin-bottom: 28px;
+
+}
+
+
+.dashboard-filter h2 {
+
+    margin-top: 0;
+
+    margin-bottom: 20px;
+
+}
+
+
+.dashboard-filter form {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.dashboard-filter .report-date-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+}
+
+
+.dashboard-filter .report-date-group label {
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-filter .report-date-group input {
+
+    width: 170px;
+
+    box-sizing: border-box;
+
+}
+
+
+.dashboard-filter .report-filter-actions {
+
+    display: flex;
+
+    align-items: flex-end;
+
+}
+
+
+/* =====================================================
+   CARDS PRINCIPAIS
+===================================================== */
+
+.dashboard-cards {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 36px;
+
+}
+
+
+.dashboard-card {
+
+    background: #ffffff;
+
+    border: 1px solid #dfe4e8;
+
+    border-radius: 8px;
+
+    padding: 24px;
+
+    min-height: 145px;
+
+    box-sizing: border-box;
+
+}
+
+
+.dashboard-card-title {
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    color: #17324F;
+
+    margin-bottom: 14px;
+
+}
+
+
+.dashboard-card-value {
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+    color: #17324F;
+
+    margin-bottom: 10px;
+
+}
+
+
+.dashboard-card-description {
+
+    font-size: 14px;
+
+    color: #666666;
+
+    line-height: 1.4;
+
+}
+
+
+/* =====================================================
+   SEÇÕES
+===================================================== */
+
+.dashboard-section {
+
+    margin-bottom: 36px;
+
+}
+
+
+.dashboard-section h2 {
+
+    margin-top: 0;
+
+    margin-bottom: 16px;
+
+    color: #17324F;
+
+}
+
+
+.dashboard-section > p {
+
+    margin: 6px 0;
+
+}
+
+
+/* =====================================================
+   INFORMAÇÕES DOS PERÍODOS
+===================================================== */
+
+.dashboard-period-info {
+
+    margin-bottom: 24px;
+
+    padding: 14px 16px;
+
+    background: #f7f9fb;
+
+    border-left: 4px solid #17324F;
+
+    border-radius: 4px;
+
+}
+
+
+.dashboard-period-info p {
+
+    margin: 4px 0;
+
+}
+
+
+.dashboard-period-info strong {
+
+    color: #17324F;
+
+}
+
+
+/* =====================================================
+   TABELAS DO DASHBOARD
+===================================================== */
+
+.dashboard-section .table-responsive {
+
+    margin-top: 20px;
+
+}
+
+
+.dashboard-section .table {
+
+    margin-top: 0;
+
+}
+
+
+.dashboard-section .table th {
+
+    padding: 14px 16px;
+
+}
+
+
+.dashboard-section .table td {
+
+    padding: 14px 16px;
+
+}
+
+
+/* =====================================================
+   RESUMO GERAL
+===================================================== */
+
+.dashboard-summary {
+
+    margin-top: 32px;
+
+}
+
+
+.dashboard-summary h2 {
+
+    margin-top: 0;
+
+    margin-bottom: 22px;
+
+}
+
+
+.dashboard-summary .table-responsive {
+
+    margin-top: 0;
+
+}
+
+
+.dashboard-summary-table th:last-child,
+.dashboard-summary-table td:last-child {
+
+    text-align: right;
+
+}
+
+
+/* =====================================================
+   VARIAÇÕES
+===================================================== */
+
+.dashboard-variation-positive {
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-variation-negative {
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-variation-neutral {
+
+    font-weight: 600;
+
+}
+
+
+/* =====================================================
+   RESPONSIVIDADE
+===================================================== */
+
+@media (max-width: 900px) {
+
+    .dashboard-cards {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .dashboard-cards {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .dashboard-filter form {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .dashboard-filter .report-date-group input {
+
+        width: 100%;
+
+    }
+
+}

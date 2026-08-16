@@ -180,7 +180,7 @@ Relatório por Motorista - SGJP
                                 id_motorista=motorista.id_motorista,
                                 data_inicial=data_inicial.isoformat(),
                                 data_final=data_final.isoformat()
-                            ) }}">
+                            ) }}" class="btn btn-secondary">
 
                             Ver atendimentos
 
@@ -306,7 +306,7 @@ Relatório por Motorista - SGJP
         <a
             href="{{ url_for(
                 'atendimento.completo'
-            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&origem=relatorio_motoristas"
+            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&origem=relatorio_motoristas_lista&data_inicial={{ data_inicial.isoformat() }}&data_final={{ data_final.isoformat() }}"
             class="btn btn-secondary">
 
             Visualização Completa

@@ -1,8 +1,20 @@
 {% extends "base.html" %}
 
+
 {% block title %}
 
 Dashboard - SGJP
+
+{% endblock %}
+
+{% block styles %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/dashboard.css'
+    ) }}">
 
 {% endblock %}
 
@@ -13,19 +25,604 @@ Dashboard - SGJP
 
 {% include "components/page_header.html" %}
 
-<div class="content-card">
 
-    <h2>Bem-vindo!</h2>
+{% if session.get("perfil") == "Administrador" %}
 
-    <p>
 
-        Utilize o menu lateral para acessar os módulos do sistema.
+    <!-- =====================================================
+         FILTRO DE PERÍODO
+    ====================================================== -->
 
-    </p>
+    <div class="content-card dashboard-filter">
 
-</div>
+        <h2>
+
+            Resumo do Período
+
+        </h2>
+
+
+        <form
+            method="GET"
+            class="report-filters">
+
+            <div class="report-date-group">
+
+                <label for="data_inicial">
+
+                    Data Inicial
+
+                </label>
+
+                <input
+                    type="date"
+                    id="data_inicial"
+                    name="data_inicial"
+                    value="{{ data_inicial.isoformat() }}"
+                    required>
+
+            </div>
+
+
+            <div class="report-date-group">
+
+                <label for="data_final">
+
+                    Data Final
+
+                </label>
+
+                <input
+                    type="date"
+                    id="data_final"
+                    name="data_final"
+                    value="{{ data_final.isoformat() }}"
+                    required>
+
+            </div>
+
+
+            <div class="report-filter-actions">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
+                    Consultar
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         CARDS PRINCIPAIS
+    ====================================================== -->
+
+    <div class="dashboard-cards">
+
+
+        <!-- ATENDIMENTOS -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-title">
+
+                Atendimentos
+
+            </div>
+
+            <div class="dashboard-card-value">
+
+                {{ atual.quantidade_atendimentos }}
+
+            </div>
+
+            <div class="dashboard-card-description">
+
+                No período selecionado
+
+            </div>
+
+        </div>
+
+
+        <!-- FATURAMENTO -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-title">
+
+                Faturamento Bruto
+
+            </div>
+
+            <div class="dashboard-card-value">
+
+                R$
+
+                {{ "%.2f"|format(
+                    atual.faturamento_bruto
+                ) }}
+
+            </div>
+
+            <div class="dashboard-card-description">
+
+                No período selecionado
+
+            </div>
+
+        </div>
+
+
+        <!-- COMPARAÇÃO -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-title">
+
+                Comparação
+
+            </div>
+
+
+            {% if percentual_faturamento is not none %}
+
+                <div class="dashboard-card-value">
+
+                    {% if percentual_faturamento > 0 %}
+
+                        ↑
+
+                    {% elif percentual_faturamento < 0 %}
+
+                        ↓
+
+                    {% else %}
+
+                        =
+
+                    {% endif %}
+
+                    {{ "%.2f"|format(
+                        percentual_faturamento|abs
+                    ) }}%
+
+                </div>
+
+            {% else %}
+
+                <div class="dashboard-card-value">
+
+                    —
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="dashboard-card-description">
+
+                Faturamento em relação ao período anterior
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         COMPARAÇÃO COM PERÍODO ANTERIOR
+    ====================================================== -->
+
+    <div class="content-card">
+
+        <h2>
+
+            Comparação com o Período Anterior
+
+        </h2>
+
+
+        <div class="dashboard-period-info">
+
+            <p>
+
+                Período atual:
+
+                <strong>
+
+                    {{ data_inicial.strftime("%d/%m/%Y") }}
+
+                    até
+
+                    {{ data_final.strftime("%d/%m/%Y") }}
+
+                </strong>
+
+            </p>
+
+
+            <p>
+
+                Período anterior:
+
+                <strong>
+
+                    {{ periodo_anterior_inicial.strftime("%d/%m/%Y") }}
+
+                    até
+
+                    {{ periodo_anterior_final.strftime("%d/%m/%Y") }}
+
+                </strong>
+
+            </p>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table report-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Indicador</th>
+
+                        <th>Período Atual</th>
+
+                        <th>Período Anterior</th>
+
+                        <th>Variação</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <!-- ATENDIMENTOS -->
+
+                    <tr>
+
+                        <td>
+
+                            Quantidade de Atendimentos
+
+                        </td>
+
+                        <td>
+
+                            {{ atual.quantidade_atendimentos }}
+
+                        </td>
+
+                        <td>
+
+                            {{ anterior.quantidade_atendimentos }}
+
+                        </td>
+
+                        <td>
+
+                            {% if percentual_atendimentos is not none %}
+
+                                {% if percentual_atendimentos > 0 %}
+
+                                    ↑
+
+                                {% elif percentual_atendimentos < 0 %}
+
+                                    ↓
+
+                                {% else %}
+
+                                    =
+
+                                {% endif %}
+
+                                {{ "%.2f"|format(
+                                    percentual_atendimentos|abs
+                                ) }}%
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- FATURAMENTO -->
+
+                    <tr>
+
+                        <td>
+
+                            Faturamento Bruto
+
+                        </td>
+
+                        <td>
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                atual.faturamento_bruto
+                            ) }}
+
+                        </td>
+
+                        <td>
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                anterior.faturamento_bruto
+                            ) }}
+
+                        </td>
+
+                        <td>
+
+                            {% if percentual_faturamento is not none %}
+
+                                {% if percentual_faturamento > 0 %}
+
+                                    ↑
+
+                                {% elif percentual_faturamento < 0 %}
+
+                                    ↓
+
+                                {% else %}
+
+                                    =
+
+                                {% endif %}
+
+                                {{ "%.2f"|format(
+                                    percentual_faturamento|abs
+                                ) }}%
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESUMO GERAL DO SISTEMA
+    ====================================================== -->
+
+    <div class="content-card dashboard-section dashboard-summary">
+
+        <h2>
+
+            Resumo Geral do Sistema
+
+        </h2>
+
+
+        <div class="table-responsive">
+
+            <table class="table report-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Entidade</th>
+
+                        <th>Quantidade</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+
+                            Usuários Ativos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.usuarios }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Motoristas Ativos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.motoristas }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Caminhões Ativos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.caminhoes }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Clientes Ativos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.clientes }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Administradoras Ativas
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.administradoras }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Tipos de Serviço Ativos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.tipos_servico }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Tabelas de Valores Configuradas
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.tabelas_valores }}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Total de Atendimentos
+
+                        </td>
+
+                        <td>
+
+                            {{ resumo_geral.atendimentos }}
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+{% else %}
+
+
+    <!-- =====================================================
+         DASHBOARD DOS DEMAIS PERFIS
+    ====================================================== -->
+
+    <div class="content-card">
+
+        <h2>
+
+            Bem-vindo!
+
+        </h2>
+
+        <p>
+
+            Utilize o menu lateral para acessar
+            os módulos do sistema.
+
+        </p>
+
+    </div>
+
+
+{% endif %}
 
 {% endblock %}
+
 
 {% block scripts %}
 

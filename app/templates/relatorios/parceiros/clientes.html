@@ -3,7 +3,7 @@
 
 {% block title %}
 
-Relatório por Caminhão - SGJP
+Relatório por Cliente - {{ administradora.nome }}
 
 {% endblock %}
 
@@ -28,7 +28,7 @@ Relatório por Caminhão - SGJP
 
         <h2>
 
-            Relatório por Caminhão
+            Relatório por Cliente
 
         </h2>
 
@@ -95,7 +95,22 @@ Relatório por Caminhão - SGJP
 
 
     <!-- =====================================================
-         TABELA
+         IDENTIFICAÇÃO DA ADMINISTRADORA
+    ====================================================== -->
+
+    <div class="content-card">
+
+        <h2>
+
+            {{ administradora.nome }}
+
+        </h2>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABELA PRINCIPAL
     ====================================================== -->
 
     <div class="table-responsive">
@@ -106,15 +121,15 @@ Relatório por Caminhão - SGJP
 
                 <tr>
 
-                    <th>Caminhão</th>
-
-                    <th>Placa</th>
+                    <th>Cliente</th>
 
                     <th>Faturamento Bruto</th>
 
                     <th>KM Rodado</th>
 
                     <th>Quantidade de Atendimentos</th>
+
+                    <th>Valor Médio por KM</th>
 
                     <th>Ações</th>
 
@@ -125,53 +140,72 @@ Relatório por Caminhão - SGJP
 
             <tbody>
 
-                {% for caminhao in caminhoes %}
+                {% for cliente in clientes %}
 
                 <tr>
 
                     <td>
 
-                        {{ caminhao.modelo }}
+                        {{ cliente.nome }}
 
                     </td>
 
-                    <td>
-
-                        {{ caminhao.placa }}
-
-                    </td>
 
                     <td>
 
                         R$
 
                         {{ "%.2f"|format(
-                            caminhao.faturamento_bruto
+                            cliente.faturamento_bruto
                         ) }}
 
                     </td>
 
-                    <td>
-
-                        {{ caminhao.km_total }}
-
-                    </td>
 
                     <td>
 
-                        {{ caminhao.quantidade_atendimentos }}
+                        {{ cliente.km_total }}
 
                     </td>
+
+
+                    <td>
+
+                        {{ cliente.quantidade_atendimentos }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if cliente.valor_medio_por_km is not none %}
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                cliente.valor_medio_por_km
+                            ) }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
 
                     <td class="report-actions">
 
                         <a
                             href="{{ url_for(
-                                'relatorio_caminhoes.detalhes',
-                                id_caminhao=caminhao.id_caminhao,
+                                'relatorio_parceiros.clientes_detalhes',
+                                id_administradora=administradora.id_administradora,
+                                id_cliente=cliente.id_cliente,
                                 data_inicial=data_inicial.isoformat(),
                                 data_final=data_final.isoformat()
-                            ) }}" class="btn btn-secondary">
+                            ) }}"
+                            class="btn btn-secondary">
 
                             Ver atendimentos
 
@@ -188,8 +222,8 @@ Relatório por Caminhão - SGJP
 
                     <td colspan="6">
 
-                        Nenhum caminhão encontrado
-                        para o período informado.
+                        Nenhum cliente encontrado
+                        para a administradora no período informado.
 
                     </td>
 
@@ -216,6 +250,7 @@ Relatório por Caminhão - SGJP
 
         </h3>
 
+
         <div class="table-responsive">
 
             <table class="table report-table">
@@ -230,9 +265,12 @@ Relatório por Caminhão - SGJP
 
                         <th>KM Total Rodado</th>
 
+                        <th>Valor Médio por KM</th>
+
                     </tr>
 
                 </thead>
+
 
                 <tbody>
 
@@ -248,15 +286,36 @@ Relatório por Caminhão - SGJP
 
                         </td>
 
+
                         <td>
 
                             {{ quantidade_atendimentos_total }}
 
                         </td>
 
+
                         <td>
 
                             {{ km_total }}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if valor_medio_por_km_total is not none %}
+
+                                R$
+
+                                {{ "%.2f"|format(
+                                    valor_medio_por_km_total
+                                ) }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
 
                         </td>
 
@@ -279,8 +338,21 @@ Relatório por Caminhão - SGJP
 
         <a
             href="{{ url_for(
+                'relatorio_parceiros.listar',
+                data_inicial=data_inicial.isoformat(),
+                data_final=data_final.isoformat()
+            ) }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+
+        <a
+            href="{{ url_for(
                 'atendimento.completo'
-            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&origem=relatorio_caminhoes_lista&data_inicial={{ data_inicial.isoformat() }}&data_final={{ data_final.isoformat() }}"
+            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&campo%5B%5D=fk_administradora_id_administradora&valor%5B%5D={{ administradora.id_administradora }}&origem=relatorio_parceiros_clientes&data_inicial={{ data_inicial.isoformat() }}&data_final={{ data_final.isoformat() }}&id_administradora={{ administradora.id_administradora }}"
             class="btn btn-secondary">
 
             Visualização Completa
@@ -293,7 +365,8 @@ Relatório por Caminhão - SGJP
             <a
                 href="{{ url_for(
                     'exportacao.exportar_generico',
-                    modulo='relatorio_caminhoes',
+                    modulo='relatorio_parceiros_clientes',
+                    id_administradora=administradora.id_administradora,
                     data_inicial=data_inicial.isoformat(),
                     data_final=data_final.isoformat()
                 ) }}"

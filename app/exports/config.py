@@ -14,6 +14,8 @@ from app.services.tabela_valores_service import TabelaValoresService
 from app.services.atendimento_service import AtendimentoService
 from app.services.relatorios.caminhoes_service import CaminhoesRelatorioService
 from app.services.relatorios.motoristas_service import MotoristasRelatorioService
+from app.services.relatorios.parceiros_service import ParceirosRelatorioService
+
 
 MODELOS_MAPEADOS = {
 
@@ -641,6 +643,217 @@ MODELOS_MAPEADOS = {
 
             "valor_total":
                 "Valor"
+
+        }
+
+    },
+
+        "relatorio_parceiros_clientes": {
+
+        "modelo": Cliente,
+
+        "titulo": "Relatório por Cliente",
+
+        "ordenar_por": "nome_fantasia",
+
+        "listar_service": ParceirosRelatorioService.listar_clientes_para_exportacao,
+
+        "filtros_config": [],
+
+        "colunas_exportacao": [
+
+            "nome",
+
+            "faturamento_bruto",
+
+            "km_total",
+
+            "quantidade_atendimentos",
+
+            "valor_medio_por_km"
+
+        ],
+
+        "labels": {
+
+            "nome":
+                "Cliente",
+
+            "faturamento_bruto":
+                "Faturamento Bruto",
+
+            "km_total":
+                "KM Rodado",
+
+            "quantidade_atendimentos":
+                "Quantidade de Atendimentos",
+
+            "valor_medio_por_km":
+                "Valor Médio por KM"
+
+        }
+
+    },
+
+    "relatorio_parceiros_clientes_detalhes": {
+
+        "modelo": Atendimento,
+
+        "titulo": "Atendimentos do Cliente",
+
+        "ordenar_por": "data_atendimento",
+
+        "listar_service":
+            ParceirosRelatorioService.listar_detalhes_cliente_para_exportacao,
+
+        "filtros_config": [],
+
+        "colunas_exportacao": [
+
+            "data_atendimento",
+
+            "cliente",
+
+            "motorista",
+
+            "caminhao",
+
+            "tipo_servico",
+
+            "km_total",
+
+            "valor_total"
+
+        ],
+
+        "labels": {
+
+            "data_atendimento":
+                "Data",
+
+            "cliente":
+                "Cliente",
+
+            "motorista":
+                "Motorista",
+
+            "caminhao":
+                "Caminhão",
+
+            "tipo_servico":
+                "Tipo de Serviço",
+
+            "km_total":
+                "KM",
+
+            "valor_total":
+                "Valor"
+
+        }
+
+    },
+
+        "relatorio_parceiros_detalhes": {
+
+        "modelo": Atendimento,
+
+        "titulo": "Atendimentos do Parceiro",
+
+        "ordenar_por": "data_atendimento",
+
+        "listar_service":
+            ParceirosRelatorioService.listar_detalhes_para_exportacao,
+
+        "filtros_config": [],
+
+        "colunas_exportacao": [
+
+            "data_atendimento",
+
+            "cliente",
+
+            "motorista",
+
+            "caminhao",
+
+            "tipo_servico",
+
+            "km_total",
+
+            "valor_total"
+
+        ],
+
+        "labels": {
+
+            "data_atendimento":
+                "Data",
+
+            "cliente":
+                "Cliente",
+
+            "motorista":
+                "Motorista",
+
+            "caminhao":
+                "Caminhão",
+
+            "tipo_servico":
+                "Tipo de Serviço",
+
+            "km_total":
+                "KM",
+
+            "valor_total":
+                "Valor"
+
+        }
+
+    },
+
+    "relatorio_parceiros": {
+
+        "modelo": Administradora,
+
+        "titulo": "Relatório por Parceiro",
+
+        "ordenar_por": "nome",
+
+        "listar_service":
+            ParceirosRelatorioService.listar_para_exportacao,
+
+        "filtros_config": [],
+
+        "colunas_exportacao": [
+
+            "nome",
+
+            "faturamento_bruto",
+
+            "km_total",
+
+            "quantidade_atendimentos",
+
+            "valor_medio_por_km"
+
+        ],
+
+        "labels": {
+
+            "nome":
+                "Administradora",
+
+            "faturamento_bruto":
+                "Faturamento Bruto",
+
+            "km_total":
+                "KM Rodado",
+
+            "quantidade_atendimentos":
+                "Quantidade de Atendimentos",
+
+            "valor_medio_por_km":
+                "Valor Médio por KM"
 
         }
 

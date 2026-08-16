@@ -1,0 +1,502 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+{{ titulo }}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for(
+        "relatorio_parceiros.clientes_detalhes",
+        id_administradora=administradora.id_administradora,
+        id_cliente=cliente.id_cliente,
+        data_inicial=data_inicial.isoformat(),
+        data_final=data_final.isoformat()
+    ) %}
+
+    {% include "components/view_header.html" %}
+
+
+    <!-- =====================================================
+         INFORMAÇÕES DO FECHAMENTO
+    ====================================================== -->
+
+    <div class="content-card">
+
+        <h2>
+
+            {{ administradora.nome }}
+
+        </h2>
+
+        <p>
+
+            Cliente:
+
+            {{ cliente.nome_fantasia }}
+
+        </p>
+
+        <p>
+
+            Período:
+
+            {{ data_inicial.strftime("%d/%m/%Y") }}
+
+            até
+
+            {{ data_final.strftime("%d/%m/%Y") }}
+
+        </p>
+
+        <p>
+
+            Status:
+
+            Aguardando Fechamento
+
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABELA DE ATENDIMENTOS
+    ====================================================== -->
+
+    <div class="table-responsive">
+
+        <table class="table table-wide">
+
+            <thead>
+
+                <tr>
+
+                    <th>Data</th>
+
+                    <th>Administradora</th>
+
+                    <th>Cliente</th>
+
+                    <th>Usuário</th>
+
+                    <th>Tipo Serviço</th>
+
+                    <th>Motorista</th>
+
+                    <th>Caminhão</th>
+
+                    <th>Placa Rebocada</th>
+
+                    <th>Modelo Rebocado</th>
+
+                    <th>Origem</th>
+
+                    <th>Destino</th>
+
+                    <th>Protocolo</th>
+
+                    <th>KM</th>
+
+                    <th>Valor</th>
+
+                    <th>Valor Comissão</th>
+
+                    <th>Valor Pago</th>
+
+                    <th>Pedágio</th>
+
+                    <th>Hora Parada</th>
+
+                    <th>Hora Trabalhada</th>
+
+                    <th>Patins</th>
+
+                    <th>Status Operacional</th>
+
+                    <th>Status Financeiro</th>
+
+                    <th>Observação</th>
+
+                    <th>Ações</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for atendimento in atendimentos %}
+
+                <tr>
+
+                    <td>
+
+                        {{ atendimento.data_atendimento.strftime(
+                            "%d/%m/%Y"
+                        )
+                        if atendimento.data_atendimento
+                        else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.tabela_valores.administradora.nome
+                           if atendimento.tabela_valores
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.cliente.nome_fantasia
+                           if atendimento.cliente
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.usuario.nome
+                           if atendimento.usuario
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.tabela_valores.tipo_servico.nome
+                           if atendimento.tabela_valores
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.motorista.nome
+                           if atendimento.motorista
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.caminhao.placa
+                           if atendimento.caminhao
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.veiculo_rebocado.placa
+                           if atendimento.veiculo_rebocado
+                           and atendimento.veiculo_rebocado.placa
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.veiculo_rebocado.modelo
+                           if atendimento.veiculo_rebocado
+                           and atendimento.veiculo_rebocado.modelo
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.origem or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.destino or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.protocolo or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.km_total
+                           if atendimento.km_total is not none
+                           else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(
+                            atendimento.valor_total
+                        )
+                        if atendimento.valor_total is not none
+                        else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(
+                            atendimento.valor_comissao
+                        )
+                        if atendimento.valor_comissao is not none
+                        else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(
+                            atendimento.valor_pago
+                        )
+                        if atendimento.valor_pago is not none
+                        else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ "R$ %.2f"|format(
+                            atendimento.valor_pedagio
+                        )
+                        if atendimento.valor_pedagio is not none
+                        else "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if atendimento.cobrar_hora_parada %}
+
+                            Sim
+                            ({{ atendimento.quantidade_hora_parada }})
+
+                        {% else %}
+
+                            Não
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if atendimento.cobrar_hora_trabalhada %}
+
+                            Sim
+                            ({{ atendimento.quantidade_hora_trabalhada }})
+
+                        {% else %}
+
+                            Não
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if atendimento.usar_patins %}
+
+                            Sim
+                            ({{ atendimento.quantidade_patins }})
+
+                        {% else %}
+
+                            Não
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.status_operacional }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.status_financeiro }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ atendimento.observacao or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for(
+                                'atendimento.detalhes',
+                                id_atendimento=atendimento.id_atendimento,
+                                origem='relatorio_parceiros_fechamento',
+                                id_administradora=administradora.id_administradora,
+                                id_cliente=cliente.id_cliente,
+                                data_inicial=data_inicial.isoformat(),
+                                data_final=data_final.isoformat()
+                            ) }}">
+
+                            Ver
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="24">
+
+                        Nenhum atendimento aguardando fechamento
+                        foi encontrado para este cliente no período informado.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+        AÇÕES DO FECHAMENTO
+    ====================================================== -->
+
+    <div class="form-actions">
+
+        <a
+            href="{{ voltar }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+
+        {% if session.get("perfil") == "Administrador"
+            and atendimentos %}
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'relatorio_parceiros.realizar_fechamento',
+                    id_administradora=administradora.id_administradora,
+                    id_cliente=cliente.id_cliente
+                ) }}"
+                style="display:inline;">
+
+                <input
+                    type="hidden"
+                    name="data_inicial"
+                    value="{{ data_inicial.isoformat() }}">
+
+                <input
+                    type="hidden"
+                    name="data_final"
+                    value="{{ data_final.isoformat() }}">
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    onclick="return confirm(
+                        'Deseja realmente quitar todos os atendimentos aguardando fechamento deste cliente no período informado?'
+                    );">
+
+                    Quitar Pagamento
+
+                </button>
+
+            </form>
+
+
+            <form
+                method="GET"
+                action="{{ url_for(
+                    'exportacao.exportar_generico',
+                    modulo='atendimento_completo'
+                ) }}"
+                style="display:inline;">
+
+                {% for key, values in request.args.lists() %}
+
+                    {% for value in values %}
+
+                        <input
+                            type="hidden"
+                            name="{{ key }}"
+                            value="{{ value }}">
+
+                    {% endfor %}
+
+                {% endfor %}
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
+                    Exportar
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

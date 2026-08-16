@@ -14,12 +14,22 @@ from app.models import Caminhao
 from app.services.relatorios.caminhoes_service import (
     CaminhoesRelatorioService
 )
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
 
 
 caminhoes_relatorio_bp = Blueprint(
     "relatorio_caminhoes",
     __name__,
     url_prefix="/relatorios/caminhoes"
+)
+
+proteger_blueprint(
+    caminhoes_relatorio_bp,
+    "Administrador",
+    "Operador",
+    "Leitor"
 )
 
 

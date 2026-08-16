@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
+
 {{ titulo }}
+
 {% endblock %}
+
 
 {% block content %}
 
@@ -11,13 +14,52 @@
     {% if request.args.get("origem") == "relatorio_caminhoes" %}
 
         {% set voltar = url_for(
-            "relatorio_caminhoes.listar"
+            "relatorio_caminhoes.detalhes",
+            id_caminhao=request.args.get("id_caminhao"),
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_caminhoes_lista" %}
+
+        {% set voltar = url_for(
+            "relatorio_caminhoes.listar",
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
         ) %}
 
     {% elif request.args.get("origem") == "relatorio_motoristas" %}
 
         {% set voltar = url_for(
-            "relatorio_motoristas.listar"
+            "relatorio_motoristas.detalhes",
+            id_motorista=request.args.get("id_motorista"),
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_motoristas_lista" %}
+
+        {% set voltar = url_for(
+            "relatorio_motoristas.listar",
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_parceiros" %}
+
+        {% set voltar = url_for(
+            "relatorio_parceiros.listar",
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_parceiros_clientes" %}
+
+        {% set voltar = url_for(
+            "relatorio_parceiros.clientes",
+            id_administradora=request.args.get("id_administradora"),
+            data_inicial=request.args.get("data_inicial"),
+            data_final=request.args.get("data_final")
         ) %}
 
     {% else %}

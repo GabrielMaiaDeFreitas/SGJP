@@ -15,13 +15,21 @@ from app.services.relatorios.motoristas_service import (
     MotoristasRelatorioService
 )
 
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
 
 motoristas_relatorio_bp = Blueprint(
     "relatorio_motoristas",
     __name__,
     url_prefix="/relatorios/motoristas"
 )
-
+proteger_blueprint(
+    motoristas_relatorio_bp,
+    "Administrador",
+    "Operador",
+    "Leitor"
+)
 
 @motoristas_relatorio_bp.route("/")
 def listar():

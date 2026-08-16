@@ -162,11 +162,11 @@
                     href="{{ url_for('atendimento.listar') }}"
                     class="{%
                         if request.endpoint.startswith('atendimento.')
-                        and request.args.get('origem') not in [
-                            'relatorio_caminhoes',
-                            'relatorio_motoristas'
-                        ]
-                    %}active{% endif %}">
+                        and request.args.get('origem') != 'relatorio_caminhoes'
+                        and request.args.get('origem') != 'relatorio_motoristas'
+                        and request.args.get('origem') != 'relatorio_parceiros'
+                        and request.args.get('origem') != 'relatorio_parceiros_clientes'
+                        %}active{% endif %}">
 
                     Atendimentos
 
@@ -211,8 +211,19 @@
 
                 </a>
 
-            </li>
+                <a
+                    href="{{ url_for('relatorio_parceiros.listar') }}"
+                    class="{%
+                        if request.endpoint.startswith('relatorio_parceiros.')
+                        or request.args.get('origem') == 'relatorio_parceiros'
+                        or request.args.get('origem') == 'relatorio_parceiros_clientes'
+                        %}active{% endif %}">
 
+                    Por Parceiro
+
+                </a>
+
+            </li>
 
         </ul>
 

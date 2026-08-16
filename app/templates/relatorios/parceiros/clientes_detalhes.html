@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+Atendimentos do Parceiro - SGJP
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    {% set voltar = url_for(
+        "relatorio_parceiros.listar",
+        data_inicial=data_inicial.isoformat(),
+        data_final=data_final.isoformat()
+    ) %}
+
+    {% set titulo = "Atendimentos do Parceiro" %}
+
+    {% include "components/card_header.html" %}
+
+
+    <div class="content-card">
+
+        <h2>
+
+            {{ cliente.nome }}
+
+        </h2>
+
+        <p>
+
+            Administradora:
+
+            {{ administradora.nome }}
+
+        </p>
+
+        <p>
+
+            Período:
+
+            {{ data_inicial.strftime("%d/%m/%Y") }}
+
+            até
+
+            {{ data_final.strftime("%d/%m/%Y") }}
+
+        </p>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Data</th>
+
+                    <th>Cliente</th>
+
+                    <th>Motorista</th>
+
+                    <th>Caminhão</th>
+
+                    <th>Tipo de Serviço</th>
+
+                    <th>KM</th>
+
+                    <th>Valor</th>
+
+                    <th>Ações</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for atendimento in atendimentos %}
+
+                <tr>
+
+                    <td>
+
+                        {{
+                            atendimento.data_atendimento.strftime(
+                                "%d/%m/%Y"
+                            )
+                            if atendimento.data_atendimento
+                            else "—"
+                        }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{
+                            atendimento.cliente.nome_fantasia
+                            if atendimento.cliente
+                            else "—"
+                        }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{
+                            atendimento.motorista.nome
+                            if atendimento.motorista
+                            else "—"
+                        }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if atendimento.caminhao %}
+
+                            {{ atendimento.caminhao.modelo }}
+                            -
+                            {{ atendimento.caminhao.placa }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{
+                            atendimento.tabela_valores.tipo_servico.nome
+                            if atendimento.tabela_valores
+                            else "—"
+                        }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{
+                            atendimento.km_total
+                            if atendimento.km_total is not none
+                            else "—"
+                        }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if atendimento.valor_total is not none %}
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                atendimento.valor_total
+                            ) }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for(
+                                'atendimento.detalhes',
+                                id_atendimento=atendimento.id_atendimento,
+                                origem='relatorio_parceiros_clientes',
+                                id_administradora=administradora.id_administradora,
+                                id_cliente=cliente.id_cliente,
+                                data_inicial=data_inicial.isoformat(),
+                                data_final=data_final.isoformat()
+                            ) }}"
+                            class="btn btn-secondary">
+
+                            Detalhes
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="8">
+
+                        Nenhum atendimento encontrado
+                        para este parceiro no período informado.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="form-actions">
+
+        <a
+            href="{{ voltar }}"
+            class="btn btn-secondary">
+
+            Voltar
+
+        </a>
+
+
+        <a
+            href="{{ url_for(
+                'atendimento.completo'
+            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&campo%5B%5D=fk_administradora_id_administradora&valor%5B%5D={{ administradora.id_administradora }}&campo%5B%5D=fk_cliente_id_cliente&valor%5B%5D={{ cliente.id_cliente }}&origem=relatorio_parceiros_clientes&data_inicial={{ data_inicial.isoformat() }}&data_final={{ data_final.isoformat() }}&id_administradora={{ administradora.id_administradora }}&id_cliente={{ cliente.id_cliente }}"
+            class="btn btn-secondary">
+
+            Visualização Completa
+
+        </a>
+
+        {% if session.get("perfil") == "Administrador" %}
+
+            <a
+                href="{{ url_for(
+                    'relatorio_parceiros.fechamento',
+                    id_administradora=administradora.id_administradora,
+                    id_cliente=cliente.id_cliente,
+                    data_inicial=data_inicial.isoformat(),
+                    data_final=data_final.isoformat()
+                ) }}"
+                class="btn btn-primary">
+
+                Fazer Fechamento
+
+            </a>
+
+
+            <a
+                href="{{ url_for(
+                    'exportacao.exportar_generico',
+                    modulo='relatorio_parceiros_clientes_detalhes',
+                    id_administradora=administradora.id_administradora,
+                    id_cliente=cliente.id_cliente,
+                    data_inicial=data_inicial.isoformat(),
+                    data_final=data_final.isoformat()
+                ) }}"
+                class="btn btn-primary">
+
+                Exportar
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
