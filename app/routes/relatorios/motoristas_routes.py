@@ -9,21 +9,21 @@ from flask import (
     flash
 )
 
-from app.models import Caminhao
+from app.models import Motorista
 
-from app.services.relatorios.caminhoes_service import (
-    CaminhoesRelatorioService
+from app.services.relatorios.motoristas_service import (
+    MotoristasRelatorioService
 )
 
 
-caminhoes_relatorio_bp = Blueprint(
-    "relatorio_caminhoes",
+motoristas_relatorio_bp = Blueprint(
+    "relatorio_motoristas",
     __name__,
-    url_prefix="/relatorios/caminhoes"
+    url_prefix="/relatorios/motoristas"
 )
 
 
-@caminhoes_relatorio_bp.route("/")
+@motoristas_relatorio_bp.route("/")
 def listar():
 
     hoje = date.today()
@@ -57,7 +57,7 @@ def listar():
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_motoristas.listar"
             )
         )
 
@@ -70,19 +70,21 @@ def listar():
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_motoristas.listar"
             )
         )
 
-    relatorio = CaminhoesRelatorioService.gerar_relatorio(
-        data_inicial,
-        data_final
+    relatorio = (
+        MotoristasRelatorioService.gerar_relatorio(
+            data_inicial,
+            data_final
+        )
     )
 
     return render_template(
-        "relatorios/caminhoes/caminhoes.html",
+        "relatorios/motoristas/motoristas.html",
 
-        caminhoes=relatorio["caminhoes"],
+        motoristas=relatorio["motoristas"],
 
         faturamento_total=relatorio[
             "faturamento_total"
@@ -96,16 +98,20 @@ def listar():
             "km_total"
         ],
 
+        valor_comissao_total=relatorio[
+            "valor_comissao_total"
+        ],
+
         data_inicial=data_inicial,
 
         data_final=data_final
     )
 
 
-@caminhoes_relatorio_bp.route(
-    "/<int:id_caminhao>"
+@motoristas_relatorio_bp.route(
+    "/<int:id_motorista>"
 )
-def detalhes(id_caminhao):
+def detalhes(id_motorista):
 
     data_inicial_texto = request.args.get(
         "data_inicial"
@@ -119,7 +125,7 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_motoristas.listar"
             )
         )
 
@@ -142,7 +148,7 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_motoristas.listar"
             )
         )
 
@@ -155,28 +161,28 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_motoristas.listar"
             )
         )
 
-    caminhao = Caminhao.query.get_or_404(
-        id_caminhao
+    motorista = Motorista.query.get_or_404(
+        id_motorista
     )
 
     atendimentos = (
-        CaminhoesRelatorioService.buscar_detalhes(
-            id_caminhao,
+        MotoristasRelatorioService.buscar_detalhes(
+            id_motorista,
             data_inicial,
             data_final
         )
     )
 
     return render_template(
-        "relatorios/caminhoes/detalhes.html",
+        "relatorios/motoristas/detalhes.html",
 
-        titulo="Atendimentos do Caminhão",
+        titulo="Atendimentos do Motorista",
 
-        caminhao=caminhao,
+        motorista=motorista,
 
         atendimentos=atendimentos,
 

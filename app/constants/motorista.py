@@ -1,3 +1,6 @@
+
+from decimal import Decimal
+
 CATEGORIAS_CNH = [
     "A",
     "AB",
@@ -8,4 +11,6 @@ CATEGORIAS_CNH = [
     "C",
     "D",
     "E"
-]
+],
+
+COMISSAO_MOTORISTA = Decimal("0.08")

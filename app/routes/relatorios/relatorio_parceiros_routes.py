@@ -9,21 +9,19 @@ from flask import (
     flash
 )
 
-from app.models import Caminhao
-
-from app.services.relatorios.caminhoes_service import (
-    CaminhoesRelatorioService
+from app.services.relatorios.parceiros_service import (
+    ParceirosRelatorioService
 )
 
 
-caminhoes_relatorio_bp = Blueprint(
-    "relatorio_caminhoes",
+parceiros_relatorio_bp = Blueprint(
+    "relatorio_parceiros",
     __name__,
-    url_prefix="/relatorios/caminhoes"
+    url_prefix="/relatorios/parceiros"
 )
 
 
-@caminhoes_relatorio_bp.route("/")
+@parceiros_relatorio_bp.route("/")
 def listar():
 
     hoje = date.today()
@@ -57,7 +55,7 @@ def listar():
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_parceiros.listar"
             )
         )
 
@@ -70,42 +68,50 @@ def listar():
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_parceiros.listar"
             )
         )
 
-    relatorio = CaminhoesRelatorioService.gerar_relatorio(
-        data_inicial,
-        data_final
+    resultado = (
+        ParceirosRelatorioService.gerar_relatorio(
+            data_inicial,
+            data_final
+        )
     )
 
     return render_template(
-        "relatorios/caminhoes/caminhoes.html",
 
-        caminhoes=relatorio["caminhoes"],
+        "relatorios/parceiros/parceiros.html",
 
-        faturamento_total=relatorio[
+        parceiros=resultado["parceiros"],
+
+        faturamento_total=resultado[
             "faturamento_total"
         ],
 
-        quantidade_atendimentos_total=relatorio[
+        km_total=resultado[
+            "km_total"
+        ],
+
+        quantidade_atendimentos_total=resultado[
             "quantidade_atendimentos_total"
         ],
 
-        km_total=relatorio[
-            "km_total"
+        valor_medio_por_km_total=resultado[
+            "valor_medio_por_km_total"
         ],
 
         data_inicial=data_inicial,
 
         data_final=data_final
+
     )
 
 
-@caminhoes_relatorio_bp.route(
-    "/<int:id_caminhao>"
+@parceiros_relatorio_bp.route(
+    "/<int:id_administradora>/clientes"
 )
-def detalhes(id_caminhao):
+def clientes(id_administradora):
 
     data_inicial_texto = request.args.get(
         "data_inicial"
@@ -119,7 +125,7 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_parceiros.listar"
             )
         )
 
@@ -142,7 +148,7 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_parceiros.listar"
             )
         )
 
@@ -155,32 +161,52 @@ def detalhes(id_caminhao):
 
         return redirect(
             url_for(
-                "relatorio_caminhoes.listar"
+                "relatorio_parceiros.listar"
             )
         )
 
-    caminhao = Caminhao.query.get_or_404(
-        id_caminhao
-    )
+    resultado = (
+        ParceirosRelatorioService.gerar_relatorio_por_cliente(
 
-    atendimentos = (
-        CaminhoesRelatorioService.buscar_detalhes(
-            id_caminhao,
+            id_administradora,
+
             data_inicial,
+
             data_final
+
         )
     )
 
     return render_template(
-        "relatorios/caminhoes/detalhes.html",
 
-        titulo="Atendimentos do Caminhão",
+        "relatorios/parceiros/clientes.html",
 
-        caminhao=caminhao,
+        administradora=resultado[
+            "administradora"
+        ],
 
-        atendimentos=atendimentos,
+        clientes=resultado[
+            "clientes"
+        ],
+
+        faturamento_total=resultado[
+            "faturamento_total"
+        ],
+
+        km_total=resultado[
+            "km_total"
+        ],
+
+        quantidade_atendimentos_total=resultado[
+            "quantidade_atendimentos_total"
+        ],
+
+        valor_medio_por_km_total=resultado[
+            "valor_medio_por_km_total"
+        ],
 
         data_inicial=data_inicial,
 
         data_final=data_final
+
     )

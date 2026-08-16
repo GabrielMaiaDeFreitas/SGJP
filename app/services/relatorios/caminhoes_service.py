@@ -42,26 +42,20 @@ class CaminhoesRelatorioService:
 
             .outerjoin(
                 Atendimento,
-                Atendimento.fk_caminhao_id_caminhao
-                == Caminhao.id_caminhao
+                db.and_(
+                    Atendimento.fk_caminhao_id_caminhao
+                    == Caminhao.id_caminhao,
+
+                    Atendimento.data_atendimento
+                    >= data_inicial,
+
+                    Atendimento.data_atendimento
+                    <= data_final
+                )
             )
 
             .filter(
                 Caminhao.ativo.is_(True)
-            )
-
-            .filter(
-                db.or_(
-                    Atendimento.id_atendimento.is_(None),
-
-                    db.and_(
-                        Atendimento.data_atendimento
-                        >= data_inicial,
-
-                        Atendimento.data_atendimento
-                        <= data_final
-                    )
-                )
             )
 
             .group_by(

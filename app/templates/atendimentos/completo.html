@@ -10,11 +10,21 @@
 
     {% if request.args.get("origem") == "relatorio_caminhoes" %}
 
-        {% set voltar = url_for("relatorio_caminhoes.listar") %}
+        {% set voltar = url_for(
+            "relatorio_caminhoes.listar"
+        ) %}
+
+    {% elif request.args.get("origem") == "relatorio_motoristas" %}
+
+        {% set voltar = url_for(
+            "relatorio_motoristas.listar"
+        ) %}
 
     {% else %}
 
-        {% set voltar = url_for("atendimento.listar") %}
+        {% set voltar = url_for(
+            "atendimento.listar"
+        ) %}
 
     {% endif %}
 

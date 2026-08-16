@@ -1,16 +1,30 @@
 {% extends "base.html" %}
 
+
 {% block title %}
+
 {{ titulo }}
+
 {% endblock %}
 
+
 {% block content %}
+
 
 {% if request.args.get("origem") == "relatorio_caminhoes" %}
 
     {% set voltar = url_for(
         "relatorio_caminhoes.detalhes",
         id_caminhao=request.args.get("id_caminhao"),
+        data_inicial=request.args.get("data_inicial"),
+        data_final=request.args.get("data_final")
+    ) %}
+
+{% elif request.args.get("origem") == "relatorio_motoristas" %}
+
+    {% set voltar = url_for(
+        "relatorio_motoristas.detalhes",
+        id_motorista=request.args.get("id_motorista"),
         data_inicial=request.args.get("data_inicial"),
         data_final=request.args.get("data_final")
     ) %}
@@ -23,280 +37,315 @@
 
 {% endif %}
 
-{% include "components/card_header.html" %}
 
-{% set detalhes = [
+<div class="card">
 
-    {
-        "label": "Data do Atendimento",
-        "valor": atendimento.data_atendimento.strftime("%d/%m/%Y")
+    {% include "components/card_header.html" %}
+
+
+    {% set detalhes = [
+
+        {
+            "label": "Data do Atendimento",
+            "valor":
+                atendimento.data_atendimento.strftime("%d/%m/%Y")
                 if atendimento.data_atendimento
                 else "—"
-    },
+        },
 
-    {
-        "label": "Administradora",
-        "valor": atendimento.tabela_valores.administradora.nome
+        {
+            "label": "Administradora",
+            "valor":
+                atendimento.tabela_valores.administradora.nome
                 if atendimento.tabela_valores
                 else "—"
-    },
+        },
 
-    {
-        "label": "Cliente",
-        "valor": atendimento.cliente.nome_fantasia
+        {
+            "label": "Cliente",
+            "valor":
+                atendimento.cliente.nome_fantasia
                 if atendimento.cliente
                 else "—"
-    },
+        },
 
-    {
-        "label": "Usuário",
-        "valor": atendimento.usuario.nome
+        {
+            "label": "Usuário",
+            "valor":
+                atendimento.usuario.nome
                 if atendimento.usuario
                 else "—"
-    },
+        },
 
-    {
-        "label": "Tipo de Serviço",
-        "valor": atendimento.tabela_valores.tipo_servico.nome
+        {
+            "label": "Tipo de Serviço",
+            "valor":
+                atendimento.tabela_valores.tipo_servico.nome
                 if atendimento.tabela_valores
                 else "—"
-    },
+        },
 
-    {
-        "label": "Motorista",
-        "valor": atendimento.motorista.nome
+        {
+            "label": "Motorista",
+            "valor":
+                atendimento.motorista.nome
                 if atendimento.motorista
                 else "—"
-    },
+        },
 
-    {
-        "label": "Caminhão",
-        "valor": atendimento.caminhao.placa
+        {
+            "label": "Caminhão",
+            "valor":
+                atendimento.caminhao.placa
                 if atendimento.caminhao
                 else "—"
-    },
+        },
 
-    {
-        "label": "Placa do Veículo Rebocado",
-        "valor": atendimento.veiculo_rebocado.placa
+        {
+            "label": "Placa do Veículo Rebocado",
+            "valor":
+                atendimento.veiculo_rebocado.placa
                 if atendimento.veiculo_rebocado
                 and atendimento.veiculo_rebocado.placa
                 else "—"
-    },
+        },
 
-    {
-        "label": "Modelo do Veículo Rebocado",
-        "valor": atendimento.veiculo_rebocado.modelo
+        {
+            "label": "Modelo do Veículo Rebocado",
+            "valor":
+                atendimento.veiculo_rebocado.modelo
                 if atendimento.veiculo_rebocado
                 and atendimento.veiculo_rebocado.modelo
                 else "—"
-    },
+        },
 
-    {
-        "label": "Protocolo",
-        "valor": atendimento.protocolo
+        {
+            "label": "Protocolo",
+            "valor":
+                atendimento.protocolo
                 if atendimento.protocolo
                 else "—"
-    },
+        },
 
-    {
-        "label": "Origem",
-        "valor": atendimento.origem
+        {
+            "label": "Origem",
+            "valor":
+                atendimento.origem
                 if atendimento.origem
                 else "—"
-    },
+        },
 
-    {
-        "label": "Destino",
-        "valor": atendimento.destino
+        {
+            "label": "Destino",
+            "valor":
+                atendimento.destino
                 if atendimento.destino
                 else "—"
-    },
+        },
 
-    {
-        "label": "KM Rodado",
-        "valor": atendimento.km_total
+        {
+            "label": "KM Rodado",
+            "valor":
+                atendimento.km_total
                 if atendimento.km_total is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Valor Total",
-        "valor": "R$ %.2f"|format(atendimento.valor_total)
+        {
+            "label": "Valor Total",
+            "valor":
+                "R$ %.2f"|format(atendimento.valor_total)
                 if atendimento.valor_total is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Valor Pago",
-        "valor": "R$ %.2f"|format(atendimento.valor_pago)
+        {
+            "label": "Valor Pago",
+            "valor":
+                "R$ %.2f"|format(atendimento.valor_pago)
                 if atendimento.valor_pago is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Valor Restante",
-        "valor": "R$ %.2f"|format(
+        {
+            "label": "Valor Restante",
+            "valor":
+                "R$ %.2f"|format(
 
-            (
-                atendimento.valor_total
-                -
-                atendimento.valor_pago
-            )
+                    (
+                        atendimento.valor_total
+                        -
+                        atendimento.valor_pago
+                    )
 
-            if (
+                    if (
+                        atendimento.valor_total is not none
+                        and
+                        atendimento.valor_pago is not none
+                    )
 
-                atendimento.valor_total is not none
-                and
-                atendimento.valor_pago is not none
+                    else 0
 
-            )
+                )
+        },
 
-            else 0
-
-        )
-    },
-
-    {
-        "label": "Valor Pedágio",
-        "valor": "R$ %.2f"|format(atendimento.valor_pedagio)
+        {
+            "label": "Valor Pedágio",
+            "valor":
+                "R$ %.2f"|format(atendimento.valor_pedagio)
                 if atendimento.valor_pedagio is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Valor Comissão",
-        "valor": "R$ %.2f"|format(atendimento.valor_comissao)
+        {
+            "label": "Valor Comissão",
+            "valor":
+                "R$ %.2f"|format(atendimento.valor_comissao)
                 if atendimento.valor_comissao is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Horas Paradas",
-        "valor": atendimento.quantidade_hora_parada
+        {
+            "label": "Horas Paradas",
+            "valor":
+                atendimento.quantidade_hora_parada
                 if atendimento.quantidade_hora_parada is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Horas Trabalhadas",
-        "valor": atendimento.quantidade_hora_trabalhada
+        {
+            "label": "Horas Trabalhadas",
+            "valor":
+                atendimento.quantidade_hora_trabalhada
                 if atendimento.quantidade_hora_trabalhada is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Quantidade de Patins",
-        "valor": atendimento.quantidade_patins
+        {
+            "label": "Quantidade de Patins",
+            "valor":
+                atendimento.quantidade_patins
                 if atendimento.quantidade_patins is not none
                 else "—"
-    },
+        },
 
-    {
-        "label": "Status Operacional",
-        "valor": atendimento.status_operacional
+        {
+            "label": "Status Operacional",
+            "valor":
+                atendimento.status_operacional
                 if atendimento.status_operacional
                 else "—"
-    },
+        },
 
-    {
-        "label": "Status Financeiro",
-        "valor": atendimento.status_financeiro
+        {
+            "label": "Status Financeiro",
+            "valor":
+                atendimento.status_financeiro
                 if atendimento.status_financeiro
                 else "—"
-    },
+        },
 
-    {
-        "label": "Observação",
-        "valor": atendimento.observacao
+        {
+            "label": "Observação",
+            "valor":
+                atendimento.observacao
                 if atendimento.observacao
                 else "—"
-    }
+        }
 
-] %}
+    ] %}
 
-{% include "components/details_table.html" %}
 
-<div class="form-actions">
+    {% include "components/details_table.html" %}
 
-    <a
-        href="{{ voltar }}"
-        class="btn btn-secondary">
 
-        Voltar
+    <div class="form-actions">
 
-    </a>
+        <a
+            href="{{ voltar }}"
+            class="btn btn-secondary">
 
-    <a
-        href="{{ url_for(
-            'atendimento.editar',
-            id_atendimento=atendimento.id_atendimento
-        ) }}"
-        class="btn btn-primary">
+            Voltar
 
-        Editar Atendimento
+        </a>
 
-    </a>
 
-    {% if session.get("perfil") == "Administrador"
-          and atendimento.status_financeiro != "Pago" %}
-
-        <form
-            method="POST"
-            action="{{ url_for(
-                'atendimento.registrar_pagamento',
+        <a
+            href="{{ url_for(
+                'atendimento.editar',
                 id_atendimento=atendimento.id_atendimento
             ) }}"
-            style="display:inline;">
+            class="btn btn-primary">
 
-            <input
-                type="hidden"
-                name="origem"
-                value="detalhes">
+            Editar Atendimento
 
-            <button
-                type="submit"
-                class="btn btn-primary"
-                onclick="return confirm(
-                    'Confirma o registro do pagamento deste atendimento?'
-                );">
+        </a>
 
-                Registrar Pagamento
 
-            </button>
+        {% if session.get("perfil") == "Administrador"
+              and atendimento.status_financeiro != "Pago" %}
 
-        </form>
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'atendimento.registrar_pagamento',
+                    id_atendimento=atendimento.id_atendimento
+                ) }}"
+                style="display:inline;">
 
-    {% endif %}
+                <input
+                    type="hidden"
+                    name="origem"
+                    value="detalhes">
 
-    {% if session.get("perfil") == "Administrador" %}
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    onclick="return confirm(
+                        'Confirma o registro do pagamento deste atendimento?'
+                    );">
 
-        <form
-            method="POST"
-            action="{{ url_for(
-                'atendimento.excluir',
-                id_atendimento=atendimento.id_atendimento
-            ) }}"
-            style="display:inline;">
+                    Registrar Pagamento
 
-            <button
-                type="submit"
-                class="btn btn-secondary"
-                onclick="return confirm(
-                    'Deseja realmente excluir este atendimento? Isso não poderá ser desfeito.'
-                );">
+                </button>
 
-                Excluir
+            </form>
 
-            </button>
+        {% endif %}
 
-        </form>
 
-    {% endif %}
+        {% if session.get("perfil") == "Administrador" %}
+
+            <form
+                method="POST"
+                action="{{ url_for(
+                    'atendimento.excluir',
+                    id_atendimento=atendimento.id_atendimento
+                ) }}"
+                style="display:inline;">
+
+                <button
+                    type="submit"
+                    class="btn btn-secondary"
+                    onclick="return confirm(
+                        'Deseja realmente excluir este atendimento? Isso não poderá ser desfeito.'
+                    );">
+
+                    Excluir
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
 
 </div>
 
+
 {% endblock %}
+
 
 {% block scripts %}
 

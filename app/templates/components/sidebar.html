@@ -162,7 +162,10 @@
                     href="{{ url_for('atendimento.listar') }}"
                     class="{%
                         if request.endpoint.startswith('atendimento.')
-                        and request.args.get('origem') != 'relatorio_caminhoes'
+                        and request.args.get('origem') not in [
+                            'relatorio_caminhoes',
+                            'relatorio_motoristas'
+                        ]
                     %}active{% endif %}">
 
                     Atendimentos
@@ -194,6 +197,17 @@
                     %}active{% endif %}">
 
                     Por Caminhão
+
+                </a>
+
+                <a
+                    href="{{ url_for('relatorio_motoristas.listar') }}"
+                    class="{%
+                        if request.endpoint.startswith('relatorio_motoristas.')
+                        or request.args.get('origem') == 'relatorio_motoristas'
+                    %}active{% endif %}">
+
+                    Por Motorista
 
                 </a>
 

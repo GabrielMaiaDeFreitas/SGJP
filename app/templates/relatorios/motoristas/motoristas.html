@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+Relatório por Motorista - SGJP
+
+{% endblock %}
+
+
+{% block styles %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/relatorio.css'
+    ) }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+
+        <h2>
+
+            Relatório por Motorista
+
+        </h2>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTRO DE PERÍODO
+    ====================================================== -->
+
+    <form
+        method="GET"
+        class="report-filters">
+
+        <div class="report-date-group">
+
+            <label for="data_inicial">
+
+                Data Inicial
+
+            </label>
+
+            <input
+                type="date"
+                id="data_inicial"
+                name="data_inicial"
+                value="{{ data_inicial.isoformat() }}"
+                required>
+
+        </div>
+
+
+        <div class="report-date-group">
+
+            <label for="data_final">
+
+                Data Final
+
+            </label>
+
+            <input
+                type="date"
+                id="data_final"
+                name="data_final"
+                value="{{ data_final.isoformat() }}"
+                required>
+
+        </div>
+
+
+        <div class="report-filter-actions">
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                Consultar
+
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <!-- =====================================================
+         TABELA PRINCIPAL
+    ====================================================== -->
+
+    <div class="table-responsive">
+
+        <table class="table report-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Motorista</th>
+
+                    <th>Faturamento Bruto</th>
+
+                    <th>KM Rodado</th>
+
+                    <th>Quantidade de Atendimentos</th>
+
+                    <th>Valor de Comissão (8%)</th>
+
+                    <th>Ações</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for motorista in motoristas %}
+
+                <tr>
+
+                    <td>
+
+                        {{ motorista.nome }}
+
+                    </td>
+
+
+                    <td>
+
+                        R$
+
+                        {{ "%.2f"|format(
+                            motorista.faturamento_bruto
+                        ) }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ motorista.km_total }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ motorista.quantidade_atendimentos }}
+
+                    </td>
+
+
+                    <td>
+
+                        R$
+
+                        {{ "%.2f"|format(
+                            motorista.valor_comissao
+                        ) }}
+
+                    </td>
+
+
+                    <td class="report-actions">
+
+                        <a
+                            href="{{ url_for(
+                                'relatorio_motoristas.detalhes',
+                                id_motorista=motorista.id_motorista,
+                                data_inicial=data_inicial.isoformat(),
+                                data_final=data_final.isoformat()
+                            ) }}">
+
+                            Ver atendimentos
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        Nenhum motorista encontrado
+                        para o período informado.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESUMO DO PERÍODO
+    ====================================================== -->
+
+    <div class="report-summary">
+
+        <h3>
+
+            Resumo do Período
+
+        </h3>
+
+
+        <div class="table-responsive">
+
+            <table class="table report-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Faturamento Bruto Total</th>
+
+                        <th>Total de Atendimentos</th>
+
+                        <th>KM Total Rodado</th>
+
+                        <th>Total de Comissão</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                faturamento_total
+                            ) }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ quantidade_atendimentos_total }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ km_total }}
+
+                        </td>
+
+
+                        <td>
+
+                            R$
+
+                            {{ "%.2f"|format(
+                                valor_comissao_total
+                            ) }}
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         AÇÕES DO RELATÓRIO
+    ====================================================== -->
+
+    <div class="report-footer-actions">
+
+        <a
+            href="{{ url_for(
+                'atendimento.completo'
+            ) }}?campo%5B%5D=data_atendimento&valor_min%5B%5D={{ data_inicial.isoformat() }}&valor_max%5B%5D={{ data_final.isoformat() }}&origem=relatorio_motoristas"
+            class="btn btn-secondary">
+
+            Visualização Completa
+
+        </a>
+
+
+        {% if session.get("perfil") == "Administrador" %}
+
+            <a
+                href="{{ url_for(
+                    'exportacao.exportar_generico',
+                    modulo='relatorio_motoristas',
+                    data_inicial=data_inicial.isoformat(),
+                    data_final=data_final.isoformat()
+                ) }}"
+                class="btn btn-primary">
+
+                Exportar
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
