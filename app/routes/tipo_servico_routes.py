@@ -1,19 +1,30 @@
 from flask import (
     Blueprint,
     render_template,
-    session,
+    request,
     redirect,
     url_for,
-    request,
     flash
 )
 
-from app import db
-from app.models import TipoServico
-from app.filters.tipo_servico import FILTROS_TIPO_SERVICO
-from app.services.tipo_servico_service import TipoServicoService
+from app.filters.tipo_servico import (
+    FILTROS_TIPO_SERVICO
+)
 
-from app.helpers.autorizacao_helper import (proteger_blueprint)
+from app.services.tipo_servico_service import (
+    TipoServicoService
+)
+
+from app.exceptions import (
+    CampoObrigatorioError,
+    RecursoDuplicadoError,
+    ValidacaoError
+)
+
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
+
 
 tipo_servico_bp = Blueprint(
     "tipo_servico",
@@ -21,17 +32,20 @@ tipo_servico_bp = Blueprint(
     url_prefix="/tipos-servico"
 )
 
-proteger_blueprint(tipo_servico_bp,"Administrador")
+
+proteger_blueprint(
+    tipo_servico_bp,
+    "Administrador"
+)
+
 
 @tipo_servico_bp.route("/")
 def listar():
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
+    tipos_servico = (
+        TipoServicoService.listar()
+    )
 
-    tipos_servico = TipoServico.query.order_by(
-        TipoServico.nome
-    ).all()
 
     return render_template(
 
@@ -41,33 +55,62 @@ def listar():
 
         tipos_servico=tipos_servico,
 
-        novo_url=url_for("tipo_servico.novo"),
+        novo_url=url_for(
+            "tipo_servico.novo"
+        ),
 
         novo_texto="Novo Tipo de Serviço",
 
-        visualizacao_url=url_for("tipo_servico.completo"),
+        visualizacao_url=url_for(
+            "tipo_servico.completo"
+        ),
 
         exportar_url=url_for(
+
             "exportacao.exportar_generico",
+
             modulo="tipo_servico"
+
         )
 
     )
 
 
-@tipo_servico_bp.route("/novo", methods=["GET", "POST"])
+@tipo_servico_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
 def novo():
-
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
 
     if request.method == "POST":
 
-        def voltar_formulario():
+        nome = request.form.get(
+            "nome"
+        )
 
-            tipo_servico = TipoServico(
-                nome=request.form["nome"]
+
+        try:
+
+            TipoServicoService.criar(
+                nome
             )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+
+            tipo_servico = _tipo_servico_formulario(
+                nome
+            )
+
 
             return render_template(
 
@@ -79,37 +122,25 @@ def novo():
 
             )
 
-        if TipoServico.query.filter(
-            TipoServico.nome.ilike(request.form["nome"])
-        ).first():
-
-            flash(
-                "Já existe um tipo de serviço com esse nome.",
-                "warning"
-            )
-
-            return voltar_formulario()
-
-        tipo_servico = TipoServico(
-
-            nome=request.form["nome"],
-
-            ativo=True
-
-        )
-
-        db.session.add(tipo_servico)
-
-        db.session.commit()
 
         flash(
-            "Tipo de serviço cadastrado com sucesso.",
+
+            "Tipo de serviço cadastrado "
+            "com sucesso.",
+
             "success"
+
         )
 
+
         return redirect(
-            url_for("tipo_servico.listar")
+
+            url_for(
+                "tipo_servico.listar"
+            )
+
         )
+
 
     return render_template(
 
@@ -122,21 +153,52 @@ def novo():
     )
 
 
-@tipo_servico_bp.route("/<int:id_tipo_servico>/editar", methods=["GET", "POST"])
+@tipo_servico_bp.route(
+    "/<int:id_tipo_servico>/editar",
+    methods=["GET", "POST"]
+)
 def editar(id_tipo_servico):
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    tipo_servico = TipoServico.query.get_or_404(
-        id_tipo_servico
+    tipo_servico = (
+        TipoServicoService.buscar_por_id(
+            id_tipo_servico
+        )
     )
+
 
     if request.method == "POST":
 
-        def voltar_formulario():
+        nome = request.form.get(
+            "nome"
+        )
 
-            tipo_servico.nome = request.form["nome"]
+
+        try:
+
+            TipoServicoService.atualizar(
+
+                tipo_servico=tipo_servico,
+
+                nome=nome
+
+            )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+
+            tipo_servico.nome = (
+                nome or ""
+            )
+
 
             return render_template(
 
@@ -146,47 +208,44 @@ def editar(id_tipo_servico):
 
                 tipo_servico=tipo_servico,
 
-                origem=request.args.get("origem")
+                origem=request.form.get(
+                    "origem"
+                )
 
             )
 
-        existente = TipoServico.query.filter(
-
-            TipoServico.nome == request.form["nome"],
-
-            TipoServico.id_tipo_servico != id_tipo_servico
-
-        ).first()
-
-        if existente:
-
-            flash(
-                "Já existe um tipo de serviço com esse nome.",
-                "warning"
-            )
-
-            return voltar_formulario()
-
-        tipo_servico.nome = request.form["nome"]
-
-        db.session.commit()
 
         flash(
-            "Tipo de serviço atualizado com sucesso.",
+
+            "Tipo de serviço atualizado "
+            "com sucesso.",
+
             "success"
+
         )
 
-        origem = request.form.get("origem")
 
-        if origem == "completo":
+        if request.form.get(
+            "origem"
+        ) == "completo":
 
             return redirect(
-                url_for("tipo_servico.completo")
+
+                url_for(
+                    "tipo_servico.completo"
+                )
+
             )
 
+
         return redirect(
-            url_for("tipo_servico.listar")
+
+            url_for(
+                "tipo_servico.listar"
+            )
+
         )
+
 
     return render_template(
 
@@ -196,52 +255,72 @@ def editar(id_tipo_servico):
 
         tipo_servico=tipo_servico,
 
-        origem=request.args.get("origem")
-
-    )
-
-
-@tipo_servico_bp.route("/<int:id_tipo_servico>/toggle")
-def toggle(id_tipo_servico):
-
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    tipo_servico = TipoServico.query.get_or_404(
-        id_tipo_servico
-    )
-
-    tipo_servico.ativo = not tipo_servico.ativo
-
-    db.session.commit()
-
-    flash(
-        "Status atualizado com sucesso.",
-        "success"
-    )
-
-    origem = request.args.get("origem")
-
-    if origem == "completo":
-
-        return redirect(
-            url_for("tipo_servico.completo")
+        origem=request.args.get(
+            "origem"
         )
 
-    return redirect(
-        url_for("tipo_servico.listar")
     )
 
 
-@tipo_servico_bp.route("/<int:id_tipo_servico>")
+@tipo_servico_bp.route(
+    "/<int:id_tipo_servico>/toggle"
+)
+def toggle(id_tipo_servico):
+
+    tipo_servico = (
+        TipoServicoService.buscar_por_id(
+            id_tipo_servico
+        )
+    )
+
+
+    TipoServicoService.alternar_status(
+        tipo_servico
+    )
+
+
+    flash(
+
+        "Status atualizado com sucesso.",
+
+        "success"
+
+    )
+
+
+    if request.args.get(
+        "origem"
+    ) == "completo":
+
+        return redirect(
+
+            url_for(
+                "tipo_servico.completo"
+            )
+
+        )
+
+
+    return redirect(
+
+        url_for(
+            "tipo_servico.listar"
+        )
+
+    )
+
+
+@tipo_servico_bp.route(
+    "/<int:id_tipo_servico>"
+)
 def detalhes(id_tipo_servico):
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    tipo_servico = TipoServico.query.get_or_404(
-        id_tipo_servico
+    tipo_servico = (
+        TipoServicoService.buscar_por_id(
+            id_tipo_servico
+        )
     )
+
 
     return render_template(
 
@@ -254,15 +333,17 @@ def detalhes(id_tipo_servico):
     )
 
 
-@tipo_servico_bp.route("/completo")
+@tipo_servico_bp.route(
+    "/completo"
+)
 def completo():
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    tipos_servico = TipoServicoService.listar(
-        request.args
+    tipos_servico = (
+        TipoServicoService.listar_completo(
+            request.args
+        )
     )
+
 
     return render_template(
 
@@ -274,8 +355,23 @@ def completo():
 
         campos=FILTROS_TIPO_SERVICO,
 
-        campos_filtro=request.args.getlist("campo[]"),
+        campos_filtro=request.args.getlist(
+            "campo[]"
+        ),
 
-        valores_filtro=request.args.getlist("valor[]")
+        valores_filtro=request.args.getlist(
+            "valor[]"
+        )
 
+    )
+
+
+def _tipo_servico_formulario(
+    nome
+):
+
+    from app.models import TipoServico
+
+    return TipoServico(
+        nome=nome or ""
     )

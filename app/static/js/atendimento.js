@@ -1,8 +1,12 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    inicializar();
+        inicializar();
 
-});
+    }
+);
+
 
 /* =====================================================
    ELEMENTOS
@@ -107,21 +111,15 @@ const elementos = {
     ),
 
     origem: document.getElementById(
-
         "origem"
-
     ),
 
     destino: document.getElementById(
-
         "destino"
-
     ),
 
     btnCalcularDistancia: document.getElementById(
-
         "btn_calcular_distancia"
-
     ),
 
     placaVeiculoRebocado: document.getElementById(
@@ -130,9 +128,10 @@ const elementos = {
 
     modeloVeiculoRebocado: document.getElementById(
         "modelo_veiculo_rebocado"
-    ),
+    )
 
 };
+
 
 /* =====================================================
    TABELA DE VALORES
@@ -148,11 +147,13 @@ const tabelaValores = {
 
 };
 
+
 /* =====================================================
-   Caso da Administradora Ser Cliente Próprio
+   CASO DA ADMINISTRADORA SER CLIENTE PRÓPRIO
 ===================================================== */
 
 let administradoraClienteProprio = false;
+
 
 /* =====================================================
    INICIALIZAÇÃO
@@ -172,9 +173,13 @@ function inicializar() {
 
     configurarCalculo();
 
+    configurarPlacaVeiculoRebocado();
+
     configurarCalculoDistancia();
 
     configurarConfirmacaoValorZero();
+
+    configurarValidacaoFormulario();
 
     if (ATENDIMENTO) {
 
@@ -202,102 +207,86 @@ function inicializar() {
 
 }
 
+
+/* =====================================================
+   MODO DE EDIÇÃO
+===================================================== */
+
 function configurarModoEdicao() {
 
     if (
-
-        Number(elementos.valorPedagio.value) > 0
-
+        Number(
+            elementos.valorPedagio.value
+        ) > 0
     ) {
 
         elementos.houvePedagio.checked = true;
 
     }
 
+
     if (
-
         Number(
-
             elementos.quantidadeHoraParada.value
-
         ) > 0
-
     ) {
 
         elementos.cobrarHoraParada.checked = true;
 
     }
 
+
     if (
-
         Number(
-
             elementos.quantidadeHoraTrabalhada.value
-
         ) > 0
-
     ) {
 
         elementos.cobrarHoraTrabalhada.checked = true;
 
     }
 
+
     if (
-
         Number(
-
             elementos.quantidadePatins.value
-
         ) > 0
-
     ) {
 
         elementos.usarPatins.checked = true;
 
     }
 
+
     if (
-
         Number(
-
             elementos.valorPago.value
-
         ) > 0
-
     ) {
 
         elementos.recebeuPagamento.checked = true;
 
     }
 
+
     elementos.recebeuPagamento.dispatchEvent(
-
         new Event("change")
-
     );
 
     elementos.houvePedagio.dispatchEvent(
-
         new Event("change")
-
     );
 
     elementos.cobrarHoraParada.dispatchEvent(
-
         new Event("change")
-
     );
 
     elementos.cobrarHoraTrabalhada.dispatchEvent(
-
         new Event("change")
-
     );
 
     elementos.usarPatins.dispatchEvent(
-
         new Event("change")
-
     );
 
 }
@@ -310,21 +299,17 @@ function configurarModoEdicao() {
 function configurarAdministradora() {
 
     if (
-
         !elementos.administradora ||
-
         !elementos.tipoServico
-
     ) {
 
         return;
 
     }
 
+
     elementos.administradora.addEventListener(
-
         "change",
-
         async function () {
 
             await carregarClientes();
@@ -332,21 +317,17 @@ function configurarAdministradora() {
             await buscarTabelaValores();
 
         }
-
     );
+
 
     elementos.tipoServico.addEventListener(
-
         "change",
-
         buscarTabelaValores
-
     );
 
+
     if (
-
         elementos.administradora.value
-
     ) {
 
         atualizarFormulario();
@@ -355,11 +336,12 @@ function configurarAdministradora() {
 
 }
 
+
 async function carregarClientes() {
 
     const idAdministradora =
-
         elementos.administradora.value;
+
 
     if (!idAdministradora) {
 
@@ -369,17 +351,24 @@ async function carregarClientes() {
 
     }
 
+
     const resposta = await fetch(
 
         `/atendimentos/clientes?id_administradora=${idAdministradora}`
 
     );
 
-    const dados = await resposta.json();
 
-    preencherClientes(dados);
+    const dados =
+        await resposta.json();
+
+
+    preencherClientes(
+        dados
+    );
 
 }
+
 
 function preencherClientes(dados) {
 
@@ -389,31 +378,47 @@ function preencherClientes(dados) {
 
     }
 
+
     administradoraClienteProprio =
         dados.cliente_proprio === true;
+
 
     const clientes =
         dados.clientes || [];
 
-    elementos.cliente.innerHTML = "";
 
-    elementos.cliente.disabled = true;
+    elementos.cliente.innerHTML =
+        "";
+
+    elementos.cliente.disabled =
+        true;
+
 
     const opcaoPadrao =
-        document.createElement("option");
+        document.createElement(
+            "option"
+        );
 
-    opcaoPadrao.value = "";
 
-    opcaoPadrao.selected = true;
+    opcaoPadrao.value =
+        "";
 
-    if (!elementos.administradora.value) {
+    opcaoPadrao.selected =
+        true;
+
+
+    if (
+        !elementos.administradora.value
+    ) {
 
         opcaoPadrao.textContent =
             "Selecione uma administradora...";
 
     }
 
-    else if (clientes.length === 0) {
+    else if (
+        clientes.length === 0
+    ) {
 
         opcaoPadrao.textContent =
             "Não há clientes cadastrados para esta administradora.";
@@ -427,32 +432,46 @@ function preencherClientes(dados) {
 
     }
 
+
     elementos.cliente.appendChild(
         opcaoPadrao
     );
 
-    clientes.forEach(cliente => {
 
-        const option =
-            document.createElement("option");
+    clientes.forEach(
+        cliente => {
 
-        option.value =
-            cliente.id;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-        option.textContent =
-            cliente.nome;
 
-        elementos.cliente.appendChild(
-            option
-        );
+            option.value =
+                cliente.id;
 
-    });
 
-    if (clientes.length > 0) {
+            option.textContent =
+                cliente.nome;
 
-        elementos.cliente.disabled = false;
+
+            elementos.cliente.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if (
+        clientes.length > 0
+    ) {
+
+        elementos.cliente.disabled =
+            false;
 
     }
+
 
     if (ATENDIMENTO) {
 
@@ -462,11 +481,8 @@ function preencherClientes(dados) {
     }
 
     else if (
-
         dados.cliente_proprio &&
-
         clientes.length > 0
-
     ) {
 
         elementos.cliente.value =
@@ -476,6 +492,7 @@ function preencherClientes(dados) {
 
 }
 
+
 async function atualizarFormulario() {
 
     await carregarClientes();
@@ -484,24 +501,34 @@ async function atualizarFormulario() {
 
 }
 
+
 async function buscarTabelaValores() {
 
     const administradora =
         elementos.administradora.value;
 
+
     const tipo =
         elementos.tipoServico.value;
 
+
     removerAvisoTabelaValores();
+
 
     if (
         !administradora ||
         !tipo
     ) {
 
-        tabelaValores.valorSaida = 0;
+        tabelaValores.existe =
+            false;
 
-        tabelaValores.kmExcedente = 0;
+        tabelaValores.valorSaida =
+            0;
+
+        tabelaValores.kmExcedente =
+            0;
+
 
         calcularValores();
 
@@ -509,21 +536,32 @@ async function buscarTabelaValores() {
 
     }
 
-    const resposta = await fetch(
 
-        `/atendimentos/tabela-valores?id_administradora=${administradora}&id_tipo_servico=${tipo}`
+    const resposta =
+        await fetch(
 
-    );
+            `/atendimentos/tabela-valores` +
+            `?id_administradora=${administradora}` +
+            `&id_tipo_servico=${tipo}`
 
-    const dados = await resposta.json();
+        );
+
+
+    const dados =
+        await resposta.json();
+
 
     if (!dados) {
 
-        tabelaValores.existe = false;
+        tabelaValores.existe =
+            false;
 
-        tabelaValores.valorSaida = 0;
+        tabelaValores.valorSaida =
+            0;
 
-        tabelaValores.kmExcedente = 0;
+        tabelaValores.kmExcedente =
+            0;
+
 
         mostrarAvisoTabelaValores();
 
@@ -531,25 +569,36 @@ async function buscarTabelaValores() {
 
     else {
 
-        tabelaValores.existe = true;
+        tabelaValores.existe =
+            true;
+
 
         tabelaValores.valorSaida =
             dados.valor_saida !== null
-                ? Number(dados.valor_saida)
+                ? Number(
+                    dados.valor_saida
+                )
                 : 0;
+
 
         tabelaValores.kmExcedente =
             dados.valor_km_excedente !== null
-                ? Number(dados.valor_km_excedente)
+                ? Number(
+                    dados.valor_km_excedente
+                )
                 : 0;
 
-        if (dados.valor_zero) {
+
+        if (
+            dados.valor_zero
+        ) {
 
             mostrarAvisoValorZero();
 
         }
 
     }
+
 
     calcularValores();
 
@@ -651,6 +700,7 @@ function configurarPagamento() {
 
 }
 
+
 /* =====================================================
    VALOR NEGOCIADO
 ===================================================== */
@@ -700,6 +750,7 @@ function configurarValorNegociado() {
     }
 
 }
+
 
 /* =====================================================
    PEDÁGIO
@@ -789,6 +840,7 @@ function configurarPedagio() {
 
 }
 
+
 /* =====================================================
    HORAS / PATINS
 ===================================================== */
@@ -832,6 +884,7 @@ function configurarHoras() {
     );
 
 }
+
 
 /* =====================================================
    CAMPOS EXPANSÍVEIS
@@ -907,6 +960,7 @@ function configurarCampoExpandivel(
 
 }
 
+
 /* =====================================================
    CÁLCULO
 ===================================================== */
@@ -924,6 +978,7 @@ function configurarCalculo() {
     calcularValores();
 
 }
+
 
 function calcularValores() {
 
@@ -945,6 +1000,7 @@ function calcularValores() {
 
 }
 
+
 /* =====================================================
    REGRAS DE CÁLCULO
 ===================================================== */
@@ -954,6 +1010,7 @@ function calcularValorSaida() {
     return tabelaValores.valorSaida;
 
 }
+
 
 function calcularKmExcedente() {
 
@@ -981,6 +1038,7 @@ function calcularKmExcedente() {
 
 }
 
+
 function calcularPedagio() {
 
     if (
@@ -1000,6 +1058,7 @@ function calcularPedagio() {
     );
 
 }
+
 
 function calcularHoraParada() {
 
@@ -1029,6 +1088,7 @@ function calcularHoraParada() {
 
 }
 
+
 function calcularHoraTrabalhada() {
 
     if (
@@ -1056,6 +1116,7 @@ function calcularHoraTrabalhada() {
     );
 
 }
+
 
 function calcularPatins() {
 
@@ -1085,6 +1146,7 @@ function calcularPatins() {
 
 }
 
+
 /* =====================================================
    ATUALIZAÇÃO DO CAMPO VALOR
 ===================================================== */
@@ -1106,6 +1168,7 @@ function atualizarValor(total) {
         total.toFixed(2);
 
 }
+
 
 /* =====================================================
    DISTÂNCIA
@@ -1132,6 +1195,7 @@ function configurarCalculoDistancia() {
     );
 
 }
+
 
 async function calcularDistancia() {
 
@@ -1221,6 +1285,7 @@ async function calcularDistancia() {
 
         alert(
 
+            erro.message ||
             "Não foi possível calcular a distância."
 
         );
@@ -1229,29 +1294,48 @@ async function calcularDistancia() {
 
 }
 
+
+/* =====================================================
+   AVISOS DA TABELA DE VALORES
+===================================================== */
+
 function mostrarAvisoTabelaValores() {
 
     let aviso =
-        document.getElementById("aviso-tabela-valores");
+        document.getElementById(
+            "aviso-tabela-valores"
+        );
 
     if (aviso) {
+
         return;
+
     }
 
-    aviso = document.createElement("div");
+    aviso = document.createElement(
+        "div"
+    );
 
-    aviso.id = "aviso-tabela-valores";
+    aviso.id =
+        "aviso-tabela-valores";
 
-    aviso.className = "alert alert-warning";
+    aviso.className =
+        "alert alert-warning";
 
     aviso.textContent =
         "Não existe uma tabela de valores configurada para esta Administradora e Tipo de Serviço. Solicite ao administrador para configurar.";
 
     const campoValor =
-        elementos.valorTotal.closest(".form-group");
+        elementos.valorTotal.closest(
+            ".form-group"
+        );
 
-    campoValor.appendChild(aviso);
+    campoValor.appendChild(
+        aviso
+    );
+
 }
+
 
 function mostrarAvisoValorZero() {
 
@@ -1266,21 +1350,30 @@ function mostrarAvisoValorZero() {
 
     }
 
-    aviso = document.createElement("div");
+    aviso = document.createElement(
+        "div"
+    );
 
-    aviso.id = "aviso-valor-zero";
+    aviso.id =
+        "aviso-valor-zero";
 
-    aviso.className = "alert alert-warning";
+    aviso.className =
+        "alert alert-warning";
 
     aviso.textContent =
         "Valor configurado como 0. O valor deverá ser preenchido manualmente.";
 
     const campoValor =
-        elementos.valorTotal.closest(".form-group");
+        elementos.valorTotal.closest(
+            ".form-group"
+        );
 
-    campoValor.appendChild(aviso);
+    campoValor.appendChild(
+        aviso
+    );
 
 }
+
 
 function removerAvisoTabelaValores() {
 
@@ -1307,6 +1400,11 @@ function removerAvisoTabelaValores() {
     }
 
 }
+
+
+/* =====================================================
+   CONFIRMAÇÃO DE VALOR ZERO
+===================================================== */
 
 function configurarConfirmacaoValorZero() {
 
@@ -1353,6 +1451,165 @@ function configurarConfirmacaoValorZero() {
     );
 
 }
+
+
+/* =====================================================
+   VALIDAÇÃO DO FORMULÁRIO
+===================================================== */
+
+function configurarValidacaoFormulario() {
+
+    const formulario =
+        document.getElementById(
+            "form-atendimento"
+        );
+
+    if (!formulario) {
+
+        return;
+
+    }
+
+
+    const botaoSalvar =
+        formulario.querySelector(
+            'button[type="submit"]'
+        );
+
+    if (!botaoSalvar) {
+
+        return;
+
+    }
+
+
+    botaoSalvar.addEventListener(
+        "click",
+        function (evento) {
+
+            if (!formulario.checkValidity()) {
+
+                evento.preventDefault();
+
+                const campoInvalido =
+                    formulario.querySelector(
+                        ":invalid"
+                    );
+
+                if (campoInvalido) {
+
+                    campoInvalido.scrollIntoView({
+
+                        behavior: "smooth",
+
+                        block: "center"
+
+                    });
+
+                    setTimeout(
+
+                        function () {
+
+                            campoInvalido.reportValidity();
+
+                        },
+
+                        300
+
+                    );
+
+                }
+
+                else {
+
+                    formulario.reportValidity();
+
+                }
+
+                return;
+
+            }
+
+        }
+    );
+
+
+    formulario.addEventListener(
+        "submit",
+        function (evento) {
+
+            const dataAtendimento =
+                document.getElementById(
+                    "data_atendimento"
+                );
+
+            if (
+                dataAtendimento &&
+                dataAtendimento.value &&
+                dataAtendimento.max &&
+                dataAtendimento.value >
+                    dataAtendimento.max
+            ) {
+
+                evento.preventDefault();
+
+                dataAtendimento.setCustomValidity(
+                    "Data do Atendimento: " +
+                    "não pode ser uma data futura."
+                );
+
+                dataAtendimento.scrollIntoView({
+
+                    behavior: "smooth",
+
+                    block: "center"
+
+                });
+
+                setTimeout(
+
+                    function () {
+
+                        dataAtendimento.reportValidity();
+
+                    },
+
+                    300
+
+                );
+
+                return;
+
+            }
+
+        }
+    );
+
+
+    formulario.addEventListener(
+        "input",
+        function (evento) {
+
+            evento.target.setCustomValidity("");
+
+        }
+    );
+
+
+    formulario.addEventListener(
+        "change",
+        function (evento) {
+
+            evento.target.setCustomValidity("");
+
+        }
+    );
+
+}
+
+/* =====================================================
+   RESETAR NOVO ATENDIMENTO
+===================================================== */
 
 function resetarNovoAtendimento() {
 
@@ -1421,7 +1678,7 @@ function resetarNovoAtendimento() {
     elementos.observacao.value = "";
 
     removerAvisoTabelaValores();
-    
+
     tabelaValores.existe = false;
 
     tabelaValores.valorSaida = 0;
@@ -1469,5 +1726,97 @@ function resetarNovoAtendimento() {
     elementos.pagamentoSeparado.disabled = false;
 
     calcularValores();
+
+}
+
+
+console.log(
+    "ATENDIMENTO.JS FOI CARREGADO"
+);
+
+
+/* =====================================================
+   FORMATAÇÃO DA PLACA DO VEÍCULO REBOCADO
+===================================================== */
+
+function configurarPlacaVeiculoRebocado() {
+
+    const campoPlaca =
+        document.getElementById(
+            "placa_veiculo_rebocado"
+        );
+
+    if (!campoPlaca) {
+
+        return;
+
+    }
+
+
+    campoPlaca.addEventListener(
+        "input",
+        function () {
+
+            let placa =
+                campoPlaca.value
+                    .toUpperCase()
+                    .replace(
+                        /[^A-Z0-9]/g,
+                        ""
+                    );
+
+
+            /*
+             * Placa antiga
+             *
+             * ABC1234
+             *
+             * transforma em:
+             *
+             * ABC-1234
+             */
+
+            if (
+                /^[A-Z]{3}[0-9]{4}$/.test(
+                    placa
+                )
+            ) {
+
+                placa =
+                    placa.substring(0, 3)
+                    + "-"
+                    + placa.substring(3);
+
+            }
+
+
+            /*
+             * Limita o tamanho máximo.
+             *
+             * Placa antiga formatada:
+             * ABC-1234 = 8 caracteres
+             *
+             * Mercosul:
+             * ABC1D23 = 7 caracteres
+             */
+
+            if (
+                placa.length > 8
+            ) {
+
+                placa =
+                    placa.substring(
+                        0,
+                        8
+                    );
+
+            }
+
+
+            campoPlaca.value =
+                placa;
+
+        }
+    );
 
 }

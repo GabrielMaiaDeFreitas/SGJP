@@ -1,8 +1,17 @@
-from flask import Flask
+from flask import (
+    Flask,
+    flash,
+    redirect,
+    request,
+    url_for
+)
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from app.config import Config
+
+from app.exceptions.negocio import RegraNegocioError
+from app.exceptions.validacao import ValidacaoError
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -15,6 +24,33 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    @app.errorhandler(ValidacaoError)
+    def tratar_validacao(erro):
+
+        flash(
+            erro.mensagem,
+            "warning"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for("dashboard.index")
+        )
+
+    @app.errorhandler(RegraNegocioError)
+    def tratar_regra_negocio(erro):
+
+        flash(
+            erro.mensagem,
+            "warning"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for("dashboard.index")
+        )
+
 
     # Importa os blueprints
     from app.routes.autenticacao_routes import autenticacao_bp

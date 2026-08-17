@@ -1,35 +1,58 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const selectAdministradora = document.getElementById(
-        "id_administradora"
-    );
+    const selectAdministradora =
+        document.getElementById(
+            "id_administradora"
+        );
 
-    if (!selectAdministradora) {
 
-        return;
+    if (selectAdministradora) {
+
+        selectAdministradora.addEventListener(
+            "change",
+            () => {
+
+                if (!selectAdministradora.value) {
+                    return;
+                }
+
+                window.location =
+                    "/tabelas-valores/novo?id_administradora="
+                    + selectAdministradora.value;
+
+            }
+        );
 
     }
 
-    selectAdministradora.addEventListener(
 
-        "change",
+    const camposValor =
+        document.querySelectorAll(
+            ".valor-tabela"
+        );
 
-        () => {
 
-            if (!selectAdministradora.value) {
+    camposValor.forEach(
+        (campo) => {
 
-                return;
+            campo.addEventListener(
+                "input",
+                () => {
 
-            }
+                    if (
+                        campo.value !== ""
+                        &&
+                        Number(campo.value) < 0
+                    ) {
 
-            window.location =
+                        campo.value = "";
 
-                "/tabelas-valores/novo?id_administradora="
+                    }
 
-                + selectAdministradora.value;
+                }
+            );
 
         }
-
     );
 
 });

@@ -1,30 +1,37 @@
-from decimal import Decimal
 from copy import deepcopy
-
 
 from flask import (
     Blueprint,
     render_template,
-    session,
+    request,
     redirect,
     url_for,
-    request,
     flash
-)
-
-from app.models import (Administradora, TipoServico, TabelaValores)
-
-from app.services.tabela_valores_service import (
-    TabelaValoresService
 )
 
 from app.filters.tabela_valores import (
     FILTROS_TABELA_VALORES
 )
 
-from app.helpers.autorizacao_helper import (proteger_blueprint)
+from app.services.tabela_valores_service import (
+    TabelaValoresService
+)
 
-from copy import deepcopy
+from app.services.administradora_service import (
+    AdministradoraService
+)
+
+from app.services.tipo_servico_service import (
+    TipoServicoService
+)
+
+from app.exceptions import (
+    ValidacaoError
+)
+
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
 
 
 tabela_valores_bp = Blueprint(
@@ -37,20 +44,20 @@ tabela_valores_bp = Blueprint(
 
 )
 
-proteger_blueprint(tabela_valores_bp,"Administrador")
+
+proteger_blueprint(
+    tabela_valores_bp,
+    "Administrador"
+)
+
 
 @tabela_valores_bp.route("/")
 def listar():
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
-
-    tabelas = TabelaValoresService.listar(
-        request.args
+    tabelas = (
+        TabelaValoresService.listar()
     )
+
 
     return render_template(
 
@@ -71,51 +78,51 @@ def listar():
         ),
 
         exportar_url=url_for(
+
             "exportacao.exportar_generico",
+
             modulo="tabela_valores"
+
         )
 
     )
 
 
-@tabela_valores_bp.route("/novo",methods=["GET", "POST"])
+@tabela_valores_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
 def novo():
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
-
     administradoras = (
-
-        TabelaValoresService.administradoras_disponiveis()
-
+        TabelaValoresService
+        .administradoras_disponiveis()
     )
 
-    id_administradora = request.args.get(
 
-        "id_administradora",
-
-        type=int
-
+    id_administradora = (
+        request.args.get(
+            "id_administradora",
+            type=int
+        )
     )
+
 
     administradora = None
-
     tabela = []
+
 
     if id_administradora:
 
         if TabelaValoresService.tabela_existe(
-
             id_administradora
-
         ):
 
             flash(
 
-                "Essa administradora já possui uma tabela de valores cadastrada. Utilize a opção Editar.",
+                "Essa administradora já possui "
+                "uma tabela de valores configurada. "
+                "Utilize a opção Editar.",
 
                 "warning"
 
@@ -127,41 +134,62 @@ def novo():
 
                     "tabela_valores.editar",
 
-                    id_administradora=id_administradora
+                    id_administradora=(
+                        id_administradora
+                    )
 
                 )
 
             )
 
+
         administradora, tabela = (
-
-            TabelaValoresService.carregar_tabela(
-
+            TabelaValoresService
+            .carregar_tabela(
                 id_administradora
-
             )
-
         )
+
 
     if request.method == "POST":
 
-        id_administradora = int(
-
-            request.form[
-                "id_administradora"
-            ]
-
+        id_administradora = request.form.get(
+            "id_administradora",
+            type=int
         )
 
+
+        if not id_administradora:
+
+            flash(
+                "Selecione uma administradora.",
+                "warning"
+            )
+
+            return render_template(
+
+                "tabela_valores/form.html",
+
+                titulo="Nova Tabela de Valores",
+
+                administradoras=administradoras,
+
+                administradora=None,
+
+                tabela=[]
+
+            )
+
+
         if TabelaValoresService.tabela_existe(
-
             id_administradora
-
         ):
 
             flash(
 
-                "Essa administradora já possui uma tabela de valores cadastrada. Utilize a opção Editar.",
+                "Essa administradora já possui "
+                "uma tabela de valores configurada. "
+                "Utilize a opção Editar.",
 
                 "warning"
 
@@ -173,43 +201,81 @@ def novo():
 
                     "tabela_valores.editar",
 
-                    id_administradora=id_administradora
+                    id_administradora=(
+                        id_administradora
+                    )
 
                 )
 
             )
 
-        dados = TabelaValoresService.montar_dados(
 
-            request.form
+        try:
 
-        )
+            dados = (
+                TabelaValoresService
+                .montar_dados(
+                    request.form
+                )
+            )
 
-        TabelaValoresService.salvar_tabela(
+            TabelaValoresService.salvar_tabela(
 
-            id_administradora=id_administradora,
+                id_administradora=(
+                    id_administradora
+                ),
 
-            dados=dados
+                dados=dados
 
-        )
+            )
+
+        except ValidacaoError as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+            administradora, tabela = (
+                TabelaValoresService
+                .carregar_tabela(
+                    id_administradora
+                )
+            )
+
+            return render_template(
+
+                "tabela_valores/form.html",
+
+                titulo="Nova Tabela de Valores",
+
+                administradoras=administradoras,
+
+                administradora=administradora,
+
+                tabela=tabela
+
+            )
+
 
         flash(
 
-            "Tabela de valores cadastrada com sucesso.",
+            "Tabela de valores cadastrada "
+            "com sucesso.",
 
             "success"
 
         )
 
+
         return redirect(
 
             url_for(
-
                 "tabela_valores.listar"
-
             )
 
         )
+
 
     return render_template(
 
@@ -225,46 +291,80 @@ def novo():
 
     )
 
-@tabela_valores_bp.route("/<int:id_administradora>/editar", methods=["GET", "POST"])
+
+@tabela_valores_bp.route(
+    "/<int:id_administradora>/editar",
+    methods=["GET", "POST"]
+)
 def editar(id_administradora):
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
-
     administradora, tabela = (
-
-        TabelaValoresService.carregar_tabela(
+        TabelaValoresService
+        .carregar_tabela(
             id_administradora
         )
-
     )
+
 
     if request.method == "POST":
 
-        dados = TabelaValoresService.montar_dados(
+        try:
 
-            request.form
+            dados = (
+                TabelaValoresService
+                .montar_dados(
+                    request.form
+                )
+            )
 
-        )
+            TabelaValoresService.salvar_tabela(
 
-        TabelaValoresService.salvar_tabela(
+                id_administradora=(
+                    id_administradora
+                ),
 
-            id_administradora=id_administradora,
+                dados=dados
 
-            dados=dados
+            )
 
-        )
+        except ValidacaoError as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+            administradora, tabela = (
+                TabelaValoresService
+                .carregar_tabela(
+                    id_administradora
+                )
+            )
+
+            return render_template(
+
+                "tabela_valores/form.html",
+
+                titulo="Editar Tabela de Valores",
+
+                administradora=administradora,
+
+                tabela=tabela,
+
+                administradoras=[]
+
+            )
+
 
         flash(
 
-            "Tabela de valores atualizada com sucesso.",
+            "Tabela de valores atualizada "
+            "com sucesso.",
 
             "success"
 
         )
+
 
         return redirect(
 
@@ -273,6 +373,7 @@ def editar(id_administradora):
             )
 
         )
+
 
     return render_template(
 
@@ -288,22 +389,19 @@ def editar(id_administradora):
 
     )
 
-@tabela_valores_bp.route("/<int:id_administradora>")
+
+@tabela_valores_bp.route(
+    "/<int:id_administradora>"
+)
 def detalhes(id_administradora):
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
-
     administradora, tabela = (
-
-        TabelaValoresService.detalhes(
+        TabelaValoresService
+        .detalhes(
             id_administradora
         )
-
     )
+
 
     return render_template(
 
@@ -318,84 +416,85 @@ def detalhes(id_administradora):
     )
 
 
-@tabela_valores_bp.route("/completo")
+@tabela_valores_bp.route(
+    "/completo"
+)
 def completo():
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
+    tabelas = (
+        TabelaValoresService
+        .listar_completo(
+            request.args
         )
-
-    tabelas = TabelaValoresService.listar_completo(
-
-        request.args
-
     )
+
 
     campos = deepcopy(
         FILTROS_TABELA_VALORES
     )
 
-    administradoras = Administradora.query.filter_by(
 
-        ativo=True
+    administradoras = (
+        AdministradoraService
+        .listar_ativas()
+    )
 
-    ).order_by(
+    tipos_servico = (
+        TipoServicoService
+        .listar_ativos()
+    )
 
-        Administradora.nome
-
-    ).all()
-
-    tipos_servico = TipoServico.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        TipoServico.nome
-
-    ).all()
 
     for campo in campos:
 
-        if campo["campo"] == "fk_administradora_id_administradora":
+        if (
+            campo["campo"]
+            == "fk_administradora_id_administradora"
+        ):
 
             campo["opcoes"] = [
 
                 {
+                    "id":
+                        administradora.id_administradora,
 
-                    "id": administradora.id_administradora,
-
-                    "label": administradora.nome
-
+                    "label":
+                        administradora.nome
                 }
 
                 for administradora in administradoras
 
             ]
 
-        elif campo["campo"] == "fk_tipo_servico_id_tipo_servico":
+
+        elif (
+            campo["campo"]
+            == "fk_tipo_servico_id_tipo_servico"
+        ):
 
             campo["opcoes"] = [
 
                 {
+                    "id":
+                        tipo.id_tipo_servico,
 
-                    "id": tipo.id_tipo_servico,
-
-                    "label": tipo.nome
-
+                    "label":
+                        tipo.nome
                 }
 
                 for tipo in tipos_servico
 
             ]
 
+
     return render_template(
 
         "tabela_valores/completo.html",
 
-        titulo="Visualização Completa das Tabelas de Valores",
+        titulo=(
+            "Visualização Completa "
+            "das Tabelas de Valores"
+        ),
 
         tabelas=tabelas,
 

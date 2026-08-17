@@ -8,10 +8,19 @@ from flask import (
     flash
 )
 
-from app import db
 from app.models import Usuario
+
 from app.filters.usuario import FILTROS_USUARIO
-from app.services.usuario_service import UsuarioService
+
+from app.services.usuario_service import (
+    UsuarioService
+)
+
+from app.exceptions import (
+    ValidacaoError,
+    RecursoDuplicadoError
+)
+
 from app.helpers.autorizacao_helper import (
     requer_perfil
 )
@@ -28,9 +37,7 @@ usuario_bp = Blueprint(
 @requer_perfil("Administrador")
 def listar():
 
-    usuarios = Usuario.query.order_by(
-        Usuario.nome
-    ).all()
+    usuarios = UsuarioService.listar()
 
     return render_template(
 
@@ -40,7 +47,9 @@ def listar():
 
         usuarios=usuarios,
 
-        novo_url=url_for("usuario.novo"),
+        novo_url=url_for(
+            "usuario.novo"
+        ),
 
         novo_texto="Novo Usuário",
 
@@ -65,15 +74,56 @@ def novo():
 
     if request.method == "POST":
 
-        def voltar_formulario():
+        nome = request.form.get(
+            "nome"
+        )
+
+        login = request.form.get(
+            "login"
+        )
+
+        perfil = request.form.get(
+            "perfil"
+        )
+
+        senha = request.form.get(
+            "senha"
+        )
+
+        confirmar_senha = request.form.get(
+            "confirmar_senha"
+        )
+
+        try:
+
+            UsuarioService.criar(
+
+                nome=nome,
+
+                login=login,
+
+                perfil=perfil,
+
+                senha=senha,
+
+                confirmar_senha=confirmar_senha
+
+            )
+
+        except ValidacaoError as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
 
             usuario = Usuario(
 
-                nome=request.form["nome"],
+                nome=nome,
 
-                login=request.form["login"],
+                login=login,
 
-                perfil=request.form["perfil"]
+                perfil=perfil
 
             )
 
@@ -89,60 +139,35 @@ def novo():
 
             )
 
-        senha = request.form["senha"].strip()
-
-        confirmar_senha = (
-            request.form["confirmar_senha"].strip()
-        )
-
-        if not senha:
+        except RecursoDuplicadoError as erro:
 
             flash(
-                "Informe uma senha.",
+                erro.mensagem,
                 "warning"
             )
 
-            return voltar_formulario()
+            usuario = Usuario(
 
-        if senha != confirmar_senha:
+                nome=nome,
 
-            flash(
-                "A confirmação da senha não confere.",
-                "warning"
+                login=login,
+
+                perfil=perfil
+
             )
 
-            return voltar_formulario()
+            return render_template(
 
-        if Usuario.query.filter(
-            Usuario.login.ilike(
-                request.form["login"]
+                "usuarios/form.html",
+
+                titulo="Novo Usuário",
+
+                usuario=usuario,
+
+                editando=False
+
             )
-        ).first():
 
-            flash(
-                "Já existe um usuário com esse login.",
-                "warning"
-            )
-
-            return voltar_formulario()
-
-        usuario = Usuario(
-
-            nome=request.form["nome"],
-
-            login=request.form["login"],
-
-            perfil=request.form["perfil"],
-
-            ativo=True
-
-        )
-
-        usuario.set_senha(senha)
-
-        db.session.add(usuario)
-
-        db.session.commit()
 
         flash(
             "Usuário cadastrado com sucesso.",
@@ -150,8 +175,11 @@ def novo():
         )
 
         return redirect(
-            url_for("usuario.listar")
+            url_for(
+                "usuario.listar"
+            )
         )
+
 
     return render_template(
 
@@ -170,24 +198,82 @@ def novo():
     "/<int:id_usuario>/editar",
     methods=["GET", "POST"]
 )
-
-
 @requer_perfil("Administrador")
 def editar(id_usuario):
 
-    usuario = Usuario.query.get_or_404(
+    usuario = UsuarioService.buscar_por_id(
         id_usuario
     )
 
+
     if request.method == "POST":
 
-        def voltar_formulario():
+        nome = request.form.get(
+            "nome"
+        )
 
-            usuario.nome = request.form["nome"]
+        login = request.form.get(
+            "login"
+        )
 
-            usuario.login = request.form["login"]
+        perfil = request.form.get(
+            "perfil"
+        )
 
-            usuario.perfil = request.form["perfil"]
+        senha_atual = request.form.get(
+            "senha_atual"
+        )
+
+        nova_senha = request.form.get(
+            "nova_senha"
+        )
+
+        confirmar_senha = request.form.get(
+            "confirmar_senha"
+        )
+
+
+        try:
+
+            UsuarioService.atualizar(
+
+                usuario=usuario,
+
+                nome=nome,
+
+                login=login,
+
+                perfil=perfil,
+
+                senha_atual=senha_atual,
+
+                nova_senha=nova_senha,
+
+                confirmar_senha=confirmar_senha
+
+            )
+
+        except (
+            ValidacaoError,
+            RecursoDuplicadoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+            usuario.nome = (
+                nome or ""
+            )
+
+            usuario.login = (
+                login or ""
+            )
+
+            usuario.perfil = (
+                perfil or ""
+            )
 
             return render_template(
 
@@ -197,124 +283,41 @@ def editar(id_usuario):
 
                 usuario=usuario,
 
-                editando=True
+                editando=True,
+
+                origem=request.form.get(
+                    "origem"
+                )
 
             )
 
-        usuario_existente = Usuario.query.filter(
-
-            Usuario.login.ilike(
-                request.form["login"]
-            ),
-
-            Usuario.id_usuario != id_usuario
-
-        ).first()
-
-        if usuario_existente:
-
-            flash(
-                "Já existe um usuário com esse login.",
-                "warning"
-            )
-
-            return voltar_formulario()
-
-        usuario.nome = request.form["nome"]
-
-        usuario.login = request.form["login"]
-
-        usuario.perfil = request.form["perfil"]
-
-        senha_atual = (
-            request.form["senha_atual"].strip()
-        )
-
-        nova_senha = (
-            request.form["nova_senha"].strip()
-        )
-
-        confirmar_senha = (
-            request.form["confirmar_senha"].strip()
-        )
-
-        if (
-            senha_atual
-            or nova_senha
-            or confirmar_senha
-        ):
-
-            if not senha_atual:
-
-                flash(
-                    "Informe a senha atual.",
-                    "warning"
-                )
-
-                return voltar_formulario()
-
-            if not usuario.verificar_senha(
-                senha_atual
-            ):
-
-                flash(
-                    "Senha atual incorreta.",
-                    "error"
-                )
-
-                return voltar_formulario()
-
-            if not nova_senha:
-
-                flash(
-                    "Informe a nova senha.",
-                    "warning"
-                )
-
-                return voltar_formulario()
-
-            if nova_senha != confirmar_senha:
-
-                flash(
-                    "A confirmação da nova senha não confere.",
-                    "warning"
-                )
-
-                return voltar_formulario()
-
-            if senha_atual == nova_senha:
-
-                flash(
-                    "A nova senha deve ser diferente da senha atual.",
-                    "warning"
-                )
-
-                return voltar_formulario()
-
-            usuario.set_senha(
-                nova_senha
-            )
-
-        db.session.commit()
 
         flash(
             "Usuário atualizado com sucesso.",
             "success"
         )
 
+
         origem = request.form.get(
             "origem"
         )
 
+
         if origem == "completo":
 
             return redirect(
-                url_for("usuario.completo")
+                url_for(
+                    "usuario.completo"
+                )
             )
 
+
         return redirect(
-            url_for("usuario.listar")
+            url_for(
+                "usuario.listar"
+            )
         )
+
 
     return render_template(
 
@@ -339,13 +342,13 @@ def editar(id_usuario):
 @requer_perfil("Administrador")
 def toggle(id_usuario):
 
-    usuario = Usuario.query.get_or_404(
+    usuario = UsuarioService.buscar_por_id(
         id_usuario
     )
 
-    usuario.ativo = not usuario.ativo
-
-    db.session.commit()
+    UsuarioService.alternar_status(
+        usuario
+    )
 
     flash(
         "Status do usuário atualizado.",
@@ -359,11 +362,15 @@ def toggle(id_usuario):
     if origem == "completo":
 
         return redirect(
-            url_for("usuario.completo")
+            url_for(
+                "usuario.completo"
+            )
         )
 
     return redirect(
-        url_for("usuario.listar")
+        url_for(
+            "usuario.listar"
+        )
     )
 
 
@@ -373,7 +380,7 @@ def toggle(id_usuario):
 @requer_perfil("Administrador")
 def detalhes(id_usuario):
 
-    usuario = Usuario.query.get_or_404(
+    usuario = UsuarioService.buscar_por_id(
         id_usuario
     )
 
@@ -394,7 +401,7 @@ def detalhes(id_usuario):
 @requer_perfil("Administrador")
 def completo():
 
-    usuarios = UsuarioService.listar(
+    usuarios = UsuarioService.listar_completo(
         request.args
     )
 
@@ -419,193 +426,121 @@ def completo():
     )
 
 
-@usuario_bp.route("/meu-perfil", methods=["GET", "POST"])
-@requer_perfil("Administrador","Operador","Leitor")
+@usuario_bp.route(
+    "/meu-perfil",
+    methods=["GET", "POST"]
+)
+@requer_perfil(
+    "Administrador",
+    "Operador",
+    "Leitor"
+)
 def meu_perfil():
 
-    usuario = Usuario.query.get_or_404(
+    usuario = UsuarioService.buscar_por_id(
         session["usuario_id"]
     )
 
-    if request.method == "POST":
 
-        # =====================================================
-        # ALTERAÇÕES ADMINISTRATIVAS
-        # SOMENTE ADMINISTRADOR
-        # =====================================================
+    if request.method == "POST":
 
         if session.get("perfil") == "Administrador":
 
-            nome = request.form["nome"].strip()
-            login = request.form["login"].strip()
-            perfil = request.form["perfil"].strip()
+            nome = request.form.get(
+                "nome"
+            )
 
-            if not nome:
+            login = request.form.get(
+                "login"
+            )
 
-                flash(
-                    "Informe o nome.",
-                    "warning"
-                )
+            perfil = request.form.get(
+                "perfil"
+            )
 
-                return render_template(
-                    "usuarios/meu_perfil.html",
-                    titulo="Meu Perfil",
-                    usuario=usuario
-                )
+        else:
 
-            if not login:
+            nome = usuario.nome
 
-                flash(
-                    "Informe o login.",
-                    "warning"
-                )
+            login = usuario.login
 
-                return render_template(
-                    "usuarios/meu_perfil.html",
-                    titulo="Meu Perfil",
-                    usuario=usuario
-                )
+            perfil = usuario.perfil
 
-            if perfil not in [
-                "Administrador",
-                "Operador",
-                "Leitor"
-            ]:
 
-                flash(
-                    "Perfil inválido.",
-                    "warning"
-                )
-
-                return render_template(
-                    "usuarios/meu_perfil.html",
-                    titulo="Meu Perfil",
-                    usuario=usuario
-                )
-
-            usuario_existente = Usuario.query.filter(
-                Usuario.login.ilike(login),
-                Usuario.id_usuario != usuario.id_usuario
-            ).first()
-
-            if usuario_existente:
-
-                flash(
-                    "Já existe um usuário com esse login.",
-                    "warning"
-                )
-
-                usuario.nome = nome
-                usuario.login = login
-                usuario.perfil = perfil
-
-                return render_template(
-                    "usuarios/meu_perfil.html",
-                    titulo="Meu Perfil",
-                    usuario=usuario
-                )
-
-            usuario.nome = nome
-            usuario.login = login
-            usuario.perfil = perfil
-
-        # =====================================================
-        # ALTERAÇÃO DE SENHA
-        # TODOS OS PERFIS
-        # =====================================================
-
-        senha_atual = (
-            request.form["senha_atual"].strip()
+        senha_atual = request.form.get(
+            "senha_atual"
         )
 
-        nova_senha = (
-            request.form["nova_senha"].strip()
+        nova_senha = request.form.get(
+            "nova_senha"
         )
 
-        confirmar_senha = (
-            request.form["confirmar_senha"].strip()
+        confirmar_senha = request.form.get(
+            "confirmar_senha"
         )
 
-        if not senha_atual:
+
+        try:
+
+            UsuarioService.atualizar(
+
+                usuario=usuario,
+
+                nome=nome,
+
+                login=login,
+
+                perfil=perfil,
+
+                senha_atual=senha_atual,
+
+                nova_senha=nova_senha,
+
+                confirmar_senha=confirmar_senha
+
+            )
+
+        except (
+            ValidacaoError,
+            RecursoDuplicadoError
+        ) as erro:
 
             flash(
-                "Informe a senha atual.",
+                erro.mensagem,
                 "warning"
             )
 
-            return render_template(
-                "usuarios/meu_perfil.html",
-                titulo="Meu Perfil",
-                usuario=usuario
+            usuario.nome = (
+                nome or ""
             )
 
-        if not usuario.verificar_senha(
-            senha_atual
-        ):
+            usuario.login = (
+                login or ""
+            )
 
-            flash(
-                "Senha atual incorreta.",
-                "warning"
+            usuario.perfil = (
+                perfil or ""
             )
 
             return render_template(
+
                 "usuarios/meu_perfil.html",
+
                 titulo="Meu Perfil",
+
                 usuario=usuario
+
             )
 
-        if not nova_senha:
 
-            flash(
-                "Informe a nova senha.",
-                "warning"
-            )
-
-            return render_template(
-                "usuarios/meu_perfil.html",
-                titulo="Meu Perfil",
-                usuario=usuario
-            )
-
-        if nova_senha != confirmar_senha:
-
-            flash(
-                "A confirmação da nova senha não confere.",
-                "warning"
-            )
-
-            return render_template(
-                "usuarios/meu_perfil.html",
-                titulo="Meu Perfil",
-                usuario=usuario
-            )
-
-        if senha_atual == nova_senha:
-
-            flash(
-                "A nova senha deve ser diferente da senha atual.",
-                "warning"
-            )
-
-            return render_template(
-                "usuarios/meu_perfil.html",
-                titulo="Meu Perfil",
-                usuario=usuario
-            )
-
-        usuario.set_senha(
-            nova_senha
+        session["usuario_nome"] = (
+            usuario.nome
         )
 
-        db.session.commit()
+        session["perfil"] = (
+            usuario.perfil
+        )
 
-        # =====================================================
-        # ATUALIZA DADOS DA SESSÃO
-        # CASO O ADMINISTRADOR TENHA ALTERADO OS DADOS
-        # =====================================================
-
-        session["usuario_nome"] = usuario.nome
-        session["perfil"] = usuario.perfil
 
         flash(
             "Perfil atualizado com sucesso.",
@@ -613,11 +548,18 @@ def meu_perfil():
         )
 
         return redirect(
-            url_for("usuario.meu_perfil")
+            url_for(
+                "usuario.meu_perfil"
+            )
         )
 
+
     return render_template(
+
         "usuarios/meu_perfil.html",
+
         titulo="Meu Perfil",
+
         usuario=usuario
+
     )

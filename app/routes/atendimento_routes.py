@@ -1,3 +1,7 @@
+from copy import deepcopy
+from datetime import date
+from decimal import Decimal, InvalidOperation
+
 from flask import (
     Blueprint,
     render_template,
@@ -5,24 +9,8 @@ from flask import (
     redirect,
     url_for,
     request,
-    flash
-)
-
-from copy import deepcopy
-from flask import jsonify
-
-from app.models import (
-    Atendimento,
-    Administradora,
-    Motorista,
-    Caminhao,
-    Cliente,
-    TipoServico,
-    Usuario
-)
-
-from app.filters.atendimento import (
-    FILTROS_ATENDIMENTO
+    flash,
+    jsonify
 )
 
 from app.services.atendimento_service import (
@@ -33,8 +21,8 @@ from app.services.cliente_service import (
     ClienteService
 )
 
-from app.helpers.autorizacao_helper import (
-    requer_perfil
+from app.filters.atendimento import (
+    FILTROS_ATENDIMENTO
 )
 
 from app.constants.atendimento import (
@@ -44,19 +32,179 @@ from app.constants.atendimento import (
     KM_FRANQUIA
 )
 
-
-atendimento_bp = Blueprint(
-
-    "atendimento",
-
-    __name__,
-
-    url_prefix="/atendimentos"
-
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
 )
 
+from app.exceptions.validacao import ValidacaoError
+from app.exceptions.negocio import RegraNegocioError
+
+
+atendimento_bp = Blueprint(
+    "atendimento",
+    __name__,
+    url_prefix="/atendimentos"
+)
+
+
+proteger_blueprint(
+    atendimento_bp,
+    "Administrador",
+    "Operador"
+)
+
+# =========================================================
+# REPOPULAÇÃO DO FORMULÁRIO APÓS ERRO
+# =========================================================
+
+def _int_ou_none(valor):
+
+    try:
+
+        return int(valor)
+
+    except (TypeError, ValueError):
+
+        return None
+
+
+def _date_ou_none(valor):
+
+    if not valor:
+
+        return None
+
+    try:
+
+        return date.fromisoformat(valor)
+
+    except ValueError:
+
+        return None
+
+
+def _decimal_ou_none(valor):
+
+    if valor is None or str(valor).strip() == "":
+
+        return None
+
+    try:
+
+        return Decimal(str(valor))
+
+    except (InvalidOperation, ValueError):
+
+        return None
+
+
+def _construir_atendimento_repovoado(form):
+    """
+    Monta uma estrutura equivalente a um Atendimento
+    a partir dos dados enviados no POST, para o template
+    conseguir repopular o formulário com o que o usuário
+    digitou, em vez de resetar tudo após um erro.
+    """
+
+    tem_veiculo = bool(
+        (form.get("placa_veiculo_rebocado") or "").strip()
+        or
+        (form.get("modelo_veiculo_rebocado") or "").strip()
+    )
+
+    return {
+
+        "tabela_valores": {
+
+            "fk_administradora_id_administradora":
+                _int_ou_none(form.get("id_administradora")),
+
+            "fk_tipo_servico_id_tipo_servico":
+                _int_ou_none(form.get("id_tipo_servico")),
+
+        },
+
+        "data_atendimento":
+            _date_ou_none(form.get("data_atendimento")),
+
+        "protocolo":
+            form.get("protocolo", ""),
+
+        "fk_motorista_id_motorista":
+            _int_ou_none(form.get("id_motorista")),
+
+        "fk_caminhao_id_caminhao":
+            _int_ou_none(form.get("id_caminhao")),
+
+        "fk_cliente_id_cliente":
+            _int_ou_none(form.get("id_cliente")),
+
+        "veiculo_rebocado": {
+            "placa": form.get("placa_veiculo_rebocado", ""),
+            "modelo": form.get("modelo_veiculo_rebocado", ""),
+        } if tem_veiculo else {},
+
+        "origem":
+            form.get("origem", ""),
+
+        "destino":
+            form.get("destino", ""),
+
+        "valor_total":
+            _decimal_ou_none(form.get("valor_total")),
+
+        "status_financeiro":
+            "Outro"
+            if form.get("pagamento_separado") == "on"
+            else "Aguardando Fechamento",
+
+        "valor_pago":
+            _decimal_ou_none(form.get("valor_pago")) or Decimal("0"),
+
+        "valor_pedagio":
+            _decimal_ou_none(form.get("valor_pedagio")) or Decimal("0"),
+
+        "cobrar_pedagio":
+            form.get("cobrar_pedagio") == "on",
+
+        "cobrar_hora_parada":
+            form.get("cobrar_hora_parada") == "on",
+
+        "quantidade_hora_parada":
+            _int_ou_none(form.get("quantidade_hora_parada")) or 0,
+
+        "cobrar_hora_trabalhada":
+            form.get("cobrar_hora_trabalhada") == "on",
+
+        "quantidade_hora_trabalhada":
+            _int_ou_none(form.get("quantidade_hora_trabalhada")) or 0,
+
+        "usar_patins":
+            form.get("usar_patins") == "on",
+
+        "quantidade_patins":
+            _int_ou_none(form.get("quantidade_patins")) or 0,
+
+        "observacao":
+            form.get("observacao", ""),
+
+    }
+
+
+def _construir_atendimento_json_repovoado(form):
+
+    return {
+
+        "fk_cliente_id_cliente":
+            _int_ou_none(form.get("id_cliente")),
+
+    }
+
+# =========================================================
+# LISTAGEM
+# =========================================================
+
 @atendimento_bp.route("/")
-@requer_perfil("Administrador","Operador")
 def listar():
 
     if "usuario_id" not in session:
@@ -92,8 +240,15 @@ def listar():
 
     )
 
-@atendimento_bp.route("/novo",methods=["GET", "POST"])
-@requer_perfil("Administrador","Operador")
+
+# =========================================================
+# NOVO
+# =========================================================
+
+@atendimento_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
 def novo():
 
     if "usuario_id" not in session:
@@ -103,20 +258,18 @@ def novo():
         )
 
     dados_formulario = (
-
         AtendimentoService.carregar_formulario()
-
     )
 
     if request.method == "POST":
 
-        dados = AtendimentoService.montar_dados(
-
-            request.form
-
-        )
-
         try:
+
+            dados = (
+                AtendimentoService.montar_dados(
+                    request.form
+                )
+            )
 
             AtendimentoService.salvar(
 
@@ -126,14 +279,14 @@ def novo():
 
             )
 
-        except ValueError as erro:
+        except (
+            ValidacaoError,
+            RegraNegocioError
+        ) as erro:
 
             flash(
-
-                str(erro),
-
+                erro.mensagem,
                 "warning"
-
             )
 
             return render_template(
@@ -142,23 +295,24 @@ def novo():
 
                 titulo="Novo Atendimento",
 
+                modo_edicao=False,
+
+                atendimento=_construir_atendimento_repovoado(
+                    request.form
+                ),
+
+                atendimento_json=_construir_atendimento_json_repovoado(
+                    request.form
+                ),
+
                 **dados_formulario,
 
-                VALOR_PATINS=float(
-                    VALOR_PATINS
-                ),
+                data_atual=date.today(),
 
-                VALOR_HORA_PARADA=float(
-                    VALOR_HORA_PARADA
-                ),
-
-                VALOR_HORA_TRABALHADA=float(
-                    VALOR_HORA_TRABALHADA
-                ),
-
-                KM_FRANQUIA=KM_FRANQUIA,
-
-                resetar_novo_atendimento=False
+                VALOR_PATINS=float(VALOR_PATINS),
+                VALOR_HORA_PARADA=float(VALOR_HORA_PARADA),
+                VALOR_HORA_TRABALHADA=float(VALOR_HORA_TRABALHADA),
+                KM_FRANQUIA=KM_FRANQUIA
 
             )
 
@@ -170,36 +324,10 @@ def novo():
 
         )
 
-        return render_template(
+        return redirect(
 
-            "atendimentos/form.html",
-
-            titulo="Novo Atendimento",
-
-            **dados_formulario,
-
-            VALOR_PATINS=float(
-                VALOR_PATINS
-            ),
-
-            VALOR_HORA_PARADA=float(
-                VALOR_HORA_PARADA
-            ),
-
-            VALOR_HORA_TRABALHADA=float(
-                VALOR_HORA_TRABALHADA
-            ),
-
-            KM_FRANQUIA=KM_FRANQUIA,
-
-            resetar_novo_atendimento=True,
-
-            administradora_inicial=(
-                dados["id_administradora"]
-            ),
-
-            data_atendimento_inicial=(
-                dados["data_atendimento"]
+            url_for(
+                "atendimento.listar"
             )
 
         )
@@ -211,6 +339,8 @@ def novo():
         titulo="Novo Atendimento",
 
         **dados_formulario,
+
+        data_atual=date.today(),
 
         VALOR_PATINS=float(
             VALOR_PATINS
@@ -224,76 +354,72 @@ def novo():
             VALOR_HORA_TRABALHADA
         ),
 
-        KM_FRANQUIA=KM_FRANQUIA,
-
-        resetar_novo_atendimento=False
+        KM_FRANQUIA=KM_FRANQUIA
 
     )
+
+
+# =========================================================
+# EDITAR
+# =========================================================
 
 @atendimento_bp.route(
     "/<int:id_atendimento>/editar",
     methods=["GET", "POST"]
 )
-@requer_perfil("Administrador","Operador")
 def editar(id_atendimento):
 
     if "usuario_id" not in session:
 
         return redirect(
-
             url_for("autenticacao.login")
-
         )
 
-    atendimento = AtendimentoService.detalhes(
-
-        id_atendimento
-
+    atendimento = (
+        AtendimentoService.detalhes(
+            id_atendimento
+        )
     )
 
     dados_formulario = (
-
         AtendimentoService.carregar_formulario()
-
     )
 
     atendimento_json = {
 
         "fk_cliente_id_cliente":
-
             atendimento.fk_cliente_id_cliente,
 
         "fk_motorista_id_motorista":
-
             atendimento.fk_motorista_id_motorista,
 
         "fk_caminhao_id_caminhao":
-
             atendimento.fk_caminhao_id_caminhao,
 
         "fk_tabela_valores_id_tabela_valores":
-
             atendimento.fk_tabela_valores_id_tabela_valores,
 
         "valor_total":
-
-            float(atendimento.valor_total or 0),
+            float(
+                atendimento.valor_total or 0
+            ),
 
         "km_total":
-
-            float(atendimento.km_total or 0)
+            float(
+                atendimento.km_total or 0
+            )
 
     }
 
     if request.method == "POST":
 
-        dados = AtendimentoService.montar_dados(
-
-            request.form
-
-        )
-
         try:
+
+            dados = (
+                AtendimentoService.montar_dados(
+                    request.form
+                )
+            )
 
             AtendimentoService.atualizar(
 
@@ -303,14 +429,14 @@ def editar(id_atendimento):
 
             )
 
-        except ValueError as erro:
+        except (
+            ValidacaoError,
+            RegraNegocioError
+        ) as erro:
 
             flash(
-
-                str(erro),
-
+                erro.mensagem,
                 "warning"
-
             )
 
             return render_template(
@@ -319,30 +445,23 @@ def editar(id_atendimento):
 
                 titulo="Editar Atendimento",
 
-                atendimento=atendimento,
+                atendimento=_construir_atendimento_repovoado(
+                    request.form
+                ),
 
-                atendimento_json=atendimento_json,
+                atendimento_json=_construir_atendimento_json_repovoado(
+                    request.form
+                ),
+
+                modo_edicao=True,
 
                 **dados_formulario,
 
-                VALOR_PATINS=float(
+                data_atual=date.today(),
 
-                    VALOR_PATINS
-
-                ),
-
-                VALOR_HORA_PARADA=float(
-
-                    VALOR_HORA_PARADA
-
-                ),
-
-                VALOR_HORA_TRABALHADA=float(
-
-                    VALOR_HORA_TRABALHADA
-
-                ),
-
+                VALOR_PATINS=float(VALOR_PATINS),
+                VALOR_HORA_PARADA=float(VALOR_HORA_PARADA),
+                VALOR_HORA_TRABALHADA=float(VALOR_HORA_TRABALHADA),
                 KM_FRANQUIA=KM_FRANQUIA
 
             )
@@ -361,7 +480,9 @@ def editar(id_atendimento):
 
                 "atendimento.detalhes",
 
-                id_atendimento=atendimento.id_atendimento
+                id_atendimento=(
+                    atendimento.id_atendimento
+                )
 
             )
 
@@ -379,30 +500,34 @@ def editar(id_atendimento):
 
         **dados_formulario,
 
+        modo_edicao=True,
+
+        data_atual=date.today(),
+
         VALOR_PATINS=float(
-
             VALOR_PATINS
-
         ),
 
         VALOR_HORA_PARADA=float(
-
             VALOR_HORA_PARADA
-
         ),
 
         VALOR_HORA_TRABALHADA=float(
-
             VALOR_HORA_TRABALHADA
-
         ),
 
         KM_FRANQUIA=KM_FRANQUIA
 
     )
 
-@atendimento_bp.route("/<int:id_atendimento>")
-@requer_perfil("Administrador","Operador")
+
+# =========================================================
+# DETALHES
+# =========================================================
+
+@atendimento_bp.route(
+    "/<int:id_atendimento>"
+)
 def detalhes(id_atendimento):
 
     if "usuario_id" not in session:
@@ -411,10 +536,10 @@ def detalhes(id_atendimento):
             url_for("autenticacao.login")
         )
 
-    atendimento = AtendimentoService.detalhes(
-
-        id_atendimento
-
+    atendimento = (
+        AtendimentoService.detalhes(
+            id_atendimento
+        )
     )
 
     return render_template(
@@ -427,8 +552,12 @@ def detalhes(id_atendimento):
 
     )
 
+
+# =========================================================
+# VISUALIZAÇÃO COMPLETA
+# =========================================================
+
 @atendimento_bp.route("/completo")
-@requer_perfil("Administrador","Operador")
 def completo():
 
     if "usuario_id" not in session:
@@ -437,175 +566,19 @@ def completo():
             url_for("autenticacao.login")
         )
 
-    atendimentos = AtendimentoService.listar_completo(
-
-        request.args
-
+    atendimentos = (
+        AtendimentoService.listar_completo(
+            request.args
+        )
     )
 
     campos = deepcopy(
-
         FILTROS_ATENDIMENTO
-
     )
 
-    administradoras = Administradora.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        Administradora.nome
-
-    ).all()
-
-    clientes = Cliente.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        Cliente.nome_fantasia
-
-    ).all()
-
-    tipos_servico = TipoServico.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        TipoServico.nome
-
-    ).all()
-
-    motoristas = Motorista.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        Motorista.nome
-
-    ).all()
-
-    caminhoes = Caminhao.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        Caminhao.placa
-
-    ).all()
-
-    usuarios = Usuario.query.filter_by(
-
-        ativo=True
-
-    ).order_by(
-
-        Usuario.nome
-
-    ).all()
-
-    for campo in campos:
-
-        if campo["campo"] == "fk_administradora_id_administradora":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": administradora.id_administradora,
-
-                    "label": administradora.nome
-
-                }
-
-                for administradora in administradoras
-
-            ]
-
-        elif campo["campo"] == "fk_cliente_id_cliente":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": cliente.id_cliente,
-
-                    "label": cliente.nome_fantasia
-
-                }
-
-                for cliente in clientes
-
-            ]
-
-        elif campo["campo"] == "fk_usuario_id_usuario":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": usuario.id_usuario,
-
-                    "label": usuario.nome
-
-                }
-
-                for usuario in usuarios
-
-            ]
-
-        elif campo["campo"] == "fk_tipo_servico_id_tipo_servico":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": tipo.id_tipo_servico,
-
-                    "label": tipo.nome
-
-                }
-
-                for tipo in tipos_servico
-
-            ]
-
-        elif campo["campo"] == "fk_motorista_id_motorista":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": motorista.id_motorista,
-
-                    "label": motorista.nome
-
-                }
-
-                for motorista in motoristas
-
-            ]
-
-        elif campo["campo"] == "fk_caminhao_id_caminhao":
-
-            campo["opcoes"] = [
-
-                {
-
-                    "id": caminhao.id_caminhao,
-
-                    "label": caminhao.placa
-
-                }
-
-                for caminhao in caminhoes
-
-            ]
+    dados_formulario = (
+        AtendimentoService.carregar_formulario()
+    )
 
     return render_template(
 
@@ -618,38 +591,55 @@ def completo():
         campos=campos,
 
         campos_filtro=request.args.getlist(
-
             "campo[]"
-
         ),
 
         valores_filtro=request.args.getlist(
-
             "valor[]"
+        ),
 
-        )
+        **dados_formulario
 
     )
+
+
+# =========================================================
+# EXCLUIR
+# =========================================================
 
 @atendimento_bp.route(
     "/<int:id_atendimento>/excluir",
     methods=["POST"]
 )
-@requer_perfil("Administrador")
 def excluir(id_atendimento):
 
     if "usuario_id" not in session:
 
         return redirect(
-
             url_for("autenticacao.login")
+        )
+
+    if session.get("perfil") != "Administrador":
+
+        flash(
+
+            "Apenas administradores podem "
+            "excluir atendimentos.",
+
+            "warning"
+
+        )
+
+        return redirect(
+
+            url_for(
+                "atendimento.listar"
+            )
 
         )
 
     AtendimentoService.excluir(
-
         id_atendimento
-
     )
 
     flash(
@@ -662,32 +652,37 @@ def excluir(id_atendimento):
 
     return redirect(
 
-        url_for("atendimento.listar")
+        url_for(
+            "atendimento.listar"
+        )
 
     )
 
-@atendimento_bp.route("/<int:id_atendimento>/registrar-pagamento",methods=["POST"])
-@requer_perfil("Administrador")
+
+# =========================================================
+# REGISTRAR PAGAMENTO
+# =========================================================
+
+@atendimento_bp.route(
+    "/<int:id_atendimento>/registrar-pagamento",
+    methods=["POST"]
+)
 def registrar_pagamento(id_atendimento):
 
     if "usuario_id" not in session:
 
         return redirect(
-
             url_for("autenticacao.login")
-
         )
 
-    atendimento = AtendimentoService.detalhes(
-
-        id_atendimento
-
+    atendimento = (
+        AtendimentoService.detalhes(
+            id_atendimento
+        )
     )
 
     AtendimentoService.registrar_pagamento(
-
         [atendimento]
-
     )
 
     flash(
@@ -698,7 +693,9 @@ def registrar_pagamento(id_atendimento):
 
     )
 
-    origem = request.form.get("origem")
+    origem = request.form.get(
+        "origem"
+    )
 
     if origem == "detalhes":
 
@@ -714,69 +711,52 @@ def registrar_pagamento(id_atendimento):
 
         )
 
-    if origem == "completo":
-
-        return redirect(
-
-            request.referrer
-            or url_for(
-                "atendimento.completo"
-            )
-
-        )
-
-    if origem == "listar":
-
-        return redirect(
-
-            request.referrer
-            or url_for(
-                "atendimento.listar"
-            )
-
-        )
-
     return redirect(
 
         request.referrer
-        or url_for(
+        or
+        url_for(
             "atendimento.listar"
         )
 
     )
 
-@atendimento_bp.route("/tabela-valores")
-@requer_perfil("Administrador","Operador")
+
+# =========================================================
+# TABELA DE VALORES
+# =========================================================
+
+@atendimento_bp.route(
+    "/tabela-valores"
+)
 def tabela_valores():
 
     if "usuario_id" not in session:
 
         return jsonify(
-            {"erro": "Não autenticado"}
+            {
+                "erro": "Não autenticado"
+            }
         ), 401
 
     id_administradora = request.args.get(
-
         "id_administradora",
-
         type=int
-
     )
 
     id_tipo_servico = request.args.get(
-
         "id_tipo_servico",
-
         type=int
-
     )
 
-    tabela = AtendimentoService.buscar_tabela_valores(
+    tabela = (
+        AtendimentoService.buscar_tabela_valores(
 
-        id_administradora,
+            id_administradora,
 
-        id_tipo_servico
+            id_tipo_servico
 
+        )
     )
 
     if tabela is None:
@@ -785,89 +765,105 @@ def tabela_valores():
 
     return jsonify({
 
-        "valor_saida": (
-            float(tabela.valor_saida)
-            if tabela.valor_saida is not None
-            else None
+        "valor_saida": float(
+            tabela.valor_saida or 0
         ),
 
-        "valor_km_excedente": (
-            float(tabela.valor_km_excedente)
-            if tabela.valor_km_excedente is not None
-            else None
-        ),
-
-        "valor_zero": (
-            tabela.valor_saida == 0
-            and
-            tabela.valor_km_excedente == 0
+        "valor_km_excedente": float(
+            tabela.valor_km_excedente or 0
         )
 
     })
 
-@atendimento_bp.route("/clientes")
-@requer_perfil("Administrador","Operador")
+
+# =========================================================
+# CLIENTES
+# =========================================================
+
+@atendimento_bp.route(
+    "/clientes"
+)
 def clientes():
 
     if "usuario_id" not in session:
 
         return jsonify(
-
-            {"erro": "Não autenticado"}
-
+            {
+                "erro": "Não autenticado"
+            }
         ), 401
 
     id_administradora = request.args.get(
-
         "id_administradora",
-
         type=int
-
     )
 
-    dados = ClienteService.listar_por_administradora(
-
-        id_administradora
-
+    dados = (
+        ClienteService.listar_por_administradora(
+            id_administradora
+        )
     )
 
-    return jsonify(dados)
+    return jsonify(
+        dados
+    )
 
 
+# =========================================================
+# CALCULAR DISTÂNCIA
+# =========================================================
 
-@atendimento_bp.route("/calcular-distancia", methods=["POST"])
+@atendimento_bp.route(
+    "/calcular-distancia",
+    methods=["POST"]
+)
 def calcular_distancia():
 
     if "usuario_id" not in session:
 
         return jsonify(
-
-            {"erro": "Não autenticado"}
-
+            {
+                "erro": "Não autenticado"
+            }
         ), 401
 
-    dados = request.get_json()
+    dados = request.get_json(
+        silent=True
+    ) or {}
+
+    origem = dados.get(
+        "origem"
+    )
+
+    destino = dados.get(
+        "destino"
+    )
 
     try:
 
-        km = AtendimentoService.calcular_distancia(
+        resultado = (
+            AtendimentoService.calcular_distancia(
 
-            origem=dados["origem"],
+                origem,
 
-            destino=dados["destino"]
+                destino
 
+            )
         )
-
-    except ValueError as erro:
 
         return jsonify({
 
-            "erro": str(erro)
+            "km": resultado
+
+        })
+
+    except (
+        ValidacaoError,
+        RegraNegocioError
+    ) as erro:
+
+        return jsonify({
+
+            "erro": erro.mensagem
 
         }), 400
-
-    return jsonify({
-
-        "km": km
-
-    })

@@ -11,6 +11,6 @@ CATEGORIAS_CNH = [
     "C",
     "D",
     "E"
-],
+]
 
 COMISSAO_MOTORISTA = Decimal("0.08")

@@ -12,52 +12,47 @@
 
     {% include "components/card_header.html" %}
 
-    <form method="POST">
+
+    <form
+        method="POST"
+        class="form"
+    >
+
+        <!-- =================================================
+             ADMINISTRADORA
+        ================================================== -->
 
         <div class="form-group">
 
-            <label>
+            <label for="id_administradora">
 
                 Administradora
 
             </label>
 
+
             {% if administradora %}
 
                 <input
-
                     type="text"
-
                     class="form-control"
-
                     value="{{ administradora.nome }}"
-
                     readonly
-
                 >
 
                 <input
-
                     type="hidden"
-
                     name="id_administradora"
-
                     value="{{ administradora.id_administradora }}"
-
                 >
 
             {% else %}
 
                 <select
-
                     id="id_administradora"
-
                     name="id_administradora"
-
                     class="form-control"
-
                     required
-
                 >
 
                     <option value="">
@@ -66,18 +61,20 @@
 
                     </option>
 
+
                     {% for adm in administradoras %}
 
                         <option
-
                             value="{{ adm.id_administradora }}"
 
-                            {% if request.args.get("id_administradora", type=int) == adm.id_administradora %}
+                            {% if request.args.get(
+                                "id_administradora",
+                                type=int
+                            ) == adm.id_administradora %}
 
                                 selected
 
                             {% endif %}
-
                         >
 
                             {{ adm.nome }}
@@ -88,134 +85,169 @@
 
                 </select>
 
+                <small class="form-help">
+
+                    Selecione uma administradora para
+                    carregar os tipos de serviço.
+
+                </small>
+
             {% endif %}
 
         </div>
 
+
         {% if administradora %}
 
-        <hr>
+            <hr>
 
-        <table class="table">
 
-            <thead>
+            <!-- =============================================
+                 TABELA DE VALORES
+            ============================================== -->
 
-                <tr>
+            <div class="content-card">
 
-                    <th>
+                <h3>
 
-                        Tipo de Serviço
+                    Configuração de Valores
 
-                    </th>
+                </h3>
 
-                    <th>
+                <p>
 
-                        Valor de Saída
+                    Informe os valores aplicáveis para
+                    cada tipo de serviço.
 
-                    </th>
+                </p>
 
-                    <th>
+            </div>
 
-                        KM Excedente
 
-                    </th>
+            <div class="table-responsive">
 
-                </tr>
+                <table class="table">
 
-            </thead>
+                    <thead>
 
-            <tbody>
+                        <tr>
 
-                {% for linha in tabela %}
+                            <th>
 
-                <tr>
+                                Tipo de Serviço
 
-                    <td>
+                            </th>
 
-                        {{ linha.tipo_servico.nome }}
+                            <th>
 
-                    </td>
+                                Valor de Saída
 
-                    <td>
+                            </th>
 
-                        <input
+                            <th>
 
-                            type="hidden"
+                                Valor por KM Excedente
 
-                            name="id_tipo_servico[]"
+                            </th>
 
-                            value="{{ linha.tipo_servico.id_tipo_servico }}"
+                        </tr>
 
-                        >
+                    </thead>
 
-                        <input
 
-                            type="number"
+                    <tbody>
 
-                            class="form-control"
+                        {% for linha in tabela %}
 
-                            name="valor_saida[]"
+                            <tr>
 
-                            value="{{ linha.valor_saida }}"
+                                <td>
 
-                            min="0"
+                                    <strong>
 
-                            step="0.01"
+                                        {{ linha.tipo_servico.nome }}
 
-                        >
+                                    </strong>
 
-                    </td>
+                                </td>
 
-                    <td>
 
-                        <input
+                                <td>
 
-                            type="number"
+                                    <input
+                                        type="hidden"
+                                        name="id_tipo_servico[]"
+                                        value="{{ linha.tipo_servico.id_tipo_servico }}"
+                                    >
 
-                            class="form-control"
+                                    <input
+                                        type="number"
+                                        class="form-control valor-tabela"
+                                        name="valor_saida[]"
+                                        value="{{ linha.valor_saida if linha.valor_saida is not none else '' }}"
+                                        min="0"
+                                        step="0.01"
+                                        inputmode="decimal"
+                                    >
 
-                            name="valor_km_excedente[]"
+                                </td>
 
-                            value="{{ linha.valor_km_excedente }}"
 
-                            min="0"
+                                <td>
 
-                            step="0.01"
+                                    <input
+                                        type="number"
+                                        class="form-control valor-tabela"
+                                        name="valor_km_excedente[]"
+                                        value="{{ linha.valor_km_excedente if linha.valor_km_excedente is not none else '' }}"
+                                        min="0"
+                                        step="0.01"
+                                        inputmode="decimal"
+                                    >
 
-                        >
+                                </td>
 
-                    </td>
+                            </tr>
 
-                </tr>
+                        {% endfor %}
 
-                {% endfor %}
+                    </tbody>
 
-            </tbody>
+                </table>
 
-        </table>
+            </div>
+
+
+            <small class="form-help">
+
+                Campos vazios significam que o valor
+                não está configurado para aquele tipo
+                de serviço.
+
+            </small>
 
         {% endif %}
+
+
+        <!-- =================================================
+             AÇÕES
+        ================================================== -->
 
         <div class="form-actions">
 
             <a
-
-                href="{{ url_for('tabela_valores.listar') }}"
-
+                href="{{ voltar }}"
                 class="btn btn-secondary"
-
             >
 
                 Cancelar
 
             </a>
 
+
             <button
-
                 type="submit"
-
                 class="btn btn-primary"
-
             >
 
                 Salvar
@@ -230,11 +262,16 @@
 
 {% endblock %}
 
+
 {% block scripts %}
 
 {{ super() }}
 
-<script src="{{ url_for('static', filename='js/tabela_valores.js') }}"></script>
-
+<script
+    src="{{ url_for(
+        'static',
+        filename='js/tabela_valores.js'
+    ) }}">
+</script>
 
 {% endblock %}

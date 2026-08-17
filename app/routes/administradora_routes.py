@@ -4,37 +4,52 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash,
-    session
+    flash
 )
 
-from app import db
-from app.models import Administradora
-from app.filters.administradora import FILTROS_ADMINISTRADORA
-from app.services.administradora_service import AdministradoraService
+from app.filters.administradora import (
+    FILTROS_ADMINISTRADORA
+)
 
-from app.helpers.autorizacao_helper import (proteger_blueprint)
+from app.services.administradora_service import (
+    AdministradoraService
+)
+
+from app.exceptions import (
+    CampoObrigatorioError,
+    RecursoDuplicadoError,
+    ValidacaoError
+)
+
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
+
 
 administradora_bp = Blueprint(
+
     "administradora",
+
     __name__,
+
     url_prefix="/administradoras"
+
 )
 
-proteger_blueprint(administradora_bp,"Administrador")
+
+proteger_blueprint(
+    administradora_bp,
+    "Administrador"
+)
 
 
 @administradora_bp.route("/")
 def listar():
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
+    administradoras = (
+        AdministradoraService.listar()
+    )
 
-    administradoras = Administradora.query.order_by(
-        Administradora.nome
-    ).all()
 
     return render_template(
 
@@ -44,77 +59,222 @@ def listar():
 
         administradoras=administradoras,
 
-        novo_url=url_for("administradora.novo"),
+        novo_url=url_for(
+            "administradora.novo"
+        ),
 
         novo_texto="Nova Administradora",
 
-        visualizacao_url=url_for("administradora.completo"),
+        visualizacao_url=url_for(
+            "administradora.completo"
+        ),
 
         exportar_url=url_for(
+
             "exportacao.exportar_generico",
+
             modulo="administradora"
+
         )
 
     )
 
 
-@administradora_bp.route("/novo", methods=["GET", "POST"])
+@administradora_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
 def novo():
-
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
 
     if request.method == "POST":
 
-        if Administradora.query.filter(
-            Administradora.nome.ilike(
-                request.form["nome"]
-            )
-        ).first():
+        nome = request.form.get(
+            "nome"
+        )
 
-            flash(
-                "Já existe uma administradora com esse nome.",
-                "warning"
-            )
+        cliente_proprio = request.form.get(
+            "cliente_proprio"
+        )
 
-            administradora = Administradora(
-                nome=request.form["nome"],
-                cliente_proprio=(
-                    request.form.get("cliente_proprio")
-                    == "Sim"
+
+        try:
+
+            administradora = (
+                AdministradoraService.criar(
+
+                    nome=nome,
+
+                    cliente_proprio=
+                        cliente_proprio
+
                 )
             )
 
-            return render_template(
-                "administradoras/form.html",
-                titulo="Nova Administradora",
-                administradora=administradora
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
             )
 
-        administradora = Administradora(
 
-            nome=request.form["nome"],
+            administradora = (
+                _administradora_formulario(
 
-            cliente_proprio=(
-                request.form.get("cliente_proprio")
-                == "Sim"
-            ),
+                    nome,
 
-            ativo=True
+                    cliente_proprio
+
+                )
+            )
+
+
+            return render_template(
+
+                "administradoras/form.html",
+
+                titulo="Nova Administradora",
+
+                administradora=administradora,
+
+                origem=None
+
+            )
+
+
+        flash(
+
+            "Administradora cadastrada com sucesso.",
+
+            "success"
 
         )
 
-        db.session.add(administradora)
-        db.session.commit()
+
+        if administradora.cliente_proprio:
+
+            return redirect(
+
+                url_for(
+
+                    "cliente.novo",
+
+                    id_administradora=
+                        administradora.id_administradora,
+
+                    origem="administradora"
+
+                )
+
+            )
+
+
+        return redirect(
+
+            url_for(
+                "administradora.listar"
+            )
+
+        )
+
+
+    return render_template(
+
+        "administradoras/form.html",
+
+        titulo="Nova Administradora",
+
+        administradora=None,
+
+        origem=None
+
+    )
+
+
+@administradora_bp.route(
+    "/<int:id_administradora>/editar",
+    methods=["GET", "POST"]
+)
+def editar(id_administradora):
+
+    administradora = (
+        AdministradoraService.buscar_por_id(
+            id_administradora
+        )
+    )
+
+    if request.method == "POST":
+
+        cliente_proprio_anterior = (
+            administradora.cliente_proprio
+        )
+
+        nome = request.form.get("nome")
+
+        cliente_proprio = request.form.get(
+            "cliente_proprio"
+        )
+
+        try:
+
+            AdministradoraService.atualizar(
+
+                administradora=administradora,
+
+                nome=nome,
+
+                cliente_proprio=cliente_proprio
+
+            )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+            administradora.nome = nome or ""
+
+            administradora.cliente_proprio = (
+                cliente_proprio == "Sim"
+            )
+
+            return render_template(
+
+                "administradoras/form.html",
+
+                titulo="Editar Administradora",
+
+                administradora=administradora,
+
+                origem=request.form.get(
+                    "origem"
+                )
+
+            )
 
         flash(
-            "Administradora cadastrada com sucesso.",
+            "Administradora atualizada com sucesso.",
             "success"
         )
 
-        if administradora.cliente_proprio:
+        # =================================================
+        # FOI ATIVADO COMO CLIENTE PRÓPRIO
+        # =================================================
+
+        if (
+            not cliente_proprio_anterior
+            and administradora.cliente_proprio
+        ):
 
             return redirect(
 
@@ -132,140 +292,9 @@ def novo():
 
             )
 
-        return redirect(
-            url_for("administradora.listar")
-        )
-
-    return render_template(
-
-        "administradoras/form.html",
-
-        titulo="Nova Administradora",
-
-        administradora=None
-
-    )
-
-
-@administradora_bp.route("/<int:id_administradora>/editar", methods=["GET", "POST"])
-def editar(id_administradora):
-
-    if "usuario_id" not in session:
-
-        return redirect(
-
-            url_for("autenticacao.login")
-
-        )
-
-    administradora = Administradora.query.get_or_404(
-
-        id_administradora
-
-    )
-
-    if request.method == "POST":
-
-        administradora_existente = Administradora.query.filter(
-
-            Administradora.nome.ilike(
-
-                request.form["nome"]
-
-            ),
-
-            Administradora.id_administradora != id_administradora
-
-        ).first()
-
-        if administradora_existente:
-
-            flash(
-
-                "Já existe uma administradora com esse nome.",
-
-                "warning"
-
-            )
-
-            administradora.nome = request.form["nome"]
-
-            administradora.cliente_proprio = (
-
-                request.form.get("cliente_proprio")
-                == "Sim"
-
-            )
-
-            return render_template(
-
-                "administradoras/form.html",
-
-                titulo="Editar Administradora",
-
-                administradora=administradora,
-
-                origem=request.args.get("origem")
-
-            )
-
-        administradora.nome = request.form["nome"]
-
-        administradora.cliente_proprio = (
-
-            request.form.get("cliente_proprio")
-            == "Sim"
-
-        )
-
-        if administradora.cliente_proprio:
-
-            quantidade_clientes_ativos = sum(
-
-                1
-
-                for cliente in administradora.clientes
-
-                if cliente.ativo
-
-            )
-
-            if quantidade_clientes_ativos > 1:
-
-                flash(
-
-                    (
-                        "Não é possível definir esta "
-                        "administradora como Cliente Próprio "
-                        "porque ela possui mais de um cliente "
-                        "ativo cadastrado."
-                    ),
-
-                    "warning"
-
-                )
-
-                return render_template(
-
-                    "administradoras/form.html",
-
-                    titulo="Editar Administradora",
-
-                    administradora=administradora,
-
-                    origem=request.args.get("origem")
-
-                )
-
-        db.session.commit()
-
-        flash(
-
-            "Administradora atualizada com sucesso.",
-
-            "success"
-
-        )
+        # =================================================
+        # FLUXO NORMAL
+        # =================================================
 
         origem = request.form.get("origem")
 
@@ -273,13 +302,17 @@ def editar(id_administradora):
 
             return redirect(
 
-                url_for("administradora.completo")
+                url_for(
+                    "administradora.completo"
+                )
 
             )
 
         return redirect(
 
-            url_for("administradora.listar")
+            url_for(
+                "administradora.listar"
+            )
 
         )
 
@@ -291,54 +324,72 @@ def editar(id_administradora):
 
         administradora=administradora,
 
-        origem=request.args.get("origem")
+        origem=request.args.get(
+            "origem"
+        )
 
     )
 
-@administradora_bp.route("/<int:id_administradora>/toggle")
+
+@administradora_bp.route(
+    "/<int:id_administradora>/toggle"
+)
 def toggle(id_administradora):
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
+    administradora = (
+        AdministradoraService.buscar_por_id(
+            id_administradora
         )
-
-    administradora = Administradora.query.get_or_404(
-        id_administradora
     )
 
-    administradora.ativo = not administradora.ativo
 
-    db.session.commit()
+    AdministradoraService.alternar_status(
+        administradora
+    )
+
 
     flash(
+
         "Status da administradora atualizado.",
+
         "success"
+
     )
 
-    origem = request.args.get("origem")
 
-    if origem == "completo":
+    if request.args.get(
+        "origem"
+    ) == "completo":
+
         return redirect(
-            url_for("administradora.completo")
+
+            url_for(
+                "administradora.completo"
+            )
+
         )
+
 
     return redirect(
-        url_for("administradora.listar")
-    )
 
-
-@administradora_bp.route("/<int:id_administradora>")
-def detalhes(id_administradora):
-
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
+        url_for(
+            "administradora.listar"
         )
 
-    administradora = Administradora.query.get_or_404(
-        id_administradora
     )
+
+
+@administradora_bp.route(
+    "/<int:id_administradora>"
+)
+def detalhes(id_administradora):
+
+    administradora = (
+        AdministradoraService.buscar_por_id(
+            id_administradora
+        )
+    )
+
 
     return render_template(
 
@@ -351,22 +402,17 @@ def detalhes(id_administradora):
     )
 
 
-@administradora_bp.route("/completo")
+@administradora_bp.route(
+    "/completo"
+)
 def completo():
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
+    administradoras = (
+        AdministradoraService.listar_completo(
+            request.args
         )
-
-    ordem_final = (
-        request.args.get("ordenar_por")
-        or "nome"
     )
 
-    administradoras = AdministradoraService.listar(
-        request.args
-    )
 
     return render_template(
 
@@ -378,8 +424,35 @@ def completo():
 
         campos=FILTROS_ADMINISTRADORA,
 
-        campos_filtro=request.args.getlist("campo[]"),
+        campos_filtro=request.args.getlist(
+            "campo[]"
+        ),
 
-        valores_filtro=request.args.getlist("valor[]")
+        valores_filtro=request.args.getlist(
+            "valor[]"
+        )
+
+    )
+
+
+# =========================================================
+# AUXILIAR
+# =========================================================
+
+def _administradora_formulario(
+    nome,
+    cliente_proprio
+):
+
+    from app.models import Administradora
+
+
+    return Administradora(
+
+        nome=nome or "",
+
+        cliente_proprio=(
+            cliente_proprio == "Sim"
+        )
 
     )

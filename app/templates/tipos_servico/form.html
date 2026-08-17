@@ -12,28 +12,57 @@
 
     {% include "components/card_header.html" %}
 
-    <form method="POST" class="form">
+
+    <form
+        method="POST"
+        class="form"
+    >
 
         {% if origem %}
+
             <input
                 type="hidden"
                 name="origem"
-                value="{{ origem }}">
+                value="{{ origem }}"
+            >
+
         {% endif %}
+
 
         <div class="form-group">
 
-            <label>Nome</label>
+            <label for="nome">
+
+                Nome
+
+            </label>
+
 
             <input
                 type="text"
+                id="nome"
                 name="nome"
                 value="{{ tipo_servico.nome if tipo_servico else '' }}"
-                required>
+                maxlength="100"
+                autocomplete="off"
+                placeholder="Nome do tipo de serviço"
+                required
+            >
+
+
+            <small class="form-help">
+
+                Informe o nome do tipo de serviço.
+
+            </small>
 
         </div>
 
-        {% set cancelar = url_for("tipo_servico.listar") %}
+
+        {% set cancelar = url_for(
+            "tipo_servico.listar"
+        ) %}
+
         {% include "components/form_actions.html" %}
 
     </form>
@@ -41,6 +70,7 @@
 </div>
 
 {% endblock %}
+
 
 {% block scripts %}
 

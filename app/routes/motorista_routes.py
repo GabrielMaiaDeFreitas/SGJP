@@ -4,20 +4,31 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash,
-    session
+    flash
 )
 
+from app.constants.motorista import (
+    CATEGORIAS_CNH
+)
 
-from app import db
-from app.models import Motorista
-from app.constants.motorista import CATEGORIAS_CNH
-from app.filters.motorista import FILTROS_MOTORISTA
-from app.services.motorista_service import MotoristaService
+from app.filters.motorista import (
+    FILTROS_MOTORISTA
+)
 
-from app.helpers.autorizacao_helper import (proteger_blueprint)
+from app.services.motorista_service import (
+    MotoristaService
+)
 
-from datetime import datetime
+from app.exceptions import (
+    CampoObrigatorioError,
+    RecursoDuplicadoError,
+    ValidacaoError
+)
+
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
+
 
 motorista_bp = Blueprint(
     "motorista",
@@ -25,59 +36,73 @@ motorista_bp = Blueprint(
     url_prefix="/motoristas"
 )
 
-proteger_blueprint(motorista_bp,"Administrador")
+
+proteger_blueprint(
+    motorista_bp,
+    "Administrador"
+)
+
 
 @motorista_bp.route("/")
 def listar():
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    motoristas = Motorista.query.order_by(
-        Motorista.nome
-    ).all()
+    motoristas = MotoristaService.listar()
 
     return render_template(
+
         "motoristas/listar.html",
+
         motoristas=motoristas,
+
         titulo="Gerenciamento de Motoristas"
+
     )
 
-@motorista_bp.route("/novo", methods=["GET", "POST"])
-def novo():
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
+@motorista_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
+def novo():
 
     if request.method == "POST":
 
-        motorista = Motorista(
+        dados = _dados_formulario()
 
-            matricula=request.form["matricula"],
 
-            nome=request.form["nome"],
+        try:
 
-            numero_cnh=request.form["numero_cnh"],
+            MotoristaService.criar(
+                **dados
+            )
 
-            categoria_cnh=request.form["categoria_cnh"],
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
 
-            validade_cnh=datetime.strptime(
-                request.form["validade_cnh"],
-                "%Y-%m-%d"
-            ).date(),
+            flash(
+                erro.mensagem,
+                "warning"
+            )
 
-            validade_toxicologico=datetime.strptime(
-                request.form["validade_toxicologico"],
-                "%Y-%m-%d"
-            ).date(),
+            motorista = _motorista_formulario(
+                dados
+            )
 
-            ativo=True
+            return render_template(
 
-        )
+                "motoristas/form.html",
 
-        db.session.add(motorista)
+                titulo="Novo Motorista",
 
-        db.session.commit()
+                motorista=motorista,
+
+                categorias=CATEGORIAS_CNH
+
+            )
+
 
         flash(
             "Motorista cadastrado com sucesso.",
@@ -85,122 +110,322 @@ def novo():
         )
 
         return redirect(
-            url_for("motorista.listar")
+            url_for(
+                "motorista.listar"
+            )
         )
 
+
     return render_template(
+
         "motoristas/form.html",
+
         titulo="Novo Motorista",
+
         motorista=None,
+
         categorias=CATEGORIAS_CNH
+
     )
 
-@motorista_bp.route("/<int:id_motorista>")
+
+@motorista_bp.route(
+    "/<int:id_motorista>"
+)
 def detalhes(id_motorista):
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    motorista = Motorista.query.get_or_404(id_motorista)
+    motorista = MotoristaService.buscar_por_id(
+        id_motorista
+    )
 
     return render_template(
+
         "motoristas/detalhes.html",
+
         motorista=motorista,
+
         titulo="Detalhes do Motorista"
+
     )
 
 
-@motorista_bp.route("/<int:id_motorista>/editar", methods=["GET", "POST"])
+@motorista_bp.route(
+    "/<int:id_motorista>/editar",
+    methods=["GET", "POST"]
+)
 def editar(id_motorista):
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
+    motorista = MotoristaService.buscar_por_id(
+        id_motorista
+    )
 
-    motorista = Motorista.query.get_or_404(id_motorista)
 
     if request.method == "POST":
 
-        motorista.matricula = request.form["matricula"]
-        motorista.nome = request.form["nome"]
-        motorista.numero_cnh = request.form["numero_cnh"]
-        motorista.categoria_cnh = request.form["categoria_cnh"]
+        dados = _dados_formulario()
 
-        motorista.validade_cnh = datetime.strptime(
-            request.form["validade_cnh"],
-            "%Y-%m-%d"
-        ).date()
 
-        motorista.validade_toxicologico = datetime.strptime(
-            request.form["validade_toxicologico"],
-            "%Y-%m-%d"
-        ).date()
+        try:
 
-        db.session.commit()
+            MotoristaService.atualizar(
+
+                motorista=motorista,
+
+                **dados
+
+            )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+            motorista_formulario = (
+                _motorista_formulario(
+                    dados
+                )
+            )
+
+            return render_template(
+
+                "motoristas/form.html",
+
+                titulo="Editar Motorista",
+
+                motorista=motorista_formulario,
+
+                origem=request.form.get(
+                    "origem"
+                ),
+
+                categorias=CATEGORIAS_CNH
+
+            )
+
 
         flash(
             "Motorista atualizado com sucesso.",
             "success"
         )
 
-        origem = request.form.get("origem")
+
+        origem = request.form.get(
+            "origem"
+        )
+
 
         if origem == "completo":
-            return redirect(url_for("motorista.completo"))
 
-        return redirect(url_for("motorista.listar"))
+            return redirect(
+                url_for(
+                    "motorista.completo"
+                )
+            )
 
-    origem = request.args.get("origem")
+
+        return redirect(
+            url_for(
+                "motorista.listar"
+            )
+        )
+
 
     return render_template(
+
         "motoristas/form.html",
+
         titulo="Editar Motorista",
+
         motorista=motorista,
-        origem=origem,
+
+        origem=request.args.get(
+            "origem"
+        ),
+
         categorias=CATEGORIAS_CNH
+
     )
 
-@motorista_bp.route("/<int:id_motorista>/toggle")
+
+@motorista_bp.route(
+    "/<int:id_motorista>/toggle"
+)
 def toggle(id_motorista):
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
+    motorista = MotoristaService.buscar_por_id(
+        id_motorista
+    )
 
-    motorista = Motorista.query.get_or_404(id_motorista)
+    MotoristaService.alternar_status(
+        motorista
+    )
 
-    motorista.ativo = not motorista.ativo
-
-    db.session.commit()
 
     flash(
         "Status do motorista atualizado.",
         "success"
     )
 
-    origem = request.args.get("origem")
 
-    if origem == "completo":
-        return redirect(url_for("motorista.completo"))
+    if request.args.get(
+        "origem"
+    ) == "completo":
 
-    return redirect(url_for("motorista.listar"))
+        return redirect(
+            url_for(
+                "motorista.completo"
+            )
+        )
 
-@motorista_bp.route("/completo")
+
+    return redirect(
+        url_for(
+            "motorista.listar"
+        )
+    )
+
+
+@motorista_bp.route(
+    "/completo"
+)
 def completo():
 
-    if "usuario_id" not in session:
-        return redirect(url_for("autenticacao.login"))
-
-    motoristas = MotoristaService.listar(
-        request.args
+    motoristas = (
+        MotoristaService.listar_completo(
+            request.args
+        )
     )
 
-    campos_filtro = request.args.getlist("campo[]")
-    valores_filtro = request.args.getlist("valor[]")
+
+    campos_filtro = (
+        request.args.getlist(
+            "campo[]"
+        )
+    )
+
+
+    valores_filtro = (
+        request.args.getlist(
+            "valor[]"
+        )
+    )
+
 
     return render_template(
+
         "motoristas/completo.html",
+
         titulo="Visualização Completa de Motoristas",
+
         motoristas=motoristas,
+
         campos=FILTROS_MOTORISTA,
+
         campos_filtro=campos_filtro,
+
         valores_filtro=valores_filtro
+
     )
+
+
+# =========================================================
+# FUNÇÕES AUXILIARES DA ROUTE
+# =========================================================
+
+def _dados_formulario():
+
+    return {
+
+        "matricula":
+            request.form.get(
+                "matricula"
+            ),
+
+        "nome":
+            request.form.get(
+                "nome"
+            ),
+
+        "numero_cnh":
+            request.form.get(
+                "numero_cnh"
+            ),
+
+        "categoria_cnh":
+            request.form.get(
+                "categoria_cnh"
+            ),
+
+        "validade_cnh":
+            request.form.get(
+                "validade_cnh"
+            ),
+
+        "validade_toxicologico":
+            request.form.get(
+                "validade_toxicologico"
+            )
+
+    }
+
+
+def _motorista_formulario(
+    dados
+):
+
+    from app.models import Motorista
+    from datetime import datetime
+
+
+    motorista = Motorista(
+
+        matricula=dados["matricula"] or "",
+
+        nome=dados["nome"] or "",
+
+        numero_cnh=dados["numero_cnh"] or "",
+
+        categoria_cnh=dados["categoria_cnh"] or ""
+
+    )
+
+
+    if dados["validade_cnh"]:
+
+        try:
+
+            motorista.validade_cnh = (
+                datetime.strptime(
+                    dados["validade_cnh"],
+                    "%Y-%m-%d"
+                ).date()
+            )
+
+        except ValueError:
+
+            motorista.validade_cnh = None
+
+
+    if dados["validade_toxicologico"]:
+
+        try:
+
+            motorista.validade_toxicologico = (
+                datetime.strptime(
+                    dados["validade_toxicologico"],
+                    "%Y-%m-%d"
+                ).date()
+            )
+
+        except ValueError:
+
+            motorista.validade_toxicologico = None
+
+
+    return motorista

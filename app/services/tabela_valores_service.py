@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from app import db
 
@@ -8,58 +8,82 @@ from app.models import (
     TabelaValores
 )
 
-from app.filters.tabela_valores import FILTROS_TABELA_VALORES
-from app.services.filter_service import FilterService
+from app.filters.tabela_valores import (
+    FILTROS_TABELA_VALORES
+)
+
+from app.services.filter_service import (
+    FilterService
+)
+
+from app.exceptions import (
+    CampoObrigatorioError,
+    ValidacaoError
+)
 
 
 class TabelaValoresService:
 
+    # =====================================================
+    # LISTAGEM PRINCIPAL
+    # =====================================================
+
     @staticmethod
-    def listar(filtros):
+    def listar():
 
-        administradoras = Administradora.query.order_by(
-
-            Administradora.nome
-
-        ).all()
+        administradoras = (
+            Administradora.query
+            .order_by(Administradora.nome)
+            .all()
+        )
 
         resultado = []
 
         for administradora in administradoras:
 
-            quantidade = TabelaValores.query.filter_by(
+            quantidade_linhas = (
+                TabelaValores.query
+                .filter_by(
+                    fk_administradora_id_administradora=(
+                        administradora.id_administradora
+                    ),
+                    ativo=True
+                )
+                .count()
+            )
 
-                fk_administradora_id_administradora=(
+            configurada = (
+                TabelaValoresService
+                ._tabela_configurada(
                     administradora.id_administradora
-                ),
-
-                ativo=True
-
-            ).count()
-
-            configurada = quantidade > 0
+                )
+            )
 
             resultado.append({
 
-                "administradora": administradora.nome,
+                "administradora":
+                    administradora.nome,
 
-                "situacao": (
+                "situacao":
+                    (
+                        "Configurada"
+                        if configurada
+                        else "Não Configurada"
+                    ),
 
-                    "Configurada"
+                "configurada":
+                    configurada,
 
-                    if configurada
+                "quantidade":
+                    quantidade_linhas,
 
-                    else "Não Configurada"
-
-                ),
-
-                "configurada": configurada,
-
-                "quantidade": quantidade,
-
-                "id_administradora": administradora.id_administradora
+                "id_administradora":
+                    administradora.id_administradora
 
             })
+
+        # Não configuradas primeiro.
+        # Dentro de cada grupo, ordem alfabética.
 
         resultado.sort(
 
@@ -75,146 +99,263 @@ class TabelaValoresService:
 
         return resultado
 
+
+    # =====================================================
+    # VERIFICA SE A TABELA ESTÁ CONFIGURADA
+    # =====================================================
+
     @staticmethod
-    def carregar_tabela(id_administradora):
+    def _tabela_configurada(
+        id_administradora
+    ):
 
-        administradora = Administradora.query.get_or_404(
+        return (
+            TabelaValores.query
+            .filter(
+                TabelaValores
+                .fk_administradora_id_administradora
+                == id_administradora,
 
-            id_administradora
+                TabelaValores.ativo.is_(True),
 
+                (
+                    TabelaValores.valor_saida.isnot(None)
+                    |
+                    TabelaValores.valor_km_excedente.isnot(None)
+                )
+            )
+            .first()
+            is not None
         )
 
-        tipos_servico = TipoServico.query.filter_by(
 
-            ativo=True
+    @staticmethod
+    def tabela_existe(
+        id_administradora
+    ):
 
-        ).order_by(
+        return TabelaValoresService._tabela_configurada(
+            id_administradora
+        )
 
-            TipoServico.nome
 
-        ).all()
+    # =====================================================
+    # CARREGAR TABELA
+    # =====================================================
+
+    @staticmethod
+    def carregar_tabela(
+        id_administradora
+    ):
+
+        administradora = (
+            Administradora.query.get_or_404(
+                id_administradora
+            )
+        )
+
+        tipos_servico = (
+            TipoServico.query
+            .filter_by(ativo=True)
+            .order_by(TipoServico.nome)
+            .all()
+        )
 
         tabela = []
 
         for tipo_servico in tipos_servico:
 
-            registro = TabelaValores.query.filter_by(
+            registro = (
+                TabelaValores.query
+                .filter_by(
 
-                fk_administradora_id_administradora=(
-                    id_administradora
-                ),
+                    fk_administradora_id_administradora=(
+                        id_administradora
+                    ),
 
-                fk_tipo_servico_id_tipo_servico=(
-                    tipo_servico.id_tipo_servico
-                ),
+                    fk_tipo_servico_id_tipo_servico=(
+                        tipo_servico.id_tipo_servico
+                    ),
 
-                ativo=True
+                    ativo=True
 
-            ).first()
+                )
+                .first()
+            )
 
             tabela.append({
 
-                "tipo_servico": tipo_servico,
+                "tipo_servico":
+                    tipo_servico,
 
-                "valor_saida": (
+                "valor_saida":
+                    (
+                        registro.valor_saida
+                        if registro
+                        else None
+                    ),
 
-                    registro.valor_saida
-
-                    if registro
-
-                    else None
-
-                ),
-
-                "valor_km_excedente": (
-
-                    registro.valor_km_excedente
-
-                    if registro
-
-                    else None
-
-                )
+                "valor_km_excedente":
+                    (
+                        registro.valor_km_excedente
+                        if registro
+                        else None
+                    )
 
             })
 
         return administradora, tabela
 
-    @staticmethod
-    def _servico_prestado(
 
-        valor_saida,
-
-        valor_km_excedente
-
-    ):
-
-        return (
-
-            valor_saida is not None
-
-            or
-
-            valor_km_excedente is not None
-
-        )
+    # =====================================================
+    # SALVAR TABELA
+    # =====================================================
 
     @staticmethod
     def salvar_tabela(
-
         id_administradora,
-
         dados
-
     ):
+
+        if not dados:
+
+            raise ValidacaoError(
+                "Nenhum dado da tabela de valores foi informado."
+            )
+
+
+        Administradora.query.get_or_404(
+            id_administradora
+        )
+
+
+        # -------------------------------------------------
+        # Valida tudo ANTES de alterar o banco
+        # -------------------------------------------------
+
+        ids_tipos = {
+
+            tipo.id_tipo_servico
+
+            for tipo in (
+                TipoServico.query
+                .filter_by(ativo=True)
+                .all()
+            )
+
+        }
+
 
         for item in dados:
 
-            tipo_servico = item["id_tipo_servico"]
+            id_tipo_servico = (
+                item["id_tipo_servico"]
+            )
 
-            valor_saida = item["valor_saida"]
+            valor_saida = (
+                item["valor_saida"]
+            )
 
-            valor_km = item["valor_km_excedente"]
+            valor_km_excedente = (
+                item["valor_km_excedente"]
+            )
 
-            registro = TabelaValores.query.filter_by(
 
-                fk_administradora_id_administradora=(
-                    id_administradora
-                ),
+            if id_tipo_servico not in ids_tipos:
 
-                fk_tipo_servico_id_tipo_servico=(
-                    tipo_servico
-                ),
+                raise ValidacaoError(
+                    "Tipo de serviço inválido."
+                )
 
-                ativo=True
 
-            ).first()
+            TabelaValoresService._validar_valor(
+                valor_saida,
+                "Valor de saída"
+            )
+
+            TabelaValoresService._validar_valor(
+                valor_km_excedente,
+                "Valor por KM excedente"
+            )
+
+
+        # -------------------------------------------------
+        # Atualiza os registros
+        # -------------------------------------------------
+
+        for item in dados:
+
+            id_tipo_servico = (
+                item["id_tipo_servico"]
+            )
+
+            valor_saida = (
+                item["valor_saida"]
+            )
+
+            valor_km_excedente = (
+                item["valor_km_excedente"]
+            )
+
+
+            registro = (
+                TabelaValores.query
+                .filter_by(
+
+                    fk_administradora_id_administradora=(
+                        id_administradora
+                    ),
+
+                    fk_tipo_servico_id_tipo_servico=(
+                        id_tipo_servico
+                    ),
+
+                    ativo=True
+
+                )
+                .first()
+            )
+
+
+            # Nada foi informado para esse serviço.
+            # Portanto, ele não deve possuir uma
+            # configuração ativa.
+
+            if (
+                valor_saida is None
+                and
+                valor_km_excedente is None
+            ):
+
+                if registro:
+
+                    registro.ativo = False
+
+                continue
+
+
+            # Se já existe e não houve alteração,
+            # mantém o registro atual.
 
             if registro:
 
                 if (
-
-                    registro.valor_saida == valor_saida
-
+                    registro.valor_saida
+                    == valor_saida
                     and
-
-                    registro.valor_km_excedente == valor_km
-
+                    registro.valor_km_excedente
+                    == valor_km_excedente
                 ):
 
                     continue
 
+
+                # Houve alteração.
+                # Mantemos o histórico e criamos
+                # uma nova versão.
+
                 registro.ativo = False
 
-            if not TabelaValoresService._servico_prestado(
-
-                valor_saida,
-
-                valor_km
-
-            ):
-
-                continue
 
             novo = TabelaValores(
 
@@ -223,12 +364,16 @@ class TabelaValoresService:
                 ),
 
                 fk_tipo_servico_id_tipo_servico=(
-                    tipo_servico
+                    id_tipo_servico
                 ),
 
-                valor_saida=valor_saida,
+                valor_saida=(
+                    valor_saida
+                ),
 
-                valor_km_excedente=valor_km,
+                valor_km_excedente=(
+                    valor_km_excedente
+                ),
 
                 ativo=True
 
@@ -236,10 +381,55 @@ class TabelaValoresService:
 
             db.session.add(novo)
 
+
         db.session.commit()
 
+
+    # =====================================================
+    # VALIDAÇÃO DOS VALORES
+    # =====================================================
+
     @staticmethod
-    def montar_dados(formulario):
+    def _validar_valor(
+        valor,
+        nome
+    ):
+
+        if valor is None:
+
+            return
+
+
+        try:
+
+            valor = Decimal(str(valor))
+
+        except (
+            InvalidOperation,
+            ValueError,
+            TypeError
+        ):
+
+            raise ValidacaoError(
+                f"{nome} inválido."
+            )
+
+
+        if valor < 0:
+
+            raise ValidacaoError(
+                f"{nome} não pode ser negativo."
+            )
+
+
+    # =====================================================
+    # CONVERTE FORMULÁRIO
+    # =====================================================
+
+    @staticmethod
+    def montar_dados(
+        formulario
+    ):
 
         dados = []
 
@@ -255,45 +445,121 @@ class TabelaValoresService:
             "valor_km_excedente[]"
         )
 
+
+        if not (
+            len(ids)
+            == len(valores_saida)
+            == len(valores_km)
+        ):
+
+            raise ValidacaoError(
+                "Os dados da tabela de valores estão inconsistentes."
+            )
+
+
         for id_tipo, saida, km in zip(
 
             ids,
-
             valores_saida,
-
             valores_km
 
         ):
 
+            try:
+
+                id_tipo_servico = int(
+                    id_tipo
+                )
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                raise ValidacaoError(
+                    "Tipo de serviço inválido."
+                )
+
+
+            valor_saida = (
+                TabelaValoresService
+                ._converter_decimal(saida)
+            )
+
+            valor_km = (
+                TabelaValoresService
+                ._converter_decimal(km)
+            )
+
+
             dados.append({
 
-                "id_tipo_servico": int(id_tipo),
+                "id_tipo_servico":
+                    id_tipo_servico,
 
-                "valor_saida": (
-                    Decimal(saida)
-                    if saida
-                    else None
-                ),
+                "valor_saida":
+                    valor_saida,
 
-                "valor_km_excedente": (
-                    Decimal(km)
-                    if km
-                    else None
-                )
+                "valor_km_excedente":
+                    valor_km
 
             })
 
+
         return dados
 
+
     @staticmethod
-    def detalhes(id_administradora):
+    def _converter_decimal(
+        valor
+    ):
+
+        if valor is None:
+
+            return None
+
+
+        valor = str(valor).strip()
+
+
+        if not valor:
+
+            return None
+
+
+        try:
+
+            return Decimal(valor)
+
+        except InvalidOperation:
+
+            raise ValidacaoError(
+                "Um dos valores informados é inválido."
+            )
+
+
+    # =====================================================
+    # DETALHES
+    # =====================================================
+
+    @staticmethod
+    def detalhes(
+        id_administradora
+    ):
 
         return TabelaValoresService.carregar_tabela(
             id_administradora
         )
 
+
+    # =====================================================
+    # VISUALIZAÇÃO COMPLETA
+    # =====================================================
+
     @staticmethod
-    def listar_completo(filtros):
+    def listar_completo(
+        filtros
+    ):
 
         tabelas = FilterService.listar(
 
@@ -303,7 +569,9 @@ class TabelaValoresService:
 
             configuracoes=FILTROS_TABELA_VALORES,
 
-            ordenar_por="fk_administradora_id_administradora"
+            ordenar_por=(
+                "fk_administradora_id_administradora"
+            )
 
         )
 
@@ -321,75 +589,93 @@ class TabelaValoresService:
 
         return tabelas
 
+
+    # =====================================================
+    # ADMINISTRADORAS DISPONÍVEIS
+    # =====================================================
+
     @staticmethod
     def administradoras_disponiveis():
 
-        ids_configurados = {
+        administradoras_configuradas = {
 
-            tabela.fk_administradora_id_administradora
+            tabela
+            .fk_administradora_id_administradora
 
-            for tabela in TabelaValores.query.filter_by(
+            for tabela in (
+                TabelaValores.query
+                .filter(
+                    TabelaValores.ativo.is_(True),
 
-                ativo=True
-
-            ).all()
+                    (
+                        TabelaValores.valor_saida.isnot(None)
+                        |
+                        TabelaValores.valor_km_excedente.isnot(None)
+                    )
+                )
+                .all()
+            )
 
         }
 
-        return Administradora.query.filter(
 
-            Administradora.ativo.is_(True),
+        return (
+            Administradora.query
+            .filter(
 
-            ~Administradora.id_administradora.in_(
+                Administradora.ativo.is_(True),
 
-                ids_configurados
+                ~Administradora.id_administradora.in_(
+                    administradoras_configuradas
+                )
 
             )
+            .order_by(
+                Administradora.nome
+            )
+            .all()
+        )
 
-        ).order_by(
 
-            Administradora.nome
-
-        ).all()
-
-    @staticmethod
-    def tabela_existe(id_administradora):
-
-        return TabelaValores.query.filter_by(
-
-            fk_administradora_id_administradora=id_administradora,
-
-            ativo=True
-
-        ).first() is not None
+    # =====================================================
+    # ADMINISTRADORAS CONFIGURADAS
+    # =====================================================
 
     @staticmethod
     def administradoras_configuradas():
 
-        return Administradora.query.join(
-
-            TabelaValores,
-
-            TabelaValores.fk_administradora_id_administradora
-            == Administradora.id_administradora
-
-        ).filter(
-
-            Administradora.ativo.is_(True),
-
-            TabelaValores.ativo.is_(True),
-
-            (
-                TabelaValores.valor_saida.isnot(None)
-                |
-                TabelaValores.valor_km_excedente.isnot(None)
+        return (
+            Administradora.query
+            .join(
+                TabelaValores,
+                TabelaValores
+                .fk_administradora_id_administradora
+                == Administradora.id_administradora
             )
+            .filter(
 
-        ).distinct().order_by(
+                Administradora.ativo.is_(True),
 
-            Administradora.nome
+                TabelaValores.ativo.is_(True),
 
-        ).all()
+                (
+                    TabelaValores.valor_saida.isnot(None)
+                    |
+                    TabelaValores.valor_km_excedente.isnot(None)
+                )
+
+            )
+            .distinct()
+            .order_by(
+                Administradora.nome
+            )
+            .all()
+        )
+
+
+    # =====================================================
+    # BUSCAR TABELA
+    # =====================================================
 
     @staticmethod
     def buscar_tabela(
@@ -397,16 +683,20 @@ class TabelaValoresService:
         id_tipo_servico
     ):
 
-        return TabelaValores.query.filter_by(
+        return (
+            TabelaValores.query
+            .filter_by(
 
-            fk_administradora_id_administradora=(
-                id_administradora
-            ),
+                fk_administradora_id_administradora=(
+                    id_administradora
+                ),
 
-            fk_tipo_servico_id_tipo_servico=(
-                id_tipo_servico
-            ),
+                fk_tipo_servico_id_tipo_servico=(
+                    id_tipo_servico
+                ),
 
-            ativo=True
+                ativo=True
 
-        ).first()
+            )
+            .first()
+        )

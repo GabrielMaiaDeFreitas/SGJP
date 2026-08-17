@@ -8,19 +8,27 @@ from flask import (
     flash
 )
 
-from app import db
+from app.models import Administradora
 
-from app.models import (
-    Cliente,
-    Administradora
+from app.filters.cliente import (
+    FILTROS_CLIENTE
 )
 
-from app.filters.cliente import FILTROS_CLIENTE
-from app.services.cliente_service import ClienteService
+from app.services.cliente_service import (
+    ClienteService
+)
+
+from app.exceptions import (
+    CampoObrigatorioError,
+    RecursoDuplicadoError,
+    ValidacaoError
+)
+
+from app.helpers.autorizacao_helper import (
+    proteger_blueprint
+)
 
 from copy import deepcopy
-
-from app.helpers.autorizacao_helper import (proteger_blueprint)
 
 
 cliente_bp = Blueprint(
@@ -29,20 +37,18 @@ cliente_bp = Blueprint(
     url_prefix="/clientes"
 )
 
-proteger_blueprint(cliente_bp,"Administrador")
+
+proteger_blueprint(
+    cliente_bp,
+    "Administrador"
+)
 
 
 @cliente_bp.route("/")
 def listar():
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
+    clientes = ClienteService.listar()
 
-    clientes = Cliente.query.order_by(
-        Cliente.nome_fantasia
-    ).all()
 
     return render_template(
 
@@ -52,84 +58,113 @@ def listar():
 
         clientes=clientes,
 
-        novo_url=url_for("cliente.novo"),
+        novo_url=url_for(
+            "cliente.novo"
+        ),
 
         novo_texto="Novo Cliente",
 
-        visualizacao_url=url_for("cliente.completo"),
+        visualizacao_url=url_for(
+            "cliente.completo"
+        ),
 
         exportar_url=url_for(
+
             "exportacao.exportar_generico",
+
             modulo="cliente"
+
         )
 
     )
 
 
-@cliente_bp.route("/novo", methods=["GET", "POST"])
+@cliente_bp.route(
+    "/novo",
+    methods=["GET", "POST"]
+)
 def novo():
-
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
 
     origem = request.args.get(
         "origem"
     )
 
     id_administradora = request.args.get(
-
         "id_administradora",
-
         type=int
-
     )
 
-    if origem == "administradora":
 
-        administradoras = Administradora.query.filter_by(
+    administradoras = (
+        _obter_administradoras(
+            origem
+        )
+    )
 
-            ativo=True
-
-        ).order_by(
-
-            Administradora.nome
-
-        ).all()
-
-    else:
-
-        administradoras = Administradora.query.filter_by(
-
-            ativo=True,
-
-            cliente_proprio=False
-
-        ).order_by(
-
-            Administradora.nome
-
-        ).all()
 
     if request.method == "POST":
 
-        def voltar_formulario():
+        nome_fantasia = request.form.get(
+            "nome_fantasia"
+        )
 
-            cliente = Cliente(
+        razao_social = request.form.get(
+            "razao_social"
+        )
 
-                nome_fantasia=administradora.nome,
+        cnpj = request.form.get(
+            "cnpj"
+        )
 
-                razao_social="",
+        id_administradora = request.form.get(
+            "fk_administradora_id_administradora",
+            type=int
+        )
 
-                cnpj="",
 
-                fk_administradora_id_administradora=(
-                    administradora.id_administradora
+        try:
+
+            cliente = ClienteService.criar(
+
+                nome_fantasia=nome_fantasia,
+
+                razao_social=razao_social,
+
+                cnpj=cnpj,
+
+                id_administradora=
+                    id_administradora,
+
+                origem=request.form.get(
+                    "origem"
                 )
 
             )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+
+            cliente = _cliente_formulario(
+
+                nome_fantasia,
+
+                razao_social,
+
+                cnpj,
+
+                id_administradora
+
+            )
+
 
             return render_template(
 
@@ -141,45 +176,12 @@ def novo():
 
                 administradoras=administradoras,
 
-                origem=request.form.get("origem")
+                origem=request.form.get(
+                    "origem"
+                )
 
             )
 
-        if Cliente.query.filter(
-
-            Cliente.cnpj == request.form["cnpj"]
-
-        ).first():
-
-            flash(
-
-                "Já existe um cliente com esse CNPJ.",
-
-                "warning"
-
-            )
-
-            return voltar_formulario()
-
-        cliente = Cliente(
-
-            nome_fantasia=request.form["nome_fantasia"],
-
-            razao_social=request.form["razao_social"],
-
-            cnpj=request.form["cnpj"],
-
-            ativo=True,
-
-            fk_administradora_id_administradora=request.form[
-                "fk_administradora_id_administradora"
-            ]
-
-        )
-
-        db.session.add(cliente)
-
-        db.session.commit()
 
         flash(
 
@@ -189,31 +191,43 @@ def novo():
 
         )
 
+
         return redirect(
 
-            url_for("cliente.listar")
-
-        )
-
-    cliente = None
-
-    if origem == "administradora" and id_administradora:
-
-        administradora = Administradora.query.get_or_404(
-
-            id_administradora
-
-        )
-
-        cliente = Cliente(
-
-            nome_fantasia=administradora.nome,
-
-            fk_administradora_id_administradora=(
-                administradora.id_administradora
+            url_for(
+                "cliente.listar"
             )
 
         )
+
+
+    cliente = None
+
+
+    if (
+        origem == "administradora"
+        and id_administradora
+    ):
+
+        administradora = (
+            Administradora.query.get_or_404(
+                id_administradora
+            )
+        )
+
+
+        cliente = _cliente_formulario(
+
+            administradora.nome,
+
+            "",
+
+            "",
+
+            administradora.id_administradora
+
+        )
+
 
     return render_template(
 
@@ -230,38 +244,86 @@ def novo():
     )
 
 
-@cliente_bp.route("/<int:id_cliente>/editar", methods=["GET", "POST"])
+@cliente_bp.route(
+    "/<int:id_cliente>/editar",
+    methods=["GET", "POST"]
+)
 def editar(id_cliente):
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
+    cliente = ClienteService.buscar_por_id(
+        id_cliente
+    )
 
-    cliente = Cliente.query.get_or_404(id_cliente)
 
-    administradoras = Administradora.query.filter_by(
+    administradoras = (
+        _obter_administradoras()
+    )
 
-        ativo=True,
-
-        cliente_proprio=False
-
-    ).order_by(
-
-        Administradora.nome
-
-    ).all()
 
     if request.method == "POST":
 
-        def voltar_formulario():
+        try:
 
-            cliente.nome_fantasia = request.form["nome_fantasia"]
-            cliente.razao_social = request.form["razao_social"]
-            cliente.cnpj = request.form["cnpj"]
-            cliente.fk_administradora_id_administradora = request.form[
-                "fk_administradora_id_administradora"
-            ]
+            ClienteService.atualizar(
+
+                cliente=cliente,
+
+                nome_fantasia=
+                    request.form.get(
+                        "nome_fantasia"
+                    ),
+
+                razao_social=
+                    request.form.get(
+                        "razao_social"
+                    ),
+
+                cnpj=
+                    request.form.get(
+                        "cnpj"
+                    ),
+
+                id_administradora=
+                    request.form.get(
+                        "fk_administradora_id_administradora",
+                        type=int
+                    )
+
+            )
+
+        except (
+            CampoObrigatorioError,
+            RecursoDuplicadoError,
+            ValidacaoError
+        ) as erro:
+
+            flash(
+                erro.mensagem,
+                "warning"
+            )
+
+
+            cliente.nome_fantasia = (
+                request.form.get(
+                    "nome_fantasia"
+                )
+                or ""
+            )
+
+            cliente.razao_social = (
+                request.form.get(
+                    "razao_social"
+                )
+                or ""
+            )
+
+            cliente.cnpj = (
+                request.form.get(
+                    "cnpj"
+                )
+                or ""
+            )
+
 
             return render_template(
 
@@ -273,52 +335,43 @@ def editar(id_cliente):
 
                 administradoras=administradoras,
 
-                origem=request.args.get("origem")
+                origem=request.form.get(
+                    "origem"
+                )
 
             )
 
-        existente = Cliente.query.filter(
-
-            Cliente.cnpj == request.form["cnpj"],
-
-            Cliente.id_cliente != id_cliente
-
-        ).first()
-
-        if existente:
-
-            flash(
-                "Já existe um cliente com esse CNPJ.",
-                "warning"
-            )
-
-            return voltar_formulario()
-
-        cliente.nome_fantasia = request.form["nome_fantasia"]
-        cliente.razao_social = request.form["razao_social"]
-        cliente.cnpj = request.form["cnpj"]
-        cliente.fk_administradora_id_administradora = request.form[
-            "fk_administradora_id_administradora"
-        ]
-
-        db.session.commit()
 
         flash(
+
             "Cliente atualizado com sucesso.",
+
             "success"
+
         )
 
-        origem = request.form.get("origem")
 
-        if origem == "completo":
+        if request.form.get(
+            "origem"
+        ) == "completo":
 
             return redirect(
-                url_for("cliente.completo")
+
+                url_for(
+                    "cliente.completo"
+                )
+
             )
 
+
         return redirect(
-            url_for("cliente.listar")
+
+            url_for(
+                "cliente.listar"
+            )
+
         )
+
 
     return render_template(
 
@@ -330,52 +383,68 @@ def editar(id_cliente):
 
         administradoras=administradoras,
 
-        origem=request.args.get("origem")
+        origem=request.args.get(
+            "origem"
+        )
 
     )
 
 
-@cliente_bp.route("/<int:id_cliente>/toggle")
+@cliente_bp.route(
+    "/<int:id_cliente>/toggle"
+)
 def toggle(id_cliente):
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
+    cliente = ClienteService.buscar_por_id(
+        id_cliente
+    )
 
-    cliente = Cliente.query.get_or_404(id_cliente)
 
-    cliente.ativo = not cliente.ativo
+    ClienteService.alternar_status(
+        cliente
+    )
 
-    db.session.commit()
 
     flash(
+
         "Status atualizado com sucesso.",
+
         "success"
+
     )
 
-    origem = request.args.get("origem")
 
-    if origem == "completo":
+    if request.args.get(
+        "origem"
+    ) == "completo":
 
         return redirect(
-            url_for("cliente.completo")
+
+            url_for(
+                "cliente.completo"
+            )
+
         )
+
 
     return redirect(
-        url_for("cliente.listar")
+
+        url_for(
+            "cliente.listar"
+        )
+
     )
 
 
-@cliente_bp.route("/<int:id_cliente>")
+@cliente_bp.route(
+    "/<int:id_cliente>"
+)
 def detalhes(id_cliente):
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
-        )
+    cliente = ClienteService.buscar_por_id(
+        id_cliente
+    )
 
-    cliente = Cliente.query.get_or_404(id_cliente)
 
     return render_template(
 
@@ -388,31 +457,35 @@ def detalhes(id_cliente):
     )
 
 
-@cliente_bp.route("/completo")
+@cliente_bp.route(
+    "/completo"
+)
 def completo():
 
-    if "usuario_id" not in session:
-        return redirect(
-            url_for("autenticacao.login")
+    clientes = (
+        ClienteService.listar_completo(
+            request.args
         )
-
-    clientes = ClienteService.listar(
-        request.args
     )
+
 
     campos = deepcopy(
         FILTROS_CLIENTE
     )
 
-    administradoras = Administradora.query.filter_by(
 
-        ativo=True
+    administradoras = (
+        Administradora.query.filter_by(
 
-    ).order_by(
+            ativo=True
 
-        Administradora.nome
+        ).order_by(
 
-    ).all()
+            Administradora.nome
+
+        ).all()
+    )
+
 
     for campo in campos:
 
@@ -424,16 +497,18 @@ def completo():
             campo["opcoes"] = [
 
                 {
+                    "id":
+                        administradora.id_administradora,
 
-                    "id": administradora.id_administradora,
-
-                    "label": administradora.nome
-
+                    "label":
+                        administradora.nome
                 }
 
-                for administradora in administradoras
+                for administradora
+                in administradoras
 
             ]
+
 
     return render_template(
 
@@ -445,9 +520,13 @@ def completo():
 
         campos=campos,
 
-        campos_filtro=request.args.getlist("campo[]"),
+        campos_filtro=request.args.getlist(
+            "campo[]"
+        ),
 
-        valores_filtro=request.args.getlist("valor[]")
+        valores_filtro=request.args.getlist(
+            "valor[]"
+        )
 
     )
 
@@ -455,38 +534,85 @@ def completo():
 @cliente_bp.route(
     "/cancelar-cadastro-proprio/<int:id_administradora>"
 )
-def cancelar_cadastro_proprio(id_administradora):
+def cancelar_cadastro_proprio(
+    id_administradora
+):
 
-    if "usuario_id" not in session:
-
-        return redirect(
-            url_for("autenticacao.login")
-        )
-
-    administradora = Administradora.query.get_or_404(
-
+    ClienteService.cancelar_cadastro_proprio(
         id_administradora
-
     )
 
-    db.session.delete(
-
-        administradora
-
-    )
-
-    db.session.commit()
 
     flash(
-
         "Cadastro cancelado.",
-
         "info"
-
     )
+
 
     return redirect(
 
-        url_for("administradora.listar")
+        url_for(
+            "administradora.listar"
+        )
+
+    )
+
+
+# =========================================================
+# AUXILIARES
+# =========================================================
+
+def _obter_administradoras(
+    origem=None
+):
+
+    if origem == "administradora":
+
+        return Administradora.query.filter_by(
+
+            ativo=True
+
+        ).order_by(
+
+            Administradora.nome
+
+        ).all()
+
+
+    return Administradora.query.filter_by(
+
+        ativo=True,
+
+        cliente_proprio=False
+
+    ).order_by(
+
+        Administradora.nome
+
+    ).all()
+
+
+def _cliente_formulario(
+    nome_fantasia,
+    razao_social,
+    cnpj,
+    id_administradora
+):
+
+    from app.models import Cliente
+
+    return Cliente(
+
+        nome_fantasia=
+            nome_fantasia or "",
+
+        razao_social=
+            razao_social or "",
+
+        cnpj=
+            cnpj or "",
+
+        fk_administradora_id_administradora=
+            id_administradora
 
     )
