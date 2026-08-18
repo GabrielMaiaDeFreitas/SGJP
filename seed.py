@@ -1,3 +1,4 @@
+import os
 from app import create_app, db
 from app.models import Usuario
 
@@ -16,7 +17,7 @@ with app.app_context():
             ativo=True
         )
 
-        administrador.set_senha("[SECRET_REMOVED]")
+        administrador.set_senha(os.getenv("ADMIN_PASSWORD"))
 
         db.session.add(administrador)
 
