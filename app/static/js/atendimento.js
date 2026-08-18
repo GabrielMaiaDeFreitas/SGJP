@@ -1487,18 +1487,27 @@ function configurarValidacaoFormulario() {
         "click",
         function (evento) {
 
+            limparErrosCustomizados(formulario);
+
             if (!formulario.checkValidity()) {
 
                 evento.preventDefault();
 
-                const campoInvalido =
-                    formulario.querySelector(
+                const camposInvalidos =
+                    formulario.querySelectorAll(
                         ":invalid"
                     );
 
-                if (campoInvalido) {
+                camposInvalidos.forEach(
+                    mostrarErroCustomizado
+                );
 
-                    campoInvalido.scrollIntoView({
+                const primeiro =
+                    camposInvalidos[0];
+
+                if (primeiro) {
+
+                    primeiro.scrollIntoView({
 
                         behavior: "smooth",
 
@@ -1506,23 +1515,7 @@ function configurarValidacaoFormulario() {
 
                     });
 
-                    setTimeout(
-
-                        function () {
-
-                            campoInvalido.reportValidity();
-
-                        },
-
-                        300
-
-                    );
-
-                }
-
-                else {
-
-                    formulario.reportValidity();
+                    primeiro.focus();
 
                 }
 
@@ -1558,6 +1551,10 @@ function configurarValidacaoFormulario() {
                     "não pode ser uma data futura."
                 );
 
+                mostrarErroCustomizado(
+                    dataAtendimento
+                );
+
                 dataAtendimento.scrollIntoView({
 
                     behavior: "smooth",
@@ -1566,17 +1563,7 @@ function configurarValidacaoFormulario() {
 
                 });
 
-                setTimeout(
-
-                    function () {
-
-                        dataAtendimento.reportValidity();
-
-                    },
-
-                    300
-
-                );
+                dataAtendimento.focus();
 
                 return;
 
@@ -1592,6 +1579,8 @@ function configurarValidacaoFormulario() {
 
             evento.target.setCustomValidity("");
 
+            limparErroCustomizadoDoCampo(evento);
+
         }
     );
 
@@ -1602,7 +1591,96 @@ function configurarValidacaoFormulario() {
 
             evento.target.setCustomValidity("");
 
+            limparErroCustomizadoDoCampo(evento);
+
         }
+    );
+
+}
+
+/* =====================================================
+   ERRO DE VALIDAÇÃO CUSTOMIZADO
+===================================================== */
+
+function mostrarErroCustomizado(campo) {
+
+    const grupo =
+        campo.closest(".form-group");
+
+    if (!grupo) {
+
+        return;
+
+    }
+
+    if (
+        grupo.querySelector(".erro-campo")
+    ) {
+
+        return;
+
+    }
+
+    campo.classList.add(
+        "campo-invalido"
+    );
+
+    const erro =
+        document.createElement("small");
+
+    erro.className =
+        "erro-campo";
+
+    erro.textContent =
+        campo.validationMessage ||
+        "Este campo é obrigatório.";
+
+    grupo.appendChild(
+        erro
+    );
+
+}
+
+
+function limparErroCustomizadoDoCampo(evento) {
+
+    const grupo =
+        evento.target.closest(".form-group");
+
+    if (!grupo) {
+
+        return;
+
+    }
+
+    evento.target.classList.remove(
+        "campo-invalido"
+    );
+
+    const erro =
+        grupo.querySelector(".erro-campo");
+
+    if (erro) {
+
+        erro.remove();
+
+    }
+
+}
+
+
+function limparErrosCustomizados(formulario) {
+
+    formulario.querySelectorAll(
+        ".erro-campo"
+    ).forEach(
+        el => el.remove()
+    );
+
+    formulario.querySelectorAll(
+        ".campo-invalido"
+    ).forEach(
+        el => el.classList.remove("campo-invalido")
     );
 
 }

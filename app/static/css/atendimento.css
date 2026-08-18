@@ -219,3 +219,27 @@ textarea {
     justify-content: flex-start;
 
 }
+
+/* =====================================================
+   ERRO DE VALIDAÇÃO CUSTOMIZADO
+===================================================== */
+
+.campo-invalido {
+
+    border-color: #dc3545 !important;
+
+    box-shadow: 0 0 0 1px #dc3545;
+
+}
+
+.erro-campo {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: --color-danger;
+
+    font-size: .85rem;
+
+}
