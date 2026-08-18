@@ -52,11 +52,6 @@ from app.exceptions.validacao import (
 
 from sqlalchemy.orm import joinedload
 
-from app.services.google_maps_service import (
-    GoogleMapsService
-)
-
-
 class AtendimentoService:
 
     # =========================================================
@@ -1518,7 +1513,22 @@ class AtendimentoService:
     # =========================================================
 
     @staticmethod
-    def listar():
+    def listar(filtros=None):
+
+        if filtros is not None:
+
+            return FilterService.listar(
+
+                modelo=Atendimento,
+
+                filtros=filtros,
+
+                configuracoes=FILTROS_ATENDIMENTO,
+
+                ordenar_por="data_atendimento"
+
+            )
+
 
         return (
 

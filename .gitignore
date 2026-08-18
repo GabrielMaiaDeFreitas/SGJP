@@ -23,6 +23,10 @@ __pycache__/
 *.sqlite
 *.sqlite3
 
+# Testes
+.pytest_cache/
+sgjp_test_*.sqlite3
+
 # ==========================
 # Variáveis de ambiente
 # ==========================

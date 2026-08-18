@@ -623,6 +623,74 @@ class ParceirosRelatorioService:
         )
 
     @staticmethod
+    def listar_atendimentos_cliente_para_exportacao(
+        parametros
+    ):
+
+        id_administradora = parametros.get(
+            "id_administradora",
+            type=int
+        )
+
+        id_cliente = parametros.get(
+            "id_cliente",
+            type=int
+        )
+
+        data_inicial_texto = parametros.get(
+            "data_inicial"
+        )
+
+        data_final_texto = parametros.get(
+            "data_final"
+        )
+
+
+        if (
+            not id_administradora
+            or not id_cliente
+            or not data_inicial_texto
+            or not data_final_texto
+        ):
+
+            return []
+
+
+        try:
+
+            data_inicial = date.fromisoformat(
+                data_inicial_texto
+            )
+
+            data_final = date.fromisoformat(
+                data_final_texto
+            )
+
+        except ValueError:
+
+            return []
+
+
+        (
+            administradora,
+            cliente,
+            atendimentos
+        ) = ParceirosRelatorioService.buscar_detalhes_cliente(
+
+            id_administradora,
+
+            id_cliente,
+
+            data_inicial,
+
+            data_final
+
+        )
+
+
+        return atendimentos
+
+    @staticmethod
     def buscar_atendimentos_para_fechamento(
         id_administradora,
         id_cliente,

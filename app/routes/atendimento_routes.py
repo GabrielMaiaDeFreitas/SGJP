@@ -13,6 +13,8 @@ from flask import (
     jsonify
 )
 
+from app.models import Usuario
+
 from app.services.atendimento_service import (
     AtendimentoService
 )
@@ -566,19 +568,32 @@ def completo():
             url_for("autenticacao.login")
         )
 
+
     atendimentos = (
         AtendimentoService.listar_completo(
             request.args
         )
     )
 
+
     campos = deepcopy(
         FILTROS_ATENDIMENTO
     )
 
+
     dados_formulario = (
         AtendimentoService.carregar_formulario()
     )
+
+
+    _preencher_opcoes_filtros_atendimento(
+
+        campos,
+
+        dados_formulario
+
+    )
+
 
     return render_template(
 
@@ -867,3 +882,173 @@ def calcular_distancia():
             "erro": erro.mensagem
 
         }), 400
+
+def _preencher_opcoes_filtros_atendimento(
+    campos,
+    dados_formulario
+):
+
+    administradoras = (
+        dados_formulario["administradoras"]
+    )
+
+    clientes = (
+        dados_formulario["clientes"]
+    )
+
+    tipos_servico = (
+        dados_formulario["tipos_servico"]
+    )
+
+    motoristas = (
+        dados_formulario["motoristas"]
+    )
+
+    caminhoes = (
+        dados_formulario["caminhoes"]
+    )
+
+    usuarios = (
+        Usuario.query
+            .filter_by(
+                ativo=True
+            )
+            .order_by(
+                Usuario.nome
+            )
+            .all()
+    )
+
+
+    for campo in campos:
+
+        if (
+            campo["campo"]
+            == "fk_administradora_id_administradora"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        administradora.id_administradora,
+
+                    "label":
+                        administradora.nome
+
+                }
+
+                for administradora
+                in administradoras
+
+            ]
+
+
+        elif (
+            campo["campo"]
+            == "fk_cliente_id_cliente"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        cliente.id_cliente,
+
+                    "label":
+                        cliente.nome_fantasia
+
+                }
+
+                for cliente
+                in clientes
+
+            ]
+
+
+        elif (
+            campo["campo"]
+            == "fk_usuario_id_usuario"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        usuario.id_usuario,
+
+                    "label":
+                        usuario.nome
+
+                }
+
+                for usuario
+                in usuarios
+
+            ]
+
+
+        elif (
+            campo["campo"]
+            == "fk_tipo_servico_id_tipo_servico"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        tipo.id_tipo_servico,
+
+                    "label":
+                        tipo.nome
+
+                }
+
+                for tipo
+                in tipos_servico
+
+            ]
+
+
+        elif (
+            campo["campo"]
+            == "fk_motorista_id_motorista"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        motorista.id_motorista,
+
+                    "label":
+                        motorista.nome
+
+                }
+
+                for motorista
+                in motoristas
+
+            ]
+
+
+        elif (
+            campo["campo"]
+            == "fk_caminhao_id_caminhao"
+        ):
+
+            campo["opcoes"] = [
+
+                {
+                    "id":
+                        caminhao.id_caminhao,
+
+                    "label":
+                        caminhao.placa
+
+                }
+
+                for caminhao
+                in caminhoes
+
+            ]
