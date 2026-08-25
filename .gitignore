@@ -31,6 +31,8 @@ sgjp_test_*.sqlite3
 # Variáveis de ambiente
 # ==========================
 .env
+.env.*
+!.env.example
 
 # ==========================
 # VS Code
@@ -41,11 +43,6 @@ sgjp_test_*.sqlite3
 # Se toda a equipe usar VS Code, remova esta linha
 # e versione a pasta .vscode.
 .vscode/
-
-# ==========================
-# Pytest
-# ==========================
-.pytest_cache/
 
 # ==========================
 # Ruff
