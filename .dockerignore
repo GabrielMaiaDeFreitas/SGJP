@@ -1,0 +1,33 @@
+# Ambiente virtual
+.venv/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Testes
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Banco SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Variáveis de ambiente
+.env
+
+# Git
+.git/
+.gitignore
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Cobertura
+.coverage
+htmlcov/
