@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18
+    image: postgres:17
     container_name: sgjp_postgres
     restart: always
 
@@ -38,7 +38,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DOCKER_DATABASE_URL}
 
     ports:
       - "8000:8000"
