@@ -12,7 +12,7 @@ git clone <repositorio>
 cd SGJP
 ```
 
-## 2. Criar o .env
+## 2. Criar o arquivo de ambiente
 
 Copie o arquivo de exemplo:
 
@@ -20,9 +20,9 @@ Copie o arquivo de exemplo:
 cp .env.example .env
 ```
 
-Preencha as credenciais de produção.
+Edite o `.env` e preencha as credenciais de produção (`SECRET_KEY`, `ADMIN_PASSWORD`, `POSTGRES_PASSWORD`, `DATABASE_URL`, etc.).
 
-## 3. Subir os containers
+## 3. Iniciar os containers
 
 ```bash
 docker compose up -d
@@ -34,8 +34,14 @@ docker compose up -d
 docker compose exec web flask db upgrade
 ```
 
-## 5. Criar administrador
+## 5. Criar o administrador inicial
 
 ```bash
 docker compose exec web python seed.py
+```
+
+## 6. Verificar os containers
+
+```bash
+docker compose ps
 ```
