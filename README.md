@@ -1,14 +1,14 @@
 # SGJP — Sistema de Gerenciamento da JP Transportes
 
-Sistema web desenvolvido para gerenciamento operacional da **JP Transportes**, com foco no controle de atendimentos, clientes, motoristas, caminhões, administradoras e tabelas de valores.
+Sistema web desenvolvido para o gerenciamento operacional da **JP Transportes**, centralizando o controle de usuários, frota, motoristas, clientes, administradoras, tabelas de valores, atendimentos e relatórios gerenciais.
 
-O projeto foi desenvolvido utilizando **Python**, **Flask** e **SQLAlchemy**, seguindo uma arquitetura **MVC em camadas** com separação entre Models, Routes, Services e Views.
+A aplicação foi construída utilizando **Python**, **Flask** e **SQLAlchemy**, seguindo uma arquitetura **MVC em Camadas** (Model • View • Controller + Service), priorizando organização, reutilização de código e separação de responsabilidades.
 
 ---
 
 # Autor
 
-* **Gabriel Maia de Freitas**
+**Gabriel Maia de Freitas**
 
 ---
 
@@ -18,25 +18,24 @@ O projeto foi desenvolvido utilizando **Python**, **Flask** e **SQLAlchemy**, se
 * Flask
 * SQLAlchemy
 * Flask-Migrate (Alembic)
-* SQLite
+* PostgreSQL / SQLite
 * Jinja2
 * HTML5
 * CSS3
 * JavaScript
-* MVC em Camadas (Model • View • Controller + Service)
+* Arquitetura MVC em Camadas
 
 ---
 
-# Principais Funcionalidades
+# Funcionalidades
 
-## Autenticação
+### Autenticação
 
-* Login de usuários
+* Login e Logout
 * Controle de sessão
-* Perfis de acesso
-* Logout
+* Perfis de acesso (Administrador, Operador e Leitor)
 
-## Cadastros
+### Módulos de Cadastro
 
 * Usuários
 * Caminhões
@@ -46,10 +45,25 @@ O projeto foi desenvolvido utilizando **Python**, **Flask** e **SQLAlchemy**, se
 * Tipos de Serviço
 * Tabelas de Valores
 
-## Recursos Gerais
+### Operação
 
-* Filtros dinâmicos
-* Visualização completa dos módulos
+* Cadastro de Atendimentos
+* Cálculo automático de valores pela Tabela de Valores
+* Controle de pedágio, horas paradas, horas trabalhadas e patins
+* Status operacional e financeiro dos atendimentos
+
+### Relatórios
+
+* Relatório por Caminhão
+* Relatório por Motorista
+* Relatório por Parceiro (Administradora)
+* Indicadores de faturamento e quantidade de atendimentos
+
+### Recursos Gerais
+
+* CRUD completo em todos os módulos
+* Filtros dinâmicos reutilizáveis
+* Visualização completa dos registros
 * Exportação para Excel e PDF
 * Ativação e desativação de registros
 * Versionamento de Tabelas de Valores
@@ -58,16 +72,16 @@ O projeto foi desenvolvido utilizando **Python**, **Flask** e **SQLAlchemy**, se
 
 # Arquitetura do Projeto
 
-O projeto segue uma arquitetura **MVC em camadas**, onde cada responsabilidade é isolada em um diretório específico.
+O SGJP utiliza uma arquitetura **MVC em Camadas**, onde cada responsabilidade é isolada em um diretório específico.
 
 ```text
 app/
 │
-├── models/          # Entidades do banco
+├── models/          # Entidades e relacionamentos
 ├── routes/          # Controllers (Blueprints)
 ├── services/        # Regras de negócio
 ├── filters/         # Configuração dos filtros
-├── exports/         # Excel / PDF / CSV
+├── exports/         # Exportação Excel / PDF
 ├── templates/       # Views (Jinja2)
 ├── static/
 │   ├── css/
@@ -99,8 +113,6 @@ Crie o ambiente virtual:
 python -m venv .venv
 ```
 
-Ative o ambiente:
-
 ### Windows
 
 ```bash
@@ -121,33 +133,31 @@ pip install -r requirements.txt
 
 ---
 
-# Banco de Dados
+## Banco de Dados
 
-Crie todas as tabelas utilizando as migrations:
+Aplique as migrations:
 
 ```bash
 flask db upgrade
 ```
 
-Caso seja a primeira execução do projeto:
+Para criar o usuário administrador:
 
 ```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+python seed.py
 ```
 
 ---
 
 # Executando a Aplicação
 
-Inicie o servidor Flask:
+Inicie o servidor:
 
 ```bash
 python run.py
 ```
 
-A aplicação ficará disponível em:
+Acesse a aplicação em:
 
 ```text
 http://localhost:5000
@@ -157,16 +167,31 @@ http://localhost:5000
 
 # Estrutura dos Módulos
 
-| Módulo             | Descrição                                                    |
-| ------------------ | ------------------------------------------------------------ |
-| Usuários           | Controle de acesso e autenticação                            |
-| Caminhões          | Cadastro e gerenciamento da frota                            |
-| Motoristas         | Controle de documentos e validade                            |
-| Administradoras    | Empresas responsáveis pelos atendimentos                     |
-| Clientes           | Clientes vinculados às administradoras                       |
-| Tipos de Serviço   | Serviços prestados pela empresa                              |
-| Tabelas de Valores | Valores por administradora e tipo de serviço                 |
-| Atendimento        | Controle operacional dos atendimentos *(em desenvolvimento)* |
+| **Módulo**         | **Descrição**                                |
+| ------------------ | -------------------------------------------- |
+| Usuários           | Controle de acesso e permissões              |
+| Caminhões          | Gerenciamento da frota de veículos           |
+| Motoristas         | Controle de documentos e validade            |
+| Administradoras    | Empresas responsáveis pelos atendimentos     |
+| Clientes           | Clientes vinculados às administradoras       |
+| Tipos de Serviço   | Categorias de serviços prestados             |
+| Tabelas de Valores | Valores por administradora e tipo de serviço |
+| Atendimentos       | Controle operacional completo dos serviços   |
+| Relatórios         | Indicadores e consultas gerenciais           |
+
+---
+
+## Deploy
+
+O SGJP possui configuração para execução em ambiente de produção utilizando Docker e PostgreSQL.
+
+```bash
+docker compose up -d
+docker compose exec web flask db upgrade
+docker compose exec web python seed.py
+```
+
+A documentação completa encontra-se em `DEPLOY.md`.
 
 ---
 
@@ -174,72 +199,120 @@ http://localhost:5000
 
 ## Login
 
-**(Inserir imagem: `images/login.png`)**
+Tela de autenticação com controle de acesso por perfil.
+
+![Login](images/login.png)
 
 ---
 
 ## Dashboard
 
-**(Inserir imagem: `images/dashboard.png`)**
+Visão geral do sistema com indicadores operacionais, faturamento e comparação entre períodos.
+
+![Dashboard](images/dashboard.png)
 
 ---
 
 ## Gerenciamento de Usuários
 
-**(Inserir imagem: `images/usuarios.png`)**
+CRUD completo de usuários com cadastro, edição, ativação/desativação, visualização completa e exportação.
+
+![Usuários](images/usuarios.png)
 
 ---
 
 ## Gerenciamento de Caminhões
 
-**(Inserir imagem: `images/caminhoes.png`)**
+Controle da frota de veículos cadastrados.
+
+![Caminhões](images/caminhoes.png)
 
 ---
 
 ## Gerenciamento de Motoristas
 
-**(Inserir imagem: `images/motoristas.png`)**
+Visualização completa dos motoristas com filtros dinâmicos e controle de documentos.
+
+![Motoristas](images/motoristas.png)
 
 ---
 
 ## Gerenciamento de Administradoras
 
-**(Inserir imagem: `images/administradoras.png`)**
+Cadastro e gerenciamento das administradoras responsáveis pelos atendimentos.
+
+![Administradoras](images/administradoras.png)
 
 ---
 
 ## Gerenciamento de Clientes
 
-**(Inserir imagem: `images/clientes.png`)**
+Cadastro de clientes integrado às administradoras.
+
+![Clientes](images/clientes.png)
 
 ---
 
 ## Gerenciamento de Tipos de Serviço
 
-**(Inserir imagem: `images/tipos_servico.png`)**
+Organização dos tipos de serviço utilizados pela operação.
+
+![Tipos de Serviço](images/tipos_servico.png)
 
 ---
 
-## Gerenciamento de Tabelas de Valores
+## Tabelas de Valores
 
-**(Inserir imagem: `images/tabelas_valores.png`)**
+Versionamento de valores por administradora e tipo de serviço, preservando o histórico das alterações.
+
+![Tabelas de Valores](images/tabelas_valores.png)
+
+---
+
+## Atendimento — Cadastro
+
+Principal formulário operacional do sistema, responsável pela criação dos atendimentos e cálculo automático dos valores do serviço.
+
+![Atendimento Cadastro](images/atendimento_form1.png)
+![Atendimento Cadastro](images/atendimento_form2.png)
+![Atendimento Cadastro](images/atendimento_form3.png)
+
+---
+
+## Atendimento — Detalhes
+
+Consulta de atendimentos com filtros avançados, status operacional e financeiro, permitindo localizar rapidamente qualquer atendimento.
+
+![Atendimento Completo](images/atendimento_detalhes.png)
+
+---
+
+## Relatório por Parceiro
+
+Relatório gerencial consolidando faturamento e quantidade de atendimentos por administradora, permitindo análise de desempenho dos parceiros.
+
+![Relatório por Parceiro](images/relatorio_parceiro.png)
 
 ---
 
 ## Exportação de Dados
 
-**(Inserir imagem: `images/exportacao.png`)**
+Exportação padronizada dos módulos para Excel e PDF, preservando filtros e colunas selecionadas.
+
+![Exportação](images/exportacao.png)
 
 ---
 
 # Diferenciais do Projeto
 
-* Arquitetura MVC em camadas com separação de responsabilidades.
-* Camada de **Services** para centralizar toda a regra de negócio.
+* Arquitetura **MVC em Camadas** com separação clara de responsabilidades.
+* Camada de **Services** para centralização das regras de negócio.
 * Sistema de filtros reutilizável entre todos os módulos.
-* Exportação padronizada para Excel e PDF.
-* Versionamento das Tabelas de Valores preservando histórico.
+* Exportação padronizada para **Excel** e **PDF**.
+* Versionamento de tabelas de valores preservando histórico.
+* Relatórios gerenciais por caminhão, motorista e parceiro.
 * Relacionamentos utilizando **SQLAlchemy** com `back_populates`.
+* Interface modular desenvolvida com **Jinja2**, HTML, CSS e JavaScript.
 
 ---
 
@@ -247,15 +320,18 @@ http://localhost:5000
 
 **Em desenvolvimento**
 
-Próximo módulo em implementação:
+Próximas implementações:
 
-* Atendimento
-* Integração com Google Routes API
-* Dashboard operacional
-* Controle de fechamento e pagamentos
+* Dashboard operacional avançado.
+* Controle de fechamento e pagamentos.
+* Comissão de motoristas.
+* Correções de pquenos bugs.
+* Melhoria no UX do usuário.
 
 ---
 
 # Licença
 
-Projeto desenvolvido para fins acadêmicos e de aprendizado no **Instituto Federal de Goiás (IFG) – Campus Anápolis**.
+## Licença
+
+Projeto desenvolvido por Gabriel Maia de Freitas como sistema de gerenciamento para a JP Transportes, sendo também utilizado como projeto acadêmico no Instituto Federal de Goiás (IFG) – Campus Anápolis.
