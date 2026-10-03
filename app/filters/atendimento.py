@@ -22,6 +22,7 @@ FILTROS_ATENDIMENTO = [
         ),
         "label": "Administradora",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -31,6 +32,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "fk_cliente_id_cliente",
         "label": "Cliente",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -40,6 +42,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "fk_usuario_id_usuario",
         "label": "Usuário",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -52,6 +55,7 @@ FILTROS_ATENDIMENTO = [
         ),
         "label": "Tipo de Serviço",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -61,6 +65,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "fk_motorista_id_motorista",
         "label": "Motorista",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -70,6 +75,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "fk_caminhao_id_caminhao",
         "label": "Caminhão",
         "tipo": "select",
+        "subtipo": "inteiro",
         "operacao": "igual",
         "opcoes": []
     },
@@ -183,6 +189,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "cobrar_pedagio",
         "label": "Cobrou Pedágio",
         "tipo": "select",
+        "subtipo": "boolean",
         "operacao": "igual",
         "converter": "sim_nao",
         "opcoes": [
@@ -196,6 +203,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "cobrar_hora_parada",
         "label": "Cobrou Hora Parada",
         "tipo": "select",
+        "subtipo": "boolean",
         "operacao": "igual",
         "converter": "sim_nao",
         "opcoes": [
@@ -209,6 +217,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "cobrar_hora_trabalhada",
         "label": "Cobrou Hora Trabalhada",
         "tipo": "select",
+        "subtipo": "boolean",
         "operacao": "igual",
         "converter": "sim_nao",
         "opcoes": [
@@ -222,6 +231,7 @@ FILTROS_ATENDIMENTO = [
         "atributo": "usar_patins",
         "label": "Usou Patins",
         "tipo": "select",
+        "subtipo": "boolean",
         "operacao": "igual",
         "converter": "sim_nao",
         "opcoes": [

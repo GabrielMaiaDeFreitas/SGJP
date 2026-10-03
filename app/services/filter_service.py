@@ -1,3 +1,6 @@
+from datetime import date
+
+
 class FilterService:
 
     @staticmethod
@@ -11,11 +14,8 @@ class FilterService:
         query = modelo.query
 
         configuracoes = {
-
             filtro["campo"]: filtro
-
             for filtro in configuracoes
-
         }
 
         campos = filtros.getlist(
@@ -51,26 +51,22 @@ class FilterService:
                 "tipo"
             )
 
+            subtipo = configuracao.get(
+                "subtipo"
+            )
+
             if tipo == "intervalo":
 
                 valor_min = (
-
                     valores_min[indice_min]
-
                     if indice_min < len(valores_min)
-
                     else ""
-
                 )
 
                 valor_max = (
-
                     valores_max[indice_max]
-
                     if indice_max < len(valores_max)
-
                     else ""
-
                 )
 
                 indice_min += 1
@@ -84,13 +80,9 @@ class FilterService:
             else:
 
                 valor = (
-
                     valores[indice_valor]
-
                     if indice_valor < len(valores)
-
                     else ""
-
                 )
 
                 indice_valor += 1
@@ -102,132 +94,149 @@ class FilterService:
                 valor_max = ""
 
             atributo_config = configuracao.get(
-
                 "atributo",
-
                 configuracao["campo"]
-
             )
 
             query, atributo = (
-
                 FilterService._obter_atributo(
-
                     query,
-
                     modelo,
-
                     atributo_config
-
                 )
-
             )
 
             operacao = configuracao.get(
-
                 "operacao",
-
                 "igual"
-
             )
 
-            if (
-
-                configuracao.get("converter")
-
-                == "boolean"
-
-            ):
+            if configuracao.get(
+                "converter"
+            ) == "boolean":
 
                 valor = (
-
                     valor == "Ativo"
-
-                )
-
-            if (
-
-                configuracao.get("converter")
-
-                == "cliente_proprio"
-
-            ):
-
-                valor = (
-
-                    valor == "Sim"
-
                 )
 
             if configuracao.get(
-
                 "converter"
+            ) == "cliente_proprio":
 
+                valor = (
+                    valor == "Sim"
+                )
+
+            if configuracao.get(
+                "converter"
             ) == "sim_nao":
 
-                valor = valor == "Sim"
+                valor = (
+                    valor == "Sim"
+                )
 
             if tipo == "intervalo":
 
                 if valor_min:
 
+                    valor_min = (
+                        FilterService._converter_valor(
+                            valor_min,
+                            subtipo
+                        )
+                    )
+
                     query = query.filter(
-
                         atributo >= valor_min
-
                     )
 
                 if valor_max:
 
+                    valor_max = (
+                        FilterService._converter_valor(
+                            valor_max,
+                            subtipo
+                        )
+                    )
+
                     query = query.filter(
-
                         atributo <= valor_max
-
                     )
 
-            elif operacao == "contains":
+            else:
 
-                query = query.filter(
+                if (
+                    configuracao.get("converter")
+                    not in (
+                        "boolean",
+                        "cliente_proprio",
+                        "sim_nao"
+                    )
+                ):
 
-                    atributo.ilike(
-
-                        f"%{valor}%"
-
+                    valor = (
+                        FilterService._converter_valor(
+                            valor,
+                            subtipo
+                        )
                     )
 
-                )
+                if operacao == "contains":
 
-            elif operacao == "igual":
+                    query = query.filter(
+                        atributo.ilike(
+                            f"%{valor}%"
+                        )
+                    )
 
-                query = query.filter(
+                elif operacao == "igual":
 
-                    atributo == valor
-
-                )
+                    query = query.filter(
+                        atributo == valor
+                    )
 
         atributo_ordenacao = getattr(
-
             modelo,
-
             ordenar_por
-
         )
 
         return query.order_by(
-
             atributo_ordenacao
-
         ).all()
 
     @staticmethod
+    def _converter_valor(valor, subtipo):
+
+        if not valor:
+            return valor
+
+        if subtipo == "data":
+            return date.fromisoformat(valor)
+
+        if subtipo == "numero":
+            return float(valor)
+
+        if subtipo == "inteiro":
+            return int(valor)
+
+        if subtipo == "boolean":
+            return valor in (
+                True,
+                "true",
+                "True",
+                "1",
+                1,
+                "Sim",
+                "Ativo"
+            )
+
+        return valor
+
+    @staticmethod
     def _obter_atributo(
-
         query,
-
         modelo,
-
         atributo_config
-
     ):
 
         partes = atributo_config.split(".")
@@ -237,49 +246,31 @@ class FilterService:
         for relacionamento in partes[:-1]:
 
             atributo_relacionamento = getattr(
-
                 modelo_atual,
-
                 relacionamento
-
             )
 
             modelo_relacionado = (
-
                 atributo_relacionamento
-
                 .property
-
                 .mapper
-
                 .class_
-
             )
 
             query = query.join(
-
                 atributo_relacionamento
-
             )
 
             modelo_atual = (
-
                 modelo_relacionado
-
             )
 
         atributo = getattr(
-
             modelo_atual,
-
             partes[-1]
-
         )
 
         return (
-
             query,
-
             atributo
-
         )
